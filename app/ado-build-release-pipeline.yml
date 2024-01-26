@@ -1,0 +1,56 @@
+# Required Variables:
+# - ContainerRegistryUrl
+# - ContainerRegistryUsername
+# - ContainerRegistryPassword (secret)
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - services/IngestionService/*
+
+pool:
+      vmImage: 'ubuntu-latest'
+
+variables:
+  rootDirectory: 'services/IngestionService'
+  azureSubscription: 'DEMO_ACCOUNT'
+  resourceGroupName: 'demo-aoai-custom-copilot-ci'
+  region: 'eastus'
+  imageName: demo-aoai-custom-copilot/web-app:$(Build.BuildId)
+
+stages:
+- stage: Build
+  displayName: Build stage
+
+  jobs:
+  - job: Build
+    displayName: Build
+    steps:
+    - task: CmdLine@2
+      displayName: 'Docker Build'
+      inputs:
+        script: |
+          docker build . -t $(tag)
+          docker images
+        workingDirectory: '/home/vsts/work/1/s/app/'
+    - task: CmdLine@2
+      displayName: 'Docker Push'
+      inputs:
+        script: |
+          echo $(ContainerRegistryPassword) | docker login $(ContainerRegistryUrl) -u $(ContainerRegistryUsername) --password-stdin
+          docker tag $(imageName) $(ContainerRegistryUrl)/$(imageName)
+          docker push $(ContainerRegistryUrl)/$(imageName)
+        workingDirectory: '/home/vsts/work/1/s/app/'
+
+- template: ado-release-pipeline-stage-template.yml
+  parameters:
+    stageName: 'CI'
+    environment: 'CI'
+    azureSubscription: ${{ variables.azureSubscription }}
+    resourceGroupName: 'demo-aoai-custom-copilot-ci'
+    functionAppName: 'demo-aoai-custom-copilot-ci'
+    region: 'eastus'
+    imageName: $(imageName)
+

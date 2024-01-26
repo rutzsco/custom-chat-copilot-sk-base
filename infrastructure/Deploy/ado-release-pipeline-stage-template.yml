@@ -1,0 +1,54 @@
+parameters: 
+- name: stageName
+  default: ''
+- name: environment
+  default: ''
+- name: azureSubscription
+  default: ''
+- name: resourceGroupName
+  default: ''
+- name: region
+  default: ''
+- name: cosmosDbAccountName
+  default: ''
+- name: logAnalyticsWorkspaceName
+  default: ''
+- name: searchServiceName
+  default: ''  
+- name: storageAccountName
+  default: ''
+- name: workloadStackName
+  default: ''  
+- name: acrName
+  default: ''  
+
+stages:
+  - stage: ${{ parameters.stageName }}
+    displayName: ${{ parameters.stageName }}
+
+    jobs:
+    - deployment: Deploy
+      displayName: Deploy
+      environment: ${{ parameters.environment }}
+      pool:
+        vmImage: 'ubuntu-latest'
+  
+      strategy:
+        runOnce:
+          deploy:
+  
+            steps:
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                buildType: 'current'
+                targetPath: '$(Pipeline.Workspace)/build'
+
+            - task: AzureCLI@2
+              displayName: '1. Deploy Azure Resources'
+              inputs:
+                azureSubscription: ${{ parameters.azureSubscription }}
+                scriptType: bash
+                scriptLocation: inlineScript
+                inlineScript: |
+                  az group create --name ${{ parameters.resourceGroupName }} --location ${{ parameters.region }}
+                  az deployment group create --resource-group ${{ parameters.resourceGroupName }} --template-file $(Pipeline.Workspace)/build/Infrastructure/main.bicep --parameters cosmosDbAccountName=${{ parameters.cosmosDbAccountName }} logAnalyticsWorkspaceName=${{ parameters.logAnalyticsWorkspaceName }} location=${{ parameters.region }} searchServiceName=${{ parameters.searchServiceName }} storageAccountName=${{ parameters.storageAccountName }} workloadStackName=${{ parameters.workloadStackName }} containerAppsEnvironmentName=${{ parameters.workloadStackName }} acrName=${{ parameters.acrName }}  > outputs.json

@@ -1,0 +1,18 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudContainer>
+            <MudGrid Class="d-flex justify-center">
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_feedback" Label="Feedback Response"></MudTextField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudRating SelectedValue="Rating" Size="Size.Medium" />
+                </MudItem>
+            </MudGrid>           
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Secondary" Size="Size.Large" StartIcon="@Icons.Material.Filled.Close" OnClick="@OnCloseClick">Close</MudButton>
+        <MudButton Color="Color.Primary" Size="Size.Large" StartIcon="@Icons.Material.Filled.Save" OnClick="@OnSubmitClickAsync">Submit</MudButton>
+    </DialogActions>
+</MudDialog>

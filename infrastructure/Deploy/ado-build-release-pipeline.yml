@@ -1,0 +1,43 @@
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - infrastructure/*
+pool:
+      vmImage: 'ubuntu-latest'
+
+variables:
+  azureSubscription: 'DEMO_ACCOUNT'
+
+stages:
+- stage: Build
+  displayName: Build stage
+
+  jobs:
+  - job: Build
+    displayName: Build
+    steps:
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: 'infrastructure'
+        artifact: 'Infrastructure'
+        publishLocation: 'pipeline'
+
+- template: ado-release-pipeline-stage-template.yml
+  parameters:
+    stageName: 'CI'
+    environment: 'CI'
+    azureSubscription: ${{ variables.azureSubscription }}
+    resourceGroupName: 'rutzsco-custom-chat-copilot-ci'
+    region: 'eastus'
+    storageAccountName: 'rutzscoccccisa'
+    logAnalyticsWorkspaceName: 'rutzsco-custom-chat-copilot-ci'
+    cosmosDbAccountName: 'rutzsco-custom-chat-copilot-ci'
+    searchServiceName: 'rutzsco-custom-chat-copilot-ci'
+    workloadStackName: 'rutzsco-custom-chat-copilot-ci'
+    acrName: 'rutzscolabcr'
+    
+ 

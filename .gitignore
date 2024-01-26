@@ -396,3 +396,5 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+app/backend/appsettings.Development.json
+infrastructure/main.rutzsco.parameters.json
