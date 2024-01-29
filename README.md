@@ -23,7 +23,7 @@ The applications azure resourcees can be deployed with main.bicep file located i
 docker login <ACRNAME>.azurecr.io
 ```
 ```bash
-docker build  custom-chat-copilot-sk-base/chat-app
+docker build . -t custom-chat-copilot-sk-base/chat-app
 ```
 
 ### DEPLOY
