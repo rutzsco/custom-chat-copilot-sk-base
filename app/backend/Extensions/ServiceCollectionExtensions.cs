@@ -37,17 +37,17 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<OpenAIClientFacade>(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
-            var deployedModelName3 = config["AzureOpenAi3ChatGptDeployment"];
-            var azureOpenAiServiceEndpoint3 = config["AzureOpenAi3ServiceEndpoint"];
-            var azureOpenAiServiceKey3 = config["AzureOpenAi3ServiceKey"];
+            var deployedModelName3 = config["AOAIStandardChatGptDeployment"];
+            var azureOpenAiServiceEndpoint3 = config["AOAIStandardServiceEndpoint"];
+            var azureOpenAiServiceKey3 = config["AOAIStandardServiceKey"];
 
             ArgumentNullException.ThrowIfNullOrEmpty(deployedModelName3);
             ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceEndpoint3);
             ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceKey3);
 
-            var deployedModelName4 = config["AzureOpenAi4ChatGptDeployment"];
-            var azureOpenAiServiceEndpoint4 = config["AzureOpenAi4ServiceEndpoint"];
-            var azureOpenAiServiceKey4 = config["AzureOpenAi4ServiceKey"];
+            var deployedModelName4 = config["AOAIPremiumChatGptDeployment"];
+            var azureOpenAiServiceEndpoint4 = config["AOAIPremiumServiceEndpoint"];
+            var azureOpenAiServiceKey4 = config["AOAIPremiumServiceKey"];
             ArgumentNullException.ThrowIfNullOrEmpty(deployedModelName4);
             ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceEndpoint4);
             ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceKey4);
