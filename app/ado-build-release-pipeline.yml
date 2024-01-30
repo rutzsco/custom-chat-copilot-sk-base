@@ -8,13 +8,13 @@ trigger:
     - main
   paths:
     include:
-    - services/app/*
+    - app/*
 
 pool:
       vmImage: 'ubuntu-latest'
 
 variables:
-  rootDirectory: 'services/app'
+  rootDirectory: 'app'
   azureSubscription: 'DEMO_ACCOUNT'
   resourceGroupName: 'demo-aoai-custom-copilot-ci'
   region: 'eastus'
