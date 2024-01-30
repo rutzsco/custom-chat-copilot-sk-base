@@ -7,8 +7,6 @@ parameters:
   default: ''
 - name: resourceGroupName
   default: ''
-- name: functionAppName
-  default: ''
 - name: region
   default: ''
 - name: imageName

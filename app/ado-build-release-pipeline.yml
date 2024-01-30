@@ -18,7 +18,7 @@ variables:
   azureSubscription: 'DEMO_ACCOUNT'
   resourceGroupName: 'demo-aoai-custom-copilot-ci'
   region: 'eastus'
-  imageName: demo-aoai-custom-copilot/web-app:$(Build.BuildId)
+  imageName: custom-chat-copilot/chat-app:$(Build.BuildId)
 
 stages:
 - stage: Build
@@ -32,7 +32,7 @@ stages:
       displayName: 'Docker Build'
       inputs:
         script: |
-          docker build . -t $(tag)
+          docker build . -t $(imageName)
           docker images
         workingDirectory: '/home/vsts/work/1/s/app/'
     - task: CmdLine@2
@@ -50,7 +50,6 @@ stages:
     environment: 'CI'
     azureSubscription: ${{ variables.azureSubscription }}
     resourceGroupName: 'demo-aoai-custom-copilot-ci'
-    functionAppName: 'demo-aoai-custom-copilot-ci'
     region: 'eastus'
     imageName: $(imageName)
 
