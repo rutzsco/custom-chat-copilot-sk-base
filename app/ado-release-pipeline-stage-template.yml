@@ -9,6 +9,8 @@ parameters:
   default: ''
 - name: region
   default: ''
+- name: appName
+  default: ''  
 - name: imageName
   default: ''  
 
@@ -32,3 +34,13 @@ stages:
               inputs:
                 buildType: 'current'
                 targetPath: '$(Pipeline.Workspace)/build'
+            - task: AzureCLI@2
+              inputs:
+                azureSubscription: ${{ parameters.azureSubscription }}
+                scriptType: 'bash'
+                scriptLocation: 'inlineScript'
+                inlineScript: |
+                  az containerapp update \
+                    --name ${{ parameters.appName }} \
+                    --resource-group ${{ parameters.resourceGroupName }} \
+                    --image ${{ parameters.imageName }}
