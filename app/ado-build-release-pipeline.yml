@@ -52,5 +52,5 @@ stages:
     resourceGroupName:  $(resourceGroupName)
     region: 'eastus'
     appName: 'chatapp'
-    imageName: $(imageName)
+    imageName: $(ContainerRegistryUrl)/$(imageName)
 
