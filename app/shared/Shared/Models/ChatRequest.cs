@@ -13,7 +13,4 @@ public record class ChatRequest(
     public string? LastUserQuestion => History?.LastOrDefault()?.User;
 }
 
-
-public record class ChatOptions(string Source, string Model, string Year, bool useGPT4);
-
 public record class ChatRatingRequest(Guid ChatId, Guid MessageId, int Rating, string Feedback, Approach Approach) : ApproachRequest(Approach);

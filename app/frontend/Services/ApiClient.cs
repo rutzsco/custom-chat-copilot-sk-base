@@ -6,16 +6,6 @@ namespace ClientApp.Services;
 
 public sealed class ApiClient(HttpClient httpClient)
 {
-    public async Task<ImageResponse?> RequestImageAsync(PromptRequest request)
-    {
-        var response = await httpClient.PostAsJsonAsync(
-            "api/images", request, SerializerOptions.Default);
-
-        response.EnsureSuccessStatusCode();
-
-        return await response.Content.ReadFromJsonAsync<ImageResponse>();
-    }
-
     public async Task<bool> ShowLogoutButtonAsync()
     {
         var response = await httpClient.GetAsync("api/enableLogout");
