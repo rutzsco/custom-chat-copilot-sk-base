@@ -11,7 +11,7 @@
 @code {
     [Parameter] public bool ShowLogoutButton { get; set; } = true;
 
-    [Parameter] public string User { get; set; } = "";
+    public string _user = "USER";
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -21,7 +21,7 @@
             ShowLogoutButton = await ApiClient.ShowLogoutButtonAsync();
             if (ShowLogoutButton)
             {
-                User = await ApiClient.GetUserAsync();
+                _user = await ApiClient.GetUserAsync();
             }
         }
         catch(Exception e)
