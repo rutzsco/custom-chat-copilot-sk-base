@@ -2,7 +2,9 @@
 // Copyright (c) Microsoft. All rights reserved.
 
 using Azure;
+using Azure.Storage;
 using Microsoft.Azure.Cosmos.Fluent;
+using Microsoft.Extensions.DependencyInjection;
 using MinimalApi.Services.ChatHistory;
 using MinimalApi.Services.Skills;
 
@@ -18,10 +20,10 @@ internal static class ServiceCollectionExtensions
         {
             var config = sp.GetRequiredService<IConfiguration>();
             var azureStorageAccountEndpoint = config["AzureStorageAccountEndpoint"];
+            var azureStorageAccountConnectionString = config["AzureStorageAccountConnectionString"];
             ArgumentNullException.ThrowIfNullOrEmpty(azureStorageAccountEndpoint);
 
-            var blobServiceClient = new BlobServiceClient(
-                new Uri(azureStorageAccountEndpoint), s_azureCredential);
+            var blobServiceClient = new BlobServiceClient(azureStorageAccountConnectionString);
 
             return blobServiceClient;
         });

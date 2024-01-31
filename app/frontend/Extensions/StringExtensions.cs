@@ -16,4 +16,9 @@ internal static class StringExtensions
 
         return builder.Uri.AbsoluteUri;
     }
+
+    internal static string ToCitationUrlViaApi(this string fileName, string baseUrl)
+    {
+        return $"/api/documents/{fileName}";
+    }
 }

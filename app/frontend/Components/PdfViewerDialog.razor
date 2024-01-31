@@ -2,7 +2,7 @@
     <DialogContent>
         <MudContainer Class="pdf-container">
             <div style="@_pdfViewerVisibilityStyle">
-                <iframe id="pdf-viewer" src="@(FileName.ToCitationUrl(BaseUrl))" title="@FileName" />
+                <iframe id="pdf-viewer" src="@(FileName.ToCitationUrlViaApi(BaseUrl))" title="@FileName" />
             </div>
             @if (_isLoading)
             {

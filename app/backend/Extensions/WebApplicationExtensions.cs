@@ -25,10 +25,39 @@ internal static class WebApplicationExtensions
         // Get recent feedback
         api.MapGet("feedback", OnGetFeedbackAsync);
 
+        api.MapGet("documents/{fileName}", OnGetSourceFileAsync);
+
         return app;
     }
 
- 
+
+    private static async Task<IResult> OnGetSourceFileAsync(string fileName, BlobServiceClient blobServiceClient)
+    {
+        try
+        {
+            var blobContainerClient = blobServiceClient.GetBlobContainerClient("content");
+            var blobClient = blobContainerClient.GetBlobClient(fileName);
+
+            if (await blobClient.ExistsAsync())
+            {
+                var stream = new MemoryStream();
+                await blobClient.DownloadToAsync(stream);
+                stream.Position = 0; // Reset stream position to the beginning
+
+                return Results.File(stream, "application/pdf");
+            }
+            else
+            {
+                return Results.NotFound("File not found");
+            }
+        }
+        catch (Exception)
+        {
+            // Log the exception details
+            return Results.Problem("Internal server error");
+        }
+    }
+
     private static async Task<IResult> OnPostChatRatingAsync(ChatRatingRequest request, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
     {
         await chatHistoryService.RecordRatingAsync(request);
