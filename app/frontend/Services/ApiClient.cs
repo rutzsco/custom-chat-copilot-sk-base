@@ -13,6 +13,13 @@ public sealed class ApiClient(HttpClient httpClient)
 
         return await response.Content.ReadFromJsonAsync<bool>();
     }
+    public async Task<string> GetUserAsync()
+    {
+        var response = await httpClient.GetAsync("api/user");
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<string>();
+    }
 
     public async Task<UploadDocumentsResponse> UploadDocumentsAsync(
         IReadOnlyList<IBrowserFile> files,

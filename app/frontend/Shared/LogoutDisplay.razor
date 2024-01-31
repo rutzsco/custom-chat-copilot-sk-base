@@ -2,15 +2,18 @@
 @inject ILogger<LogoutDisplay> Logger
 @inject ApiClient ApiClient
 
+
 @if (ShowLogoutButton)
 {
-    <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" Size="Size.Large"
-                   Title="Logout of the app." OnClick="SignOut" />
+    <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" Size="Size.Large" Title="Logout of the app." OnClick="SignOut">
+        User
+    </MudIconButton>
 }
 
 @code {
     [Parameter] public bool ShowLogoutButton { get; set; } = true;
 
+    [Parameter] public string User { get; set; } = "";
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -18,6 +21,10 @@
         {
             Logger.LogInformation("start retrieve logout button visibility.");
             ShowLogoutButton = await ApiClient.ShowLogoutButtonAsync();
+            if (ShowLogoutButton)
+            {
+                User = await ApiClient.GetUserAsync();
+            }
         }
         catch(Exception e)
         {

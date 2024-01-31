@@ -25,11 +25,31 @@ internal static class WebApplicationExtensions
         // Get recent feedback
         api.MapGet("feedback", OnGetFeedbackAsync);
 
+        // Get source file
         api.MapGet("documents/{fileName}", OnGetSourceFileAsync);
+
+        // Get enable logout
+        api.MapGet("enableLogout", OnGetEnableLogout);
+
+        // Get enable logout
+        api.MapGet("user", OnGetUser);
 
         return app;
     }
 
+    private static IResult OnGetEnableLogout(HttpContext context)
+    {
+        var header = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-ID"];
+        var enableLogout = !string.IsNullOrEmpty(header);
+
+        return TypedResults.Ok(enableLogout);
+    }
+
+    private static IResult OnGetUser(HttpContext context)
+    {
+        var header = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-NAME"];
+        return TypedResults.Ok(header);
+    }
 
     private static async Task<IResult> OnGetSourceFileAsync(string fileName, BlobServiceClient blobServiceClient)
     {
