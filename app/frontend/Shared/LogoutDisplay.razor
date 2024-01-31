@@ -5,9 +5,7 @@
 
 @if (ShowLogoutButton)
 {
-    <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" Size="Size.Large" Title="Logout of the app." OnClick="SignOut">
-        User
-    </MudIconButton>
+    <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="SignOut">@User</MudButton>
 }
 
 @code {
