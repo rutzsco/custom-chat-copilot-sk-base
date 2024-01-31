@@ -101,11 +101,11 @@ resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
           name: name
           env: [
             {
-              name: 'StorageBlobEndpoint'
+              name: 'AzureStorageAccountEndpoint'
               value: storageBlobEndpoint
             }
             {
-              name: 'StorageContainerName'
+              name: 'AzureStorageContainer'
               value: storageContainerName
             }
             {

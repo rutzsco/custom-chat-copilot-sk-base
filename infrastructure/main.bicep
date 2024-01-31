@@ -94,7 +94,7 @@ module aca 'aca.bicep' = {
     containerImage: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
     envVars: []
     useExternalIngress: true
-    containerPort: 6002
+    containerPort: 8080
     acrName: acrName
     storageBlobEndpoint: storage.outputs.primaryEndpoints.blob
     storageContainerName: storageContainerName

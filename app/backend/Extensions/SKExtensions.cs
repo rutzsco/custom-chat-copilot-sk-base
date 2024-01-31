@@ -1,4 +1,5 @@
-﻿using Microsoft.SemanticKernel.ChatCompletion;
+﻿using Azure.Core;
+using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace MinimalApi.Extensions
 {
@@ -48,6 +49,25 @@ namespace MinimalApi.Extensions
         {
             var value = options.GetValueOrDefault("GPT4ENABLED", false);
             return value;
+        }
+
+        public static ApproachResponse BuildResoponse(this KernelArguments context, ChatRequest request, IConfiguration configuration)
+        {
+            var result = (SKResult)context["ChatResult"];
+            var json = (string)context[ContextVariableOptions.KnowledgeJSON];
+            var dataSources = JsonSerializer.Deserialize<KnowledgeSource[]>(json, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+            var diagnostics = new Diagnostics(new CompletionsDiagnostics(result.Usage.CompletionTokens, result.Usage.PromptTokens, result.Usage.TotalTokens, result.DurationMilliseconds));
+            var systemMessagePrompt = (string)context["SystemMessagePrompt"];
+            var userMessage = (string)context["UserMessage"];
+
+            return new ApproachResponse(
+                DataPoints: dataSources.Select(x => new SupportingContentRecord(x.filepath, x.content)).ToArray(),
+                Answer: result.Answer.Replace("\n", "<br>"),
+                Thoughts: $"Searched for:<br>{context["intent"]}<br><br>System:<br>{systemMessagePrompt.Replace("\n", "<br>")}<br><br>{userMessage.Replace("\n", "<br>")}<br><br>{result.Answer.Replace("\n", "<br>")}",
+                CitationBaseUrl: configuration.ToCitationBaseUrl(),
+                MessageId: request.ChatTurnId,
+                ChatId: request.ChatId,
+                Diagnostics: diagnostics);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 using Microsoft.SemanticKernel.ChatCompletion;
-using MinimalApi.Models;
 using MinimalApi.Services.Prompts;
 
 namespace MinimalApi.Services;
@@ -57,7 +56,8 @@ internal sealed class ReadRetrieveReadChatServiceEnhanced
                 Thoughts: string.Empty,
                 CitationBaseUrl: _configuration.ToCitationBaseUrl(),
                 MessageId: request.ChatTurnId,
-                ChatId: request.ChatId);
+                ChatId: request.ChatId,
+                Diagnostics: null);
         }
 
 
@@ -90,7 +90,8 @@ internal sealed class ReadRetrieveReadChatServiceEnhanced
                 Thoughts: $"Searched for:<br>{context["intent"]}<br><br>System:<br>{systemMessagePrompt.Replace("\n", "<br>")}<br><br>{userMessage.Replace("\n", "<br>")}<br><br>{result.Answer.Replace("\n", "<br>")}",
                 CitationBaseUrl: _configuration.ToCitationBaseUrl(),
                 MessageId: request.ChatTurnId,
-                ChatId: request.ChatId);
+                ChatId: request.ChatId,
+                Diagnostics: diagnostics);
         }
         catch (Exception ex)
         {

@@ -10,4 +10,5 @@ public record ApproachResponse(
     string CitationBaseUrl,
     Guid MessageId,
     Guid ChatId,
+    Diagnostics? Diagnostics,
     string? Error = null);
