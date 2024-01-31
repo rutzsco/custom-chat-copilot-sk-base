@@ -14,7 +14,7 @@ public class ChatSkill
                                           Kernel kernel)
     {
         var chatGpt = kernel.Services.GetService<IChatCompletionService>();
-        var systemMessagePrompt = ResolveSystemPrompt((string)arguments["questionIntent"]);
+        var systemMessagePrompt = PromptService.GetPromptByName(PromptService.ChatSystemPrompt);
         arguments["SystemMessagePrompt"] = systemMessagePrompt;
 
         var chatHistory = new Microsoft.SemanticKernel.ChatCompletion.ChatHistory(systemMessagePrompt).AddChatHistory(chatTurns);
@@ -26,10 +26,5 @@ public class ChatSkill
         arguments["ChatResult"] = result;
 
         return result;
-    }
-
-    private string ResolveSystemPrompt(string intent)
-    {
-        return PromptService.GetPromptByName(PromptService.ChatSystemPrompt);
     }
 }

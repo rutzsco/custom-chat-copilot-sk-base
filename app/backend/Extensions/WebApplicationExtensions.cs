@@ -72,7 +72,7 @@ internal static class WebApplicationExtensions
         }
     }
 
-    private static async Task<IResult> OnPostChatAsync(ChatRequest request, ReadRetrieveReadChatServiceEnhanced chatService, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
+    private static async Task<IResult> OnPostChatAsync(ChatRequest request, ReadRetrieveReadChatService chatService, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
     {
         if (request is { History.Length: > 0 })
         {
