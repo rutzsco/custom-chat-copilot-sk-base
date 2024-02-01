@@ -37,3 +37,26 @@ docker push <ACRNAME>.azurecr.io/custom-chat-copilot-sk-base/chat-app:<VERSION>
 ```bash
 az containerapp update --name <APPLICATION_NAME> --resource-group <RESOURCE_GROUP_NAME> --image <IMAGE_NAME>
 ```
+
+## Local Development
+
+***appsettings.Development.json***
+
+```bash
+{
+  "AzureSearchContentIndex": "",
+  "AzureSearchServiceEndpoint": "",
+  "AzureSearchServiceKey": "",
+  "AzureStorageAccountEndpoint": "",
+  "AzureStorageContainer": "content",
+  "AzureStorageAccountConnectionString": "",
+  "AOAIPremiumServiceEndpoint": "",
+  "AOAIPremiumServiceKey": "",
+  "AOAIPremiumChatGptDeployment": "",
+  "AOAIStandardServiceEndpoint": "",
+  "AOAIStandardServiceKey": "",
+  "AOAIStandardChatGptDeployment": "",
+  "AOAIEmbeddingsDeployment": "",
+  "CosmosDBConnectionString": ""
+}
+```
