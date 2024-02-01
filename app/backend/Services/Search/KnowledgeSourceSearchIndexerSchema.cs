@@ -4,22 +4,28 @@ namespace MinimalApi.Services.Search;
 
 public class KnowledgeSourceSearchIndexerSchema : IKnowledgeSource
 {
-    public required string filepath { get; set; }
+    public required string title { get; set; }
 
-    public required string content { get; set; }
+    public required string chunk { get; set; }
+
+    public required string chunk_id { get; set; }
 
     public string FormatAsOpenAISourceText()
     {
-        return $"<source><name>{filepath}</name><content> {content.Replace('\r', ' ').Replace('\n', ' ')}</content></source>";
+        return $"<source><name>{title}</name><content> {chunk.Replace('\r', ' ').Replace('\n', ' ')}</content></source>";
     }
 
     public string GetContent()
     {
-        return content;
+        return chunk;
     }
 
     public string GetFilepath()
     {
-        return filepath;
+        return title;
     }
+
+    public static string IndexName = "manuals-vi";
+    public static string EmbeddingsFieldName = "vector";
+    public static List<string> SelectFieldNames = new List<string> { "title", "chunk_id", "chunk" };
 }

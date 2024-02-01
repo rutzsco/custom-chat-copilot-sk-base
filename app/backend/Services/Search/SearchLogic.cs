@@ -14,12 +14,15 @@ public class SearchLogic<T> where T : IKnowledgeSource
     private readonly SearchClient _searchClient;
     private readonly OpenAIClient _openAIClient;
     private readonly string _embeddingModelName;
-
-    public SearchLogic(OpenAIClient openAIClient, SearchClientFactory factory, string indexName, string embeddingModelName)
+    private readonly string _embeddingFieldName;
+    private readonly List<string> _selectFields;    
+    public SearchLogic(OpenAIClient openAIClient, SearchClientFactory factory, string indexName, string embeddingModelName, string embeddingFieldName, List<string> selectFields)
     {
         _searchClient = factory.GetOrCreateClient(indexName);
         _openAIClient = openAIClient;
         _embeddingModelName = embeddingModelName;
+        _embeddingFieldName = embeddingFieldName;
+        _selectFields = selectFields;
     }
 
     public async Task<KnowledgeSourceSummary> SearchAsync(string query)
@@ -33,10 +36,15 @@ public class SearchLogic<T> where T : IKnowledgeSource
             Size = AppConfiguration.SearchIndexDocumentCount,
             VectorSearch = new()
             {
-                Queries = { new VectorizedQuery(queryEmbeddings.ToArray()) { KNearestNeighborsCount = 3, Fields = { AppConfiguration.SearchIndexEmbeddingFieldName } } }
-            },
-            Select = { AppConfiguration.SearchIndexSourceFieldName, AppConfiguration.SearchIndexContentFieldName }
+                Queries = { new VectorizedQuery(queryEmbeddings.ToArray()) { KNearestNeighborsCount = 3, Fields = { _embeddingFieldName } } }
+            }
         };
+
+        foreach (var field in _selectFields)
+        {
+            searchOptions.Select.Add(field);
+        }
+
 
         // Perform the search and build the results
         var response = await _searchClient.SearchAsync<T>(query, searchOptions);

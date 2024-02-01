@@ -24,7 +24,7 @@ public sealed class RetrieveRelatedDocumentSkill
         searchQuery = searchQuery.Replace("\"", string.Empty);
         arguments["intent"] = searchQuery;
 
-        var searchLogic = new SearchLogic<KnowledgeSourceAIStudioSchema>(_openAIClient, _searchClientFactory, _config["AzureSearchContentIndex"], _config["AOAIEmbeddingsDeployment"]);
+        var searchLogic = new SearchLogic<KnowledgeSourceAIStudioSchema>(_openAIClient, _searchClientFactory, KnowledgeSourceAIStudioSchema.IndexName, _config["AOAIEmbeddingsDeployment"], KnowledgeSourceAIStudioSchema.EmbeddingsFieldName, KnowledgeSourceAIStudioSchema.SelectFieldNames);
         var result = await searchLogic.SearchAsync(searchQuery);
 
         if (!result.Sources.Any())
@@ -33,6 +33,26 @@ public sealed class RetrieveRelatedDocumentSkill
             return "NO_SOURCES";
         }
    
+        arguments[ContextVariableOptions.Knowledge] = result.FormattedSourceText;
+        arguments[ContextVariableOptions.KnowledgeSummary] = result;
+        return result.FormattedSourceText;
+    }
+
+    [KernelFunction("QueryV2"), Description("Search more information")]
+    public async Task<string> QueryV2Async([Description("search query")] string searchQuery, KernelArguments arguments)
+    {
+        searchQuery = searchQuery.Replace("\"", string.Empty);
+        arguments["intent"] = searchQuery;
+
+        var searchLogic = new SearchLogic<KnowledgeSourceSearchIndexerSchema>(_openAIClient, _searchClientFactory, KnowledgeSourceSearchIndexerSchema.IndexName, _config["AOAIEmbeddingsDeployment"], KnowledgeSourceSearchIndexerSchema.EmbeddingsFieldName, KnowledgeSourceSearchIndexerSchema.SelectFieldNames);
+        var result = await searchLogic.SearchAsync(searchQuery);
+
+        if (!result.Sources.Any())
+        {
+            arguments[ContextVariableOptions.Knowledge] = "NO_SOURCES";
+            return "NO_SOURCES";
+        }
+
         arguments[ContextVariableOptions.Knowledge] = result.FormattedSourceText;
         arguments[ContextVariableOptions.KnowledgeSummary] = result;
         return result.FormattedSourceText;
