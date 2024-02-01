@@ -10,6 +10,7 @@ param storageContainerName string = 'content'
 
 @description('SKU name for the Azure Cognitive Search service. Default: standard')
 param searchServiceSkuName string = 'standard'
+param searchContentIndex string = 'manuals'
 
 param aoaiPremiumServiceEndpoint string = 'NA'
 param aoaiPremiumServiceKey string = 'NA'
@@ -100,7 +101,11 @@ module aca 'aca.bicep' = {
     storageBlobEndpoint: storage.outputs.primaryEndpoints.blob
     storageContainerName: storageContainerName
     cosmosDBConnectionString: db.outputs.connectionString
+
     azureSearchServiceKey: searchService.outputs.key
+    azureSearchContentIndex: searchContentIndex
+    azureSearchServiceEndpoint: searchService.outputs.endpoint
+
     aoaiPremiumServiceEndpoint: aoaiPremiumServiceEndpoint
     aoaiPremiumServiceKey: aoaiPremiumServiceKey
     aoaiPremiumChatGptDeployment: aoaiPremiumChatGptDeployment

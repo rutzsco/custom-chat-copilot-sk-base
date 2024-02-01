@@ -5,8 +5,12 @@ param environmentName string
 param storageConnectionString string
 param storageBlobEndpoint string
 param storageContainerName string
+
 param cosmosDBConnectionString string
+
 param azureSearchServiceKey string
+param azureSearchServiceEndpoint string
+param azureSearchContentIndex string
 
 param aoaiPremiumServiceEndpoint string
 param aoaiPremiumServiceKey string
@@ -124,6 +128,14 @@ resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
             {
               name: 'AzureSearchServiceKey'
               secretRef: 'azuresearchservicekey'
+            }
+            {
+              name: 'AzureSearchServiceEndpoint'
+              value: azureSearchServiceEndpoint
+            }
+            {
+              name: 'AzureSearchContentIndex'
+              value: azureSearchContentIndex
             }
             {
               name: 'AOAIPremiumServiceEndpoint'
