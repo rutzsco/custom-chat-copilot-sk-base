@@ -18,10 +18,11 @@
         try
         {
             Logger.LogInformation("start retrieve logout button visibility.");
-            ShowLogoutButton = await ApiClient.ShowLogoutButtonAsync();
-            if (ShowLogoutButton)
+            var userInfo = await ApiClient.GetUserAsync();
+            ShowLogoutButton = userInfo.IsIdentityEnabled;
+            if (userInfo.IsIdentityEnabled)
             {
-                _user = await ApiClient.GetUserAsync();
+                _user = userInfo.UserName;
             }
         }
         catch(Exception e)

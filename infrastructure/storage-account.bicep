@@ -57,5 +57,7 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   }
 }
 
+var blobStorageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storage.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(storage.id, storage.apiVersion).keys[0].value}'
 output name string = storage.name
 output primaryEndpoints object = storage.properties.primaryEndpoints
+output connectionString string  = blobStorageConnectionString

@@ -96,6 +96,7 @@ module aca 'aca.bicep' = {
     useExternalIngress: true
     containerPort: 8080
     acrName: acrName
+    storageConnectionString: storage.outputs.connectionString
     storageBlobEndpoint: storage.outputs.primaryEndpoints.blob
     storageContainerName: storageContainerName
     cosmosDBConnectionString: db.outputs.connectionString

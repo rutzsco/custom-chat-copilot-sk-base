@@ -2,6 +2,7 @@ param location string
 param name string
 param environmentName string
 
+param storageConnectionString string
 param storageBlobEndpoint string
 param storageContainerName string
 param cosmosDBConnectionString string
@@ -81,6 +82,10 @@ resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
           name: 'azuresearchservicekey'
           value: azureSearchServiceKey
         }
+        {
+          name: 'azurestorageconnectionstring'
+          value: storageConnectionString
+        }
       ]
       registries: [
         {
@@ -107,6 +112,10 @@ resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
             {
               name: 'AzureStorageContainer'
               value: storageContainerName
+            }
+            {
+              name: 'AzureStorageConnectionString'
+              secretRef: 'azurestorageconnectionstring'
             }
             {
               name: 'CosmosDBConnectionString'

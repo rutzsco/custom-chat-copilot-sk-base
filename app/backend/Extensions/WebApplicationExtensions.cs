@@ -29,7 +29,7 @@ internal static class WebApplicationExtensions
         api.MapGet("documents/{fileName}", OnGetSourceFileAsync);
 
         // Get enable logout
-        api.MapGet("enableLogout", OnGetEnableLogout);
+        //api.MapGet("enableLogout", OnGetEnableLogout);
 
         // Get enable logout
         api.MapGet("user", OnGetUser);
@@ -37,18 +37,22 @@ internal static class WebApplicationExtensions
         return app;
     }
 
-    private static IResult OnGetEnableLogout(HttpContext context)
-    {
-        var header = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-ID"];
-        var enableLogout = !string.IsNullOrEmpty(header);
+    //private static IResult OnGetEnableLogout(HttpContext context)
+    //{
+    //    var id = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-ID"];
+    //    var name = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-NAME"];
+    //    var enableLogout = !string.IsNullOrEmpty(id);
 
-        return TypedResults.Ok(enableLogout);
-    }
+    //    return TypedResults.Ok(new UserInformation(enableLogout, name, id));
+    //}
 
     private static IResult OnGetUser(HttpContext context)
     {
-        var header = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-NAME"];
-        return TypedResults.Ok(header);
+        var id = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-ID"];
+        var name = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-NAME"];
+        var enableLogout = !string.IsNullOrEmpty(id);
+
+        return TypedResults.Ok(new UserInformation(enableLogout, name, id));
     }
 
     private static async Task<IResult> OnGetSourceFileAsync(string fileName, BlobServiceClient blobServiceClient)
