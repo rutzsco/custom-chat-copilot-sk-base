@@ -2,7 +2,7 @@
 
 namespace MinimalApi.Services.Search;
 
-public class KnowledgeSourceAIStudioSchema : IKnowledgeSource
+public class ManualsAIStudioIndexDefinition : IKnowledgeSource
 {
     public required string filepath { get; set; }
 

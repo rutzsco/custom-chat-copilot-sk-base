@@ -24,7 +24,7 @@ public sealed class RetrieveRelatedDocumentSkill
         searchQuery = searchQuery.Replace("\"", string.Empty);
         arguments["intent"] = searchQuery;
 
-        var searchLogic = new SearchLogic<KnowledgeSourceAIStudioSchema>(_openAIClient, _searchClientFactory, KnowledgeSourceAIStudioSchema.IndexName, _config["AOAIEmbeddingsDeployment"], KnowledgeSourceAIStudioSchema.EmbeddingsFieldName, KnowledgeSourceAIStudioSchema.SelectFieldNames);
+        var searchLogic = new SearchLogic<ManualsAIStudioIndexDefinition>(_openAIClient, _searchClientFactory, ManualsAIStudioIndexDefinition.IndexName, _config["AOAIEmbeddingsDeployment"], ManualsAIStudioIndexDefinition.EmbeddingsFieldName, ManualsAIStudioIndexDefinition.SelectFieldNames);
         var result = await searchLogic.SearchAsync(searchQuery);
 
         if (!result.Sources.Any())
@@ -44,7 +44,7 @@ public sealed class RetrieveRelatedDocumentSkill
         searchQuery = searchQuery.Replace("\"", string.Empty);
         arguments["intent"] = searchQuery;
 
-        var searchLogic = new SearchLogic<KnowledgeSourceSearchIndexerSchema>(_openAIClient, _searchClientFactory, KnowledgeSourceSearchIndexerSchema.IndexName, _config["AOAIEmbeddingsDeployment"], KnowledgeSourceSearchIndexerSchema.EmbeddingsFieldName, KnowledgeSourceSearchIndexerSchema.SelectFieldNames);
+        var searchLogic = new SearchLogic<ManualsIndexerDefinintion>(_openAIClient, _searchClientFactory, ManualsIndexerDefinintion.IndexName, _config["AOAIEmbeddingsDeployment"], ManualsIndexerDefinintion.EmbeddingsFieldName, ManualsIndexerDefinintion.SelectFieldNames);
         var result = await searchLogic.SearchAsync(searchQuery);
 
         if (!result.Sources.Any())

@@ -2,7 +2,7 @@
 
 namespace MinimalApi.Services.Search;
 
-public class KnowledgeSourceSearchIndexerSchema : IKnowledgeSource
+public class ManualsIndexerDefinintion : IKnowledgeSource
 {
     public required string title { get; set; }
 
