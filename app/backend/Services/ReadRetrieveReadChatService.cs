@@ -8,12 +8,12 @@ namespace MinimalApi.Services;
 
 internal sealed class ReadRetrieveReadChatService
 {
-    private readonly ILogger<ReadRetrieveReadChatServiceEnhanced> _logger;
+    private readonly ILogger<ReadRetrieveReadChatService> _logger;
     private readonly IConfiguration _configuration;
     private readonly OpenAIClientFacade _openAIClientFacade;
 
     public ReadRetrieveReadChatService(OpenAIClientFacade openAIClientFacade,
-                                       ILogger<ReadRetrieveReadChatServiceEnhanced> logger,
+                                       ILogger<ReadRetrieveReadChatService> logger,
                                        IConfiguration configuration)
     {
         _openAIClientFacade = openAIClientFacade;

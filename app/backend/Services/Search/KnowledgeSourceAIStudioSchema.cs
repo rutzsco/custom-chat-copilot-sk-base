@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-namespace MinimalApi.Extensions;
+namespace MinimalApi.Services.Search;
 
-public class KnowledgeSource
+public class KnowledgeSourceAIStudioSchema : IKnowledgeSource
 {
     public required string filepath { get; set; }
 
@@ -11,5 +11,15 @@ public class KnowledgeSource
     public string FormatAsOpenAISourceText()
     {
         return $"<source><name>{filepath}</name><content> {content.Replace('\r', ' ').Replace('\n', ' ')}</content></source>";
+    }
+
+    public string GetContent()
+    {
+        return content;
+    }
+
+    public string GetFilepath()
+    {
+        return filepath;
     }
 }

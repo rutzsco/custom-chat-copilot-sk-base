@@ -398,3 +398,4 @@ FodyWeavers.xsd
 *.sln.iml
 app/backend/appsettings.Development.json
 infrastructure/main.rutzsco.parameters.json
+infrastructure/main.parameters.json

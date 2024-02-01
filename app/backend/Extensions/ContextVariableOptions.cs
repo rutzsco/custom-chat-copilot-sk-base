@@ -8,5 +8,5 @@ public class ContextVariableOptions
     public static string Question = "question";
     public static string SearchQuery = "searchQuery";
     public static string Knowledge = "knowledge";
-    public static string KnowledgeJSON = "knowledge-json";
+    public static string KnowledgeSummary = "knowledge-summary";
 }

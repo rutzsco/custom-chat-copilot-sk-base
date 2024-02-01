@@ -6,6 +6,7 @@ using Azure.Storage;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.DependencyInjection;
 using MinimalApi.Services.ChatHistory;
+using MinimalApi.Services.Search;
 using MinimalApi.Services.Skills;
 
 namespace MinimalApi.Extensions;
@@ -54,12 +55,14 @@ internal static class ServiceCollectionExtensions
             ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceEndpoint4);
             ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceKey4);
 
-            var searchClientFacade = sp.GetRequiredService<SearchClientFacade>();
+            // Build Plugins
+            var searchClientFactory = sp.GetRequiredService<SearchClientFactory>();
             var openAIClient = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint3), new AzureKeyCredential(azureOpenAiServiceKey3));
-            var retrieveRelatedDocumentPlugin = new RetrieveRelatedDocumentSkill(searchClientFacade, openAIClient);
+            var retrieveRelatedDocumentPlugin = new RetrieveRelatedDocumentSkill(config, searchClientFactory, openAIClient);
             var generateSearchQueryPlugin = new GenerateSearchQuerySkill();
             var chatPlugin = new ChatSkill();
 
+            // Build Kernels
             Kernel kernel3 = Kernel.CreateBuilder()
                .AddAzureOpenAIChatCompletion(deployedModelName3, azureOpenAiServiceEndpoint3, azureOpenAiServiceKey3)
                .Build();
@@ -86,18 +89,13 @@ internal static class ServiceCollectionExtensions
         }); ;
 
 
-        services.AddSingleton<SearchClientFacade>(sp =>
+        services.AddSingleton<SearchClientFactory>(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
-            var (azureSearchServiceEndpoint, azureSearchManualsIndex, azureSearchServiceKey) = (config["AzureSearchServiceEndpoint"], config["AzureSearchContentIndex"], config["AzureSearchServiceKey"]);
-
-            var contentSearchClient = new SearchClient(new Uri(azureSearchServiceEndpoint), azureSearchManualsIndex, new AzureKeyCredential(azureSearchServiceKey));
-
-            return new SearchClientFacade(contentSearchClient);
+            return new SearchClientFactory(config);
         });
 
         services.AddSingleton<ChatHistoryService>();
-        services.AddSingleton<ReadRetrieveReadChatServiceEnhanced>();
         services.AddSingleton<ReadRetrieveReadChatService>();
         return services;
     }

@@ -1,60 +1,40 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System.Collections.Generic;
 using System.ComponentModel;
-using TiktokenSharp;
+using MinimalApi.Services.Search;
 
 namespace MinimalApi.Services.Skills;
 
 public sealed class RetrieveRelatedDocumentSkill
 {
-    private readonly SearchClientFacade _searchClientFacade;
+    private readonly IConfiguration _config;
+    private readonly SearchClientFactory _searchClientFactory;
     private readonly OpenAIClient _openAIClient;
 
-    public RetrieveRelatedDocumentSkill(SearchClientFacade searchClientFacade, OpenAIClient openAIClient)
+    public RetrieveRelatedDocumentSkill(IConfiguration config, SearchClientFactory searchClientFactory, OpenAIClient openAIClient)
     {
-        _searchClientFacade = searchClientFacade;
+        _config= config;
+        _searchClientFactory = searchClientFactory;
         _openAIClient = openAIClient;
     }
 
     [KernelFunction("Query"), Description("Search more information")]
-    public async Task<string> QueryAsync(
-        [Description("search query")] string searchQuery,
-        KernelArguments arguments)
+    public async Task<string> QueryAsync([Description("search query")] string searchQuery, KernelArguments arguments)
     {
         searchQuery = searchQuery.Replace("\"", string.Empty);
         arguments["intent"] = searchQuery;
 
-        IReadOnlyList<KnowledgeSource> sources = new List<KnowledgeSource>();
-        sources = await _searchClientFacade.SimpleHybridSearchAsync(_openAIClient, searchQuery);
-        if (!sources.Any())
+        var searchLogic = new SearchLogic<KnowledgeSourceAIStudioSchema>(_openAIClient, _searchClientFactory, _config["AzureSearchContentIndex"], _config["AOAIEmbeddingsDeployment"]);
+        var result = await searchLogic.SearchAsync(searchQuery);
+
+        if (!result.Sources.Any())
         {
-            arguments["knowledge"] = "NO_SOURCES";
+            arguments[ContextVariableOptions.Knowledge] = "NO_SOURCES";
             return "NO_SOURCES";
         }
-
-        int sourceSize = 0;
-        int tokenSize = 0;
-        var documents = new List<KnowledgeSource>();
-        var sb = new StringBuilder();
-        var tikToken = TikToken.EncodingForModel("gpt-3.5-turbo");
-        foreach (var document in sources)
-        {
-            var text = document.FormatAsOpenAISourceText();
-            sourceSize += text.Length;
-            tokenSize += tikToken.Encode(text).Count;
-            if (tokenSize > DefaultSettings.MaxRequestTokens)
-            {
-                break;
-            }
-            documents.Add(document);
-            sb.AppendLine(text);
-        }
-        var documentContents = sb.ToString();
-
-        var result = sb.ToString();
-        arguments["knowledge"] = result;
-        arguments["knowledge-json"] = JsonSerializer.Serialize(documents);
-        return result;
+   
+        arguments[ContextVariableOptions.Knowledge] = result.FormattedSourceText;
+        arguments[ContextVariableOptions.KnowledgeSummary] = result;
+        return result.FormattedSourceText;
     }
 }
