@@ -1,8 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Text.RegularExpressions;
+
 namespace MinimalApi.Services.Search;
 
-public class ManualsIndexerDefinintion : IKnowledgeSource
+public class ManualsSearchIndexerIndexDefinintion : IKnowledgeSource
 {
     public required string title { get; set; }
 
@@ -12,7 +14,7 @@ public class ManualsIndexerDefinintion : IKnowledgeSource
 
     public string FormatAsOpenAISourceText()
     {
-        return $"<source><name>{title}</name><content> {chunk.Replace('\r', ' ').Replace('\n', ' ')}</content></source>";
+        return $"<source><name>{title}#page={GetPage()}</name><content> {chunk.Replace('\r', ' ').Replace('\n', ' ')}</content></source>";
     }
 
     public string GetContent()
@@ -23,6 +25,24 @@ public class ManualsIndexerDefinintion : IKnowledgeSource
     public string GetFilepath()
     {
         return title;
+    }
+
+    public int GetPage()
+    {
+        try
+        {
+            string pattern = "_pages_(\\d+)";
+
+            Regex regex = new Regex(pattern);
+            Match match = regex.Match(chunk_id);
+            string pageNumber = match.Groups[1].Value;
+
+            return Convert.ToInt32(pageNumber);
+        }
+        catch
+        {
+            return 0;
+        }
     }
 
     public static string IndexName = "manuals-vi";

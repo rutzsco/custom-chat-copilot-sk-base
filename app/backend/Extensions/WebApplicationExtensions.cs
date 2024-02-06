@@ -29,9 +29,6 @@ internal static class WebApplicationExtensions
         api.MapGet("documents/{fileName}", OnGetSourceFileAsync);
 
         // Get enable logout
-        //api.MapGet("enableLogout", OnGetEnableLogout);
-
-        // Get enable logout
         api.MapGet("user", OnGetUser);
 
         return app;

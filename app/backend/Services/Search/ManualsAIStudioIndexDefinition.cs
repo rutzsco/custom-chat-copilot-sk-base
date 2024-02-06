@@ -23,6 +23,11 @@ public class ManualsAIStudioIndexDefinition : IKnowledgeSource
         return filepath;
     }
 
+    public int GetPage()
+    {
+        return 0;
+    }
+
     public static string IndexName = "manuals";
     public static string EmbeddingsFieldName = "contentVector";
     public static List<string> SelectFieldNames = new List<string> { "content", "filepath" };

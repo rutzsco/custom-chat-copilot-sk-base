@@ -44,7 +44,7 @@ public sealed class RetrieveRelatedDocumentSkill
         searchQuery = searchQuery.Replace("\"", string.Empty);
         arguments["intent"] = searchQuery;
 
-        var searchLogic = new SearchLogic<ManualsIndexerDefinintion>(_openAIClient, _searchClientFactory, ManualsIndexerDefinintion.IndexName, _config["AOAIEmbeddingsDeployment"], ManualsIndexerDefinintion.EmbeddingsFieldName, ManualsIndexerDefinintion.SelectFieldNames);
+        var searchLogic = new SearchLogic<ManualsSearchIndexerIndexDefinintion>(_openAIClient, _searchClientFactory, ManualsSearchIndexerIndexDefinintion.IndexName, _config["AOAIEmbeddingsDeployment"], ManualsSearchIndexerIndexDefinintion.EmbeddingsFieldName, ManualsSearchIndexerIndexDefinintion.SelectFieldNames);
         var result = await searchLogic.SearchAsync(searchQuery);
 
         if (!result.Sources.Any())

@@ -5,8 +5,7 @@ namespace MinimalApi.Services.Search;
 public interface IKnowledgeSource
 {
     string FormatAsOpenAISourceText();
-
-    public string GetFilepath();
-
-    public string GetContent();
+    string GetFilepath();
+    string GetContent();
+    int GetPage();
 }
