@@ -2,7 +2,7 @@
 
 namespace Shared.Models;
 
-public record SupportingContentRecord(string Title, string Content);
+public record SupportingContentRecord(string Title, string Content, int Page);
 public record ApproachResponse(
     string Answer,
     string? Thoughts,

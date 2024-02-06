@@ -8,7 +8,7 @@ public sealed partial class SupportingContent
     {
         // Assumes the item starts with the file name followed by : and the content.
         // Example: "sdp_corporate.pdf: this is the content that follows".
-        var title = item.Title;
+        var title = $"{item.Title} - {item.Page}" ;
         var content = item.Content;
 
         return new ParsedSupportingContentItem(title, content.Trim());
