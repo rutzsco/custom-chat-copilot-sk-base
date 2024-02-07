@@ -4,6 +4,8 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
+builder.Configuration.AddJsonFile($"appsettings.json", optional: true, reloadOnChange: true);
+builder.Configuration.AddJsonFile($"appsettings.{builder.HostEnvironment.Environment}.json", optional: true, reloadOnChange: true);
 
 builder.Services.Configure<AppSettings>(
     builder.Configuration.GetSection(nameof(AppSettings)));
@@ -17,6 +19,8 @@ builder.Services.AddSessionStorageServices();
 builder.Services.AddSpeechSynthesisServices();
 builder.Services.AddSpeechRecognitionServices();
 builder.Services.AddMudServices();
+
+AppConfiguration.Load(builder.Configuration);
 
 await JSHost.ImportAsync(
     moduleName: nameof(JavaScriptModule),
