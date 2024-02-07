@@ -5,8 +5,3 @@ Generate a search query based on the conversation and the new question.
 Do not include any text inside [] or <<>> in the search query terms.
 Do not include any special characters like '+'.
 If the question is not in English, translate the question to English before generating the search query.
-
-###
-Question: 'What is the deductible for the employee plan for a visit to Overlake in Bellevue?'
-Answer: deductible employee plan for a visit to Overlake in Bellevue
-###

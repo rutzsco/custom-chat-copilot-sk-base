@@ -13,6 +13,8 @@ public static class AppConfiguration
         ColorPaletteLightPrimary = config.GetValue<string>("ColorPaletteLightPrimary", "#84B1CB");
         ColorPaletteLightSecondary = config.GetValue<string>("ColorPaletteLightSecondary", "#287FA4");
         ColorPaletteLightAppbarBackground = config.GetValue<string>("ColorPaletteLightAppbarBackground", "#84B1CB");
+
+        HelloText = config.GetValue<string>("HelloText", "How can I help you today?");
     }
 
     public static string ExampleQuestion1 { get; set; } = "What type of motor oil is required in a ford ranger?";
@@ -23,4 +25,7 @@ public static class AppConfiguration
     public static string ColorPaletteLightAppbarBackground { get; set; } = "#84B1CB";
     public static string LogoImagePath { get; set; } = "icon-512.png";
     public static int LogoImageWidth { get; set; } = 150;
+
+    public static string HelloText { get; set; } = "";
+
 }
