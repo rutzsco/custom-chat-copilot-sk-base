@@ -46,6 +46,14 @@ public sealed partial class MainLayout
         _ => true
     };
 
+    private string LogoImagePath
+    {
+        get
+        {
+            return AppConfiguration.LogoImagePath;
+        }
+    }
+
     private bool SortDisabled
     {
         get
