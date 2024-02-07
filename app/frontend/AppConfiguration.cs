@@ -10,5 +10,7 @@ public static class AppConfiguration
     public static string ColorPaletteLightPrimary { get; set; } = "#84B1CB";
     public static string ColorPaletteLightSecondary { get; set; } = "#287FA4";
     public static string ColorPaletteLightAppbarBackground { get; set; } = "#84B1CB";
-    public static string LogoImagePath { get; set; } = "icon-512.png"; 
+    public static string LogoImagePath { get; set; } = "icon-512.png";
+
+    public static int LogoImageWidth { get; set; } = 150;
 }

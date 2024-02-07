@@ -54,6 +54,14 @@ public sealed partial class MainLayout
         }
     }
 
+    private int LogoImageWidth
+    {
+        get
+        {
+            return AppConfiguration.LogoImageWidth;
+        }
+    }
+
     private bool SortDisabled
     {
         get
