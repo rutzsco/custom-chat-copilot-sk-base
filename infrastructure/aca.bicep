@@ -42,7 +42,6 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10
 
 resource acr 'Microsoft.ContainerRegistry/registries@2021-06-01-preview' existing = {
   name: acrName
-  scope: resourceGroup('rutzsco-core-cicd')
 }
 
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2023-04-01-preview' = {
