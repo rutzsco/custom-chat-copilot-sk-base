@@ -69,6 +69,7 @@ module storage 'storage-account.bicep' = {
     name: storageAccountName
     location: location
     publicNetworkAccess: 'Enabled'
+    allowBlobPublicAccess: false
     sku: {
       name: 'Standard_ZRS'
     }
