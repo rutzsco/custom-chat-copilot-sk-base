@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using static System.Net.WebRequestMethods;
+
 namespace ClientApp.Shared;
 
 public sealed partial class MainLayout

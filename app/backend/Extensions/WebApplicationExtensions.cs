@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
 using MinimalApi.Services.ChatHistory;
 
 namespace MinimalApi.Extensions;
@@ -34,22 +35,10 @@ internal static class WebApplicationExtensions
         return app;
     }
 
-    //private static IResult OnGetEnableLogout(HttpContext context)
-    //{
-    //    var id = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-ID"];
-    //    var name = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-NAME"];
-    //    var enableLogout = !string.IsNullOrEmpty(id);
-
-    //    return TypedResults.Ok(new UserInformation(enableLogout, name, id));
-    //}
-
     private static IResult OnGetUser(HttpContext context)
     {
-        var id = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-ID"];
-        var name = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-NAME"];
-        var enableLogout = !string.IsNullOrEmpty(id);
-
-        return TypedResults.Ok(new UserInformation(enableLogout, name, id));
+        var userInfo = GetUserInfo(context);
+        return TypedResults.Ok(userInfo);
     }
 
     private static async Task<IResult> OnGetSourceFileAsync(string fileName, BlobServiceClient blobServiceClient)
@@ -79,33 +68,35 @@ internal static class WebApplicationExtensions
         }
     }
 
-    private static async Task<IResult> OnPostChatRatingAsync(ChatRatingRequest request, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
+    private static async Task<IResult> OnPostChatRatingAsync(HttpContext context, ChatRatingRequest request, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
     {
-        await chatHistoryService.RecordRatingAsync(request);
+        var userInfo = GetUserInfo(context);
+        await chatHistoryService.RecordRatingAsync(userInfo, request);
         return Results.Ok();
     }
-    private static async IAsyncEnumerable<FeedbackResponse> OnGetHistoryAsync(ChatHistoryService chatHistoryService)
+    private static async IAsyncEnumerable<FeedbackResponse> OnGetHistoryAsync(HttpContext context, ChatHistoryService chatHistoryService)
     {
-        var response = await chatHistoryService.GetMostRecentChatItemsAsync();
+        var user = GetUserInfo(context);
+        var response = await chatHistoryService.GetMostRecentChatItemsAsync(user);
         foreach (var item in response)
         {
             yield return new FeedbackResponse(item.Prompt, item.Content, 0, string.Empty, item.Timestamp);
         }
     }
 
-    private static async Task<IResult> OnPostChatAsync(ChatRequest request, ReadRetrieveReadChatService chatService, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
+    private static async Task<IResult> OnPostChatAsync(HttpContext context, ChatRequest request, ReadRetrieveReadChatService chatService, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
     {
+        var userInfo = GetUserInfo(context);
         if (request is { History.Length: > 0 })
         {
             var response = await chatService.ReplyAsync(request, cancellationToken);
-            await chatHistoryService.RecordChatMessageAsync(request, response);
+            await chatHistoryService.RecordChatMessageAsync(userInfo, request, response);
             return TypedResults.Ok(response);
         }
 
         return Results.BadRequest();
     }
 
- 
 
     private static async IAsyncEnumerable<DocumentResponse> OnGetDocumentsAsync(BlobContainerClient client, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
@@ -144,13 +135,30 @@ internal static class WebApplicationExtensions
         }
     }
 
-    private static async IAsyncEnumerable<FeedbackResponse> OnGetFeedbackAsync(ChatHistoryService chatHistoryService)
+    private static async IAsyncEnumerable<FeedbackResponse> OnGetFeedbackAsync(HttpContext context, ChatHistoryService chatHistoryService)
     {
-        var response = await chatHistoryService.GetMostRecentRatingsItemsAsync();
+        var userInfo = GetUserInfo(context);
+        var response = await chatHistoryService.GetMostRecentRatingsItemsAsync(userInfo);
         foreach (var item in response)
         {
             yield return new FeedbackResponse(item.Prompt, item.Content, item.Rating.Rating, item.Rating.Feedback, item.Rating.Timestamp);
         }
 
+    }
+
+    private static UserInformation GetUserInfo(HttpContext context)
+    {
+        var id = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-ID"];
+        var name = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-NAME"];
+        if (string.IsNullOrEmpty(id))
+        {
+            id = "LocalDevUser";
+            name = "LocalDevUser";
+        }
+        
+        var enableLogout = !string.IsNullOrEmpty(id);
+        var u = new UserInformation(enableLogout, name, id);
+
+        return u;
     }
 }

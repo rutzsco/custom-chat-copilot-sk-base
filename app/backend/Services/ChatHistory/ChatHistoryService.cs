@@ -20,14 +20,14 @@ public class ChatHistoryService
         _cosmosContainer = db.GetContainer(DefaultSettings.CosmosDBCollectionName);
     }
 
-    public async Task RecordChatMessageAsync(ChatRequest chatRequest, ApproachResponse response)
+    public async Task RecordChatMessageAsync(UserInformation user, ChatRequest chatRequest, ApproachResponse response)
     {
         var prompt = chatRequest.History.LastOrDefault().User;
-        var chatMessage = new ChatMessageRecord("Anonymous", chatRequest.ChatId.ToString(), chatRequest.ChatTurnId.ToString(), prompt, response.Answer);
+        var chatMessage = new ChatMessageRecord(user.UserId, chatRequest.ChatId.ToString(), chatRequest.ChatTurnId.ToString(), prompt, response.Answer);
         await _cosmosContainer.CreateItemAsync(chatMessage, partitionKey: new PartitionKey(chatMessage.ChatId));
     }
 
-    public async Task RecordRatingAsync(ChatRatingRequest chatRatingRequest)
+    public async Task RecordRatingAsync(UserInformation user, ChatRatingRequest chatRatingRequest)
     {
         var chatRatingId = chatRatingRequest.MessageId.ToString();
         var partitionKey = new PartitionKey(chatRatingRequest.ChatId.ToString());
@@ -40,7 +40,7 @@ public class ChatHistoryService
     }
 
 
-    public async Task<List<ChatMessageRecord>> GetMostRecentRatingsItemsAsync()
+    public async Task<List<ChatMessageRecord>> GetMostRecentRatingsItemsAsync(UserInformation user)
     {
         var query = _cosmosContainer.GetItemQueryIterator<ChatMessageRecord>(
             new QueryDefinition("SELECT TOP 100 * FROM c WHERE c.rating != null ORDER BY c.rating.timestamp DESC"));
@@ -55,7 +55,7 @@ public class ChatHistoryService
         return results;
     }
 
-    public async Task<List<ChatMessageRecord>> GetMostRecentChatItemsAsync()
+    public async Task<List<ChatMessageRecord>> GetMostRecentChatItemsAsync(UserInformation user)
     {
         var query = _cosmosContainer.GetItemQueryIterator<ChatMessageRecord>(
             new QueryDefinition("SELECT TOP 100 * FROM c ORDER BY c.timestamp DESC"));
