@@ -51,7 +51,9 @@
                             </div>
                         }
                             <div class="pt-2">
-                                <MudRating SelectedValue="_newRating" Size="Size.Small" Class="pt-2" SelectedValueChanged="OnRatingClickedAsync" />
+                                <MudFab StartIcon="@Icons.Material.Filled.ThumbUp" DisableElevation="true" Size="Size.Small" OnClick="OnPositiveFeedbackClickedAsync" />
+                                <MudFab StartIcon="@Icons.Material.Filled.ThumbDown" DisableElevation="true" Size="Size.Small" OnClick="OnNegativeFeedbackClickedAsync" />
+@*                                 <MudRating SelectedValue="_newRating" Size="Size.Small" Class="pt-2" SelectedValueChanged="OnRatingClickedAsync" /> *@
                             </div>
                     </MudPaper>
                 </ChildContent>

@@ -13,6 +13,41 @@ public sealed partial class Answer
     private HtmlParsedAnswer? _parsedAnswer;
     private int _newRating;
 
+    private async Task OnPositiveFeedbackClickedAsync()
+    {
+        _newRating = 5;
+        Dialog.Show<FeedbackDialog>($"Provide additional feedback",
+            new DialogParameters
+            {
+                [nameof(FeedbackDialog.Rating)] = _newRating,
+                [nameof(FeedbackDialog.MessageId)] = Retort.MessageId.ToString(),
+                [nameof(FeedbackDialog.ChatId)] = Retort.ChatId.ToString(),
+            },
+            new DialogOptions
+            {
+                MaxWidth = MaxWidth.Medium,
+                CloseButton = true,
+                CloseOnEscapeKey = true
+            });
+    }
+
+    private async Task OnNegativeFeedbackClickedAsync()
+    {
+        _newRating = 0;
+        Dialog.Show<FeedbackDialog>($"Provide additional feedback",
+            new DialogParameters
+            {
+                [nameof(FeedbackDialog.Rating)] = _newRating,
+                [nameof(FeedbackDialog.MessageId)] = Retort.MessageId.ToString(),
+                [nameof(FeedbackDialog.ChatId)] = Retort.ChatId.ToString(),
+            },
+            new DialogOptions
+            {
+                MaxWidth = MaxWidth.Medium,
+                CloseButton = true,
+                CloseOnEscapeKey = true
+            });
+    }
 
     private async Task OnRatingClickedAsync(int val)
     {
