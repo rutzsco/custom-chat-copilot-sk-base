@@ -42,8 +42,10 @@ public class ChatHistoryService
 
     public async Task<List<ChatMessageRecord>> GetMostRecentRatingsItemsAsync(UserInformation user)
     {
+
         var query = _cosmosContainer.GetItemQueryIterator<ChatMessageRecord>(
-            new QueryDefinition("SELECT TOP 100 * FROM c WHERE c.rating != null ORDER BY c.rating.timestamp DESC"));
+            new QueryDefinition("SELECT TOP 100 * FROM c WHERE c.rating != null AND c.userId = @username ORDER BY c.rating.timestamp DESC")
+            .WithParameter("@username", user.UserId));
 
         var results = new List<ChatMessageRecord>();
         while (query.HasMoreResults)
@@ -58,7 +60,8 @@ public class ChatHistoryService
     public async Task<List<ChatMessageRecord>> GetMostRecentChatItemsAsync(UserInformation user)
     {
         var query = _cosmosContainer.GetItemQueryIterator<ChatMessageRecord>(
-            new QueryDefinition("SELECT TOP 100 * FROM c ORDER BY c.timestamp DESC"));
+            new QueryDefinition("SELECT TOP 100 * FROM c WHERE c.userId = @username ORDER BY c.timestamp DESC")
+            .WithParameter("@username", user.UserId));
 
         var results = new List<ChatMessageRecord>();
         while (query.HasMoreResults)
