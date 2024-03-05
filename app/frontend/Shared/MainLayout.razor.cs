@@ -31,7 +31,8 @@ public sealed partial class MainLayout
 
     private bool _isReversed
     {
-        get => LocalStorage.GetItem<bool?>(StorageKeys.PrefersReversedConversationSorting) ?? true;
+        //get => LocalStorage.GetItem<bool?>(StorageKeys.PrefersReversedConversationSorting) ?? true;
+        get => false;
         set => LocalStorage.SetItem<bool>(StorageKeys.PrefersReversedConversationSorting, value);
     }
 
@@ -68,11 +69,12 @@ public sealed partial class MainLayout
     {
         get
         {
-            return new Uri(Nav.Uri).Segments.LastOrDefault() switch
-            {
-                "documents" => true,
-                _ => false
-            };
+            return true;
+            //return new Uri(Nav.Uri).Segments.LastOrDefault() switch
+            //{
+            //    "documents" => true,
+            //    _ => false
+            //};
         }
     }
 

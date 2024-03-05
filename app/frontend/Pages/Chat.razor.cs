@@ -36,7 +36,6 @@ public sealed partial class Chat
         {
             return;
         }
-
         _isReceivingResponse = true;
         _lastReferenceQuestion = _userQuestion;
         _currentQuestion = new(_userQuestion, DateTime.Now);
@@ -68,6 +67,11 @@ public sealed partial class Chat
         {
             _isReceivingResponse = false;
         }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JS.InvokeVoidAsync("scrollToBottom", "answerSection");
     }
 
     private void OnClearChat()
