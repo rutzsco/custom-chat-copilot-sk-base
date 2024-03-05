@@ -1,16 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-
-namespace MinimalApi.Extensions;
+﻿namespace MinimalApi.Extensions;
 
 public static class DefaultSettings
 {
-    public static double Temperature = .3;
-
-    public static int MaxResponseTokens = 1_024;
     public static int MaxRequestTokens = 6000;
-
-    public static string GPT3ModelType = "gpt-3.5-turbo-16k";
-    public static string GPT4ModelType = "gpt-4-32k";
 
     public static PromptExecutionSettings AISearchRequestSettings = new()
     {
