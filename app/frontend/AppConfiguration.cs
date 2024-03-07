@@ -15,6 +15,8 @@ public static class AppConfiguration
         ColorPaletteLightAppbarBackground = config.GetValue<string>("ColorPaletteLightAppbarBackground", "#84B1CB");
 
         HelloText = config.GetValue<string>("HelloText", "How can I help you today?");
+
+        ShowSampleQuestions = config.GetValue<bool>("ShowSampleQuestions", true);
     }
 
     public static string ExampleQuestion1 { get; set; } = "What type of motor oil is required in a ford ranger?";
@@ -26,4 +28,6 @@ public static class AppConfiguration
     public static string LogoImagePath { get; set; } = "icon-512.png";
     public static int LogoImageWidth { get; set; } = 150;
     public static string HelloText { get; set; } = "";
+
+    public static bool ShowSampleQuestions { get; set; } = true;
 }
