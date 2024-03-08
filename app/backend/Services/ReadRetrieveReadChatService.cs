@@ -25,11 +25,12 @@ internal sealed class ReadRetrieveReadChatService
     {   
         try
         {
+            var sw = Stopwatch.StartNew();
  
             var kernel = _openAIClientFacade.GetKernel(request.OptionFlags.IsChatGpt4Enabled());
 
             var generateSearchQueryFunction = kernel.Plugins.GetFunction(DefaultSettings.GenerateSearchQueryPluginName, DefaultSettings.GenerateSearchQueryPluginQueryFunctionName);
-            var documentLookupFunction = kernel.Plugins.GetFunction(DefaultSettings.DocumentRetrievalPluginName, DefaultSettings.DocumentRetrievalPluginQueryFunctionNameV2);
+            var documentLookupFunction = kernel.Plugins.GetFunction(DefaultSettings.DocumentRetrievalPluginName, DefaultSettings.DocumentRetrievalPluginQueryFunctionName);
             var chatFunction = kernel.Plugins.GetFunction(DefaultSettings.ChatPluginName, DefaultSettings.ChatPluginFunctionName);
 
             var context = new KernelArguments().AddUserParameters(request.History);
@@ -38,7 +39,10 @@ internal sealed class ReadRetrieveReadChatService
             await kernel.InvokeAsync(documentLookupFunction, context);
             await kernel.InvokeAsync(chatFunction, context);
 
-            var result = context.BuildResoponse(request, _configuration);
+
+            sw.Stop();
+
+            var result = context.BuildResoponse(request, _configuration, _openAIClientFacade.GetKernelDeploymentName(request.OptionFlags.IsChatGpt4Enabled()), sw.ElapsedMilliseconds);
 
             var diagnostics = result.Diagnostics;
             _logger.LogInformation($"CHAT_DIAGNOSTICS: CompletionTokens={diagnostics.AnswerDiagnostics.CompletionTokens}, PromptTokens={diagnostics.AnswerDiagnostics.PromptTokens}, TotalTokens={diagnostics.AnswerDiagnostics.TotalTokens}, DurationMilliseconds={diagnostics.AnswerDiagnostics.AnswerDurationMilliseconds}");

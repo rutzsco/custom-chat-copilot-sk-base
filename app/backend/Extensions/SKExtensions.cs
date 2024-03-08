@@ -52,12 +52,14 @@ namespace MinimalApi.Extensions
             return value;
         }
 
-        public static ApproachResponse BuildResoponse(this KernelArguments context, ChatRequest request, IConfiguration configuration)
+        public static ApproachResponse BuildResoponse(this KernelArguments context, ChatRequest request, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
         {
             var result = (SKResult)context["ChatResult"];
             var knowledgeSourceSummary = (KnowledgeSourceSummary)context[ContextVariableOptions.KnowledgeSummary];
             var dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(), x.GetContent())).ToArray();
-            var diagnostics = new Diagnostics(new CompletionsDiagnostics(result.Usage.CompletionTokens, result.Usage.PromptTokens, result.Usage.TotalTokens, result.DurationMilliseconds));
+
+            var chatDiagnostics = new CompletionsDiagnostics(result.Usage.CompletionTokens, result.Usage.PromptTokens, result.Usage.TotalTokens, result.DurationMilliseconds);
+            var diagnostics = new Diagnostics(chatDiagnostics, modelDeploymentName, workflowDurationMilliseconds);
             var systemMessagePrompt = (string)context["SystemMessagePrompt"];
             var userMessage = (string)context["UserMessage"];
 

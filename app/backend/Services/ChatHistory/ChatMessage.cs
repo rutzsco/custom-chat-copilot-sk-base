@@ -30,6 +30,7 @@ public class ChatMessageRecord
         Prompt = message;
         Type = "Message";
         Id = chatTurnId;
+        Diagnostics = diagnostics;
     }
 
     /// <summary>

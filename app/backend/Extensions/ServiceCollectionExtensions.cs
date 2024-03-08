@@ -78,7 +78,7 @@ internal static class ServiceCollectionExtensions
             kernel4.ImportPluginFromObject(generateSearchQueryPlugin, DefaultSettings.GenerateSearchQueryPluginName);
             kernel4.ImportPluginFromObject(chatPlugin, DefaultSettings.ChatPluginName);
 
-            return new OpenAIClientFacade(kernel3, kernel4, openAIClient);
+            return new OpenAIClientFacade(deployedModelName3, kernel3, deployedModelName4, kernel4, openAIClient);
         });
         services.AddSingleton((sp) => {
             var config = sp.GetRequiredService<IConfiguration>();

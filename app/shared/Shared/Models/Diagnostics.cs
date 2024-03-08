@@ -8,12 +8,18 @@ public class Diagnostics
     {
     }
 
-    public Diagnostics(CompletionsDiagnostics answerDiagnostics)
+    public Diagnostics(CompletionsDiagnostics answerDiagnostics, string modelDeploymentName, long workflowDurationMilliseconds)
     {
         AnswerDiagnostics = answerDiagnostics;
+        ModelDeploymentName = modelDeploymentName;
+        WorkflowDurationMilliseconds = workflowDurationMilliseconds;
     }
 
     public CompletionsDiagnostics AnswerDiagnostics { get; }
+
+    public string ModelDeploymentName { get; }
+
+    public long WorkflowDurationMilliseconds { get; }
 }
 
 public class CompletionsDiagnostics
