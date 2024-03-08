@@ -7,8 +7,12 @@ public record class FeedbackResponse(
     string Answer,
     int Rating,
     string Feedback,
+    string Model,
+    long ElapsedMilliseconds,
     DateTimeOffset Timestamp);
 public record class ChatHistoryResponse(
     string Prompt,
     string Answer,
+    string Model,
+    long ElapsedMilliseconds,
     DateTimeOffset Timestamp);

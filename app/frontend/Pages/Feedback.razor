@@ -29,6 +29,12 @@
                     <MudTableSortLabel SortBy="new Func<FeedbackResponse, object>(d => d.Rating)">Rating</MudTableSortLabel>
                 </MudTh>
                 <MudTh>
+                    <MudTableSortLabel SortBy="new Func<FeedbackResponse, object>(d => d.Model)">Model</MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<FeedbackResponse, object>(d => d.ElapsedMilliseconds)">ElapsedMilliseconds</MudTableSortLabel>
+                </MudTh>
+                <MudTh>
                     <MudTableSortLabel SortBy="new Func<FeedbackResponse, object>(d => d.Timestamp.ToString())">Last Modified</MudTableSortLabel>
                 </MudTh>
             </HeaderContent>
@@ -36,7 +42,8 @@
                 <MudTd DataLabel="Question" Style="text-align:center"><strong>@context.Prompt</strong></MudTd>
                 <MudTd DataLabel="Answer">@context.Answer</MudTd>
                 <MudTd DataLabel="Feedback">@context.Feedback</MudTd>
-                <MudTd DataLabel="Rating">@context.Rating</MudTd>
+                <MudTd DataLabel="Model">@context.Model</MudTd>
+                <MudTd DataLabel="ElapsedMilliseconds">@context.ElapsedMilliseconds</MudTd>
                 <MudTd DataLabel="Timestamp">@($"{context.Timestamp:G}")</MudTd>
             </RowTemplate>
             <PagerContent>

@@ -80,7 +80,14 @@ internal static class WebApplicationExtensions
         var response = await chatHistoryService.GetMostRecentChatItemsAsync(user);
         foreach (var item in response)
         {
-            yield return new FeedbackResponse(item.Prompt, item.Content, 0, string.Empty, item.Timestamp);
+            yield return new FeedbackResponse(
+                item.Prompt,
+                item.Content,
+                0,
+                string.Empty,
+                item.Diagnostics.ModelDeploymentName,
+                item.Diagnostics.WorkflowDurationMilliseconds,
+                item.Timestamp);
         }
     }
 
@@ -141,7 +148,14 @@ internal static class WebApplicationExtensions
         var response = await chatHistoryService.GetMostRecentRatingsItemsAsync(userInfo);
         foreach (var item in response)
         {
-            yield return new FeedbackResponse(item.Prompt, item.Content, item.Rating.Rating, item.Rating.Feedback, item.Rating.Timestamp);
+            yield return new FeedbackResponse(
+                item.Prompt,
+                item.Content,
+                item.Rating.Rating,
+                item.Rating.Feedback,
+                item.Diagnostics.ModelDeploymentName,
+                item.Diagnostics.WorkflowDurationMilliseconds,
+                item.Rating.Timestamp);
         }
 
     }

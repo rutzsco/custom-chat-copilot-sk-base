@@ -15,11 +15,11 @@ public class Diagnostics
         WorkflowDurationMilliseconds = workflowDurationMilliseconds;
     }
 
-    public CompletionsDiagnostics AnswerDiagnostics { get; }
+    public CompletionsDiagnostics AnswerDiagnostics { get; set; }
 
-    public string ModelDeploymentName { get; }
+    public string ModelDeploymentName { get; set; }
 
-    public long WorkflowDurationMilliseconds { get; }
+    public long WorkflowDurationMilliseconds { get; set; }
 }
 
 public class CompletionsDiagnostics
