@@ -22,8 +22,9 @@ public class ChatHistoryService
 
     public async Task RecordChatMessageAsync(UserInformation user, ChatRequest chatRequest, ApproachResponse response)
     {
+        var diagnostics = response.Diagnostics;
         var prompt = chatRequest.History.LastOrDefault().User;
-        var chatMessage = new ChatMessageRecord(user.UserId, chatRequest.ChatId.ToString(), chatRequest.ChatTurnId.ToString(), prompt, response.Answer);
+        var chatMessage = new ChatMessageRecord(user.UserId, chatRequest.ChatId.ToString(), chatRequest.ChatTurnId.ToString(), prompt, response.Answer, response.Diagnostics);
         await _cosmosContainer.CreateItemAsync(chatMessage, partitionKey: new PartitionKey(chatMessage.ChatId));
     }
 

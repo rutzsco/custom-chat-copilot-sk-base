@@ -56,7 +56,7 @@ namespace MinimalApi.Extensions
         {
             var result = (SKResult)context["ChatResult"];
             var knowledgeSourceSummary = (KnowledgeSourceSummary)context[ContextVariableOptions.KnowledgeSummary];
-            var dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(), x.GetContent(), x.GetPage())).ToArray();
+            var dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(), x.GetContent())).ToArray();
             var diagnostics = new Diagnostics(new CompletionsDiagnostics(result.Usage.CompletionTokens, result.Usage.PromptTokens, result.Usage.TotalTokens, result.DurationMilliseconds));
             var systemMessagePrompt = (string)context["SystemMessagePrompt"];
             var userMessage = (string)context["UserMessage"];

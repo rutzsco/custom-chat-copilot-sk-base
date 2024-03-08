@@ -20,7 +20,8 @@ public class ChatMessageRecord
                              string chatId,
                              string chatTurnId,
                              string message,
-                             string content)
+                             string content,
+                             Diagnostics diagnostics)
     {
         Timestamp = DateTimeOffset.Now;
         UserId = userId;
@@ -75,4 +76,7 @@ public class ChatMessageRecord
 
     [JsonProperty("rating")]
     public ChatRating Rating { get; set; }
+
+    [JsonProperty("diagnostics")]
+    public Diagnostics Diagnostics { get; set; }
 }

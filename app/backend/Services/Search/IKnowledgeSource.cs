@@ -7,5 +7,4 @@ public interface IKnowledgeSource
     string FormatAsOpenAISourceText();
     string GetFilepath();
     string GetContent();
-    int GetPage();
 }
