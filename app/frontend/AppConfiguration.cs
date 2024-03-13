@@ -17,11 +17,12 @@ public static class AppConfiguration
         HelloText = config.GetValue<string>("HelloText", "How can I help you today?");
 
         ShowSampleQuestions = config.GetValue<bool>("ShowSampleQuestions", true);
+        ShowPremiumAOAIToggleSelection = config.GetValue<bool>("ShowPremiumAOAIToggleSelection", true);
     }
 
-    public static string ExampleQuestion1 { get; set; } = "What type of motor oil is required in a ford ranger?";
-    public static string ExampleQuestion2 { get; set; } = "Q2";
-    public static string ExampleQuestion3 { get; set; } = "Q3";
+    public static string ExampleQuestion1 { get; set; } = "Q1?";
+    public static string ExampleQuestion2 { get; set; } = "Q2?";
+    public static string ExampleQuestion3 { get; set; } = "Q3?";
     public static string ColorPaletteLightPrimary { get; set; } = "#005eb8";
     public static string ColorPaletteLightSecondary { get; set; } = "#287FA4";
     public static string ColorPaletteLightAppbarBackground { get; set; } = "#84B1CB";
@@ -30,4 +31,6 @@ public static class AppConfiguration
     public static string HelloText { get; set; } = "";
 
     public static bool ShowSampleQuestions { get; set; } = true;
+
+    public static bool ShowPremiumAOAIToggleSelection { get; set; } = true;
 }
