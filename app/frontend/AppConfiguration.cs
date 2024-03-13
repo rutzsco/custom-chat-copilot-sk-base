@@ -18,6 +18,10 @@ public static class AppConfiguration
 
         ShowSampleQuestions = config.GetValue<bool>("ShowSampleQuestions", true);
         ShowPremiumAOAIToggleSelection = config.GetValue<bool>("ShowPremiumAOAIToggleSelection", true);
+
+        ExampleQuestion1 = config.GetValue<string>("ExampleQuestion1", "Q1?");
+        ExampleQuestion2 = config.GetValue<string>("ExampleQuestion2", "Q2?");
+        ExampleQuestion3 = config.GetValue<string>("ExampleQuestion3", "Q3?");
     }
 
     public static string ExampleQuestion1 { get; set; } = "Q1?";
