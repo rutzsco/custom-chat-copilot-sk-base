@@ -19,6 +19,7 @@ internal static class WebApplicationExtensions
 
         // Process chat turn
         api.MapPost("chat", OnPostChatAsync);
+        api.MapPost("chat/streaming", OnPostChatStreamingAsync);
 
         // Get all documents
         api.MapGet("documents", OnGetDocumentsAsync);
@@ -104,6 +105,18 @@ internal static class WebApplicationExtensions
         return Results.BadRequest();
     }
 
+    private static async Task<IResult> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ReadRetrieveReadChatService chatService, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
+    {
+        var userInfo = GetUserInfo(context);
+        if (request is { History.Length: > 0 })
+        {
+            var response = await chatService.ReplyAsync(request, cancellationToken);
+            await chatHistoryService.RecordChatMessageAsync(userInfo, request, response);
+            return TypedResults.Ok(response);
+        }
+
+        return Results.BadRequest();
+    }
 
     private static async IAsyncEnumerable<DocumentResponse> OnGetDocumentsAsync(BlobContainerClient client, [EnumeratorCancellation] CancellationToken cancellationToken)
     {

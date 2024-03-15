@@ -401,3 +401,4 @@ infrastructure/main.rutzsco.parameters.json
 infrastructure/main.parameters.json
 app/frontend/wwwroot/appsettings.development.json
 app/frontend/wwwroot/appsettings.json
+app/backend/appsettings.Development-v1.json

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Net.Http.Headers;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ClientApp.Services;
 
@@ -140,15 +142,13 @@ public sealed class ApiClient(HttpClient httpClient)
             Approach: request.Approach,
             Request: request);
 
-        var json = JsonSerializer.Serialize(
-            request,
-            SerializerOptions.Default);
+        var json = JsonSerializer.Serialize(request, SerializerOptions.Default);
+        using var body = new StringContent(json, Encoding.UTF8, "application/json");
 
-        using var body = new StringContent(
-            json, Encoding.UTF8, "application/json");
+
+        await PostStreamingChatAsync(request);
 
         var response = await httpClient.PostAsync(apiRoute, body);
-
         if (response.IsSuccessStatusCode)
         {
             var answer = await response.Content.ReadFromJsonAsync<ApproachResponse>();
@@ -178,5 +178,26 @@ public sealed class ApiClient(HttpClient httpClient)
         var json = JsonSerializer.Serialize(request,SerializerOptions.Default);
         using var body = new StringContent(json, Encoding.UTF8, "application/json");
         var response = await httpClient.PostAsync(apiRoute, body);
+    }
+
+    private async Task PostStreamingChatAsync(ApproachRequest request)
+    {
+        var sb = new StringBuilder();
+        var json = JsonSerializer.Serialize(request, SerializerOptions.Default);
+        using var body = new StringContent(json, Encoding.UTF8, "application/json");
+        var response = await httpClient.PostAsync("api/chat/streaming", null);
+        response.EnsureSuccessStatusCode();
+
+        using var stream = await response.Content.ReadAsStreamAsync();
+
+        await foreach (var streamResponse in JsonSerializer.DeserializeAsyncEnumerable<string>(stream))
+        {
+            if (streamResponse is null)
+            {
+                continue;
+            }
+
+            sb.AppendLine(streamResponse);
+        }
     }
 }
