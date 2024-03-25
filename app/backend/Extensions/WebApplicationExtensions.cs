@@ -41,11 +41,12 @@ internal static class WebApplicationExtensions
         return TypedResults.Ok(userInfo);
     }
 
-    private static async Task<IResult> OnGetSourceFileAsync(string fileName, BlobServiceClient blobServiceClient)
+    private static async Task<IResult> OnGetSourceFileAsync(string fileName, BlobServiceClient blobServiceClient, IConfiguration configuration)
     {
         try
         {
-            var blobContainerClient = blobServiceClient.GetBlobContainerClient("content");
+            var sourceContainer = configuration["AzureStorageContainer"];
+            var blobContainerClient = blobServiceClient.GetBlobContainerClient(sourceContainer);
             var blobClient = blobContainerClient.GetBlobClient(fileName);
 
             if (await blobClient.ExistsAsync())
