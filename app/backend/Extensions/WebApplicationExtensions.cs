@@ -86,14 +86,28 @@ internal static class WebApplicationExtensions
         var response = await chatHistoryService.GetMostRecentChatItemsAsync(user);
         foreach (var item in response)
         {
-            yield return new FeedbackResponse(
-                item.Prompt,
-                item.Content,
-                0,
-                string.Empty,
-                item.Diagnostics.ModelDeploymentName,
-                item.Diagnostics.WorkflowDurationMilliseconds,
-                item.Timestamp);
+            if (item.Diagnostics != null)
+            {
+                yield return new FeedbackResponse(
+                    item.Prompt,
+                    item.Content,
+                    0,
+                    string.Empty,
+                    item.Diagnostics.ModelDeploymentName,
+                    item.Diagnostics.WorkflowDurationMilliseconds,
+                    item.Timestamp);
+            }
+            else
+            {
+                yield return new FeedbackResponse(
+                    item.Prompt,
+                    item.Content,
+                    0,
+                    string.Empty,
+                    "Unavialable",
+                    0,
+                    item.Timestamp);
+            }
         }
     }
 
