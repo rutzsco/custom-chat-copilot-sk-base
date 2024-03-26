@@ -1,0 +1,111 @@
+﻿@page "/streamingchatv2"
+@inject IJSRuntime JS
+<!-- This page is intended for conversational Q&A. -->
+
+<PageTitle>Chat</PageTitle>
+<!-- Top Section (Fixed Height) -->
+<div>
+</div>
+
+<!-- Middle Section (Fills Remaining Space) -->
+<div id="answerSection" style="flex-grow: 1; overflow-y: auto; padding: 15px">
+    <MudGrid Justify="Justify.Center">
+        <MudItem id="answers" xs="12" Class="overflow-x-auto">
+            @if (_questionAndAnswerMap is { Count: 0 })
+            {
+                <div class="d-flex align-content-center flex-wrap flex-grow-1 full-height">
+                    <Examples Message="@AppConfiguration.HelloText" OnExampleClicked="@OnAskQuestionAsync" />
+                </div>
+            }
+            else
+            {
+                <MudStack Reverse="@IsReversed" Spacing="12">
+                    @foreach (var ((question, askedOn), answer) in _questionAndAnswerMap)
+                    {
+                        <MudStack Justify="Justify.Center" AlignItems="AlignItems.Start" Spacing="4">
+                            <MudBadge Origin="Origin.TopLeft" Overlap="true" Color="Color.Secondary" Icon="@Icons.Material.Filled.QuestionMark" Class="d-flex align-self-end">
+                                <MudPaper Class="pa-6 d-flex flex-column" Elevation="3">
+                                    <MudText Typo="Typo.body1" Align="Align.End">@question</MudText>
+                                        <MudText Typo="Typo.caption" Align="Align.End" Color="Color.Secondary">
+                                            @($"Asked at {askedOn:h:mm:ss tt} on {askedOn:M/dd/yy}")
+                                        </MudText>
+                                    </MudPaper>
+                                </MudBadge>
+                                <div class="ten-twelves">
+                                    @if (answer is null)
+                                    {
+                                        <MudBadge Origin="Origin.TopLeft" Overlap="true" Color="Color.Secondary" Icon="@Icons.Material.Filled.Lightbulb" Class="full-width">
+                                            <MudPaper Class="pa-6" Elevation="3">
+                                                <Loading />
+                                            </MudPaper>
+                                        </MudBadge>
+                                    }
+                                    else
+                                    {
+                                        <MudBadge Origin="Origin.TopLeft" Overlap="true" Color="Color.Secondary" Icon="@Icons.Material.Filled.AutoAwesome">
+                                            <MudPaper Class="pa-6" Elevation="3">
+                                                <MudText Typo="Typo.body1">
+                                                    @((MarkupString)answer)
+                                                </MudText>
+                                            </MudPaper>
+                                        </MudBadge>
+                                    }
+                            </div>
+                        </MudStack>
+                    }
+                </MudStack>
+            }
+        </MudItem>
+    </MudGrid>
+</div>
+
+<!-- Bottom Section (Fixed Height) -->
+<div style="height: 125px;">
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="12" Class="rounded">
+            <MudGrid>
+
+
+                <MudItem xs="12" lg="10">
+                    <VoiceTextInput @bind-Value="_userQuestion" Label="Prompt"
+                                    Icon="@Icons.Material.Filled.QuestionAnswer"
+                                    Placeholder="Enter OpenAI + Azure Search prompt"
+                                    HelperText="Use Shift + Enter for new lines."
+                                    Disabled=@_isReceivingResponse
+                                    OnEnterKeyPressed="OnAskClickedAsync" />
+                </MudItem>
+                <MudItem xs="0" lg="2" Class="d-flex align-self-center">
+                    <MudGrid Justify="Justify.Center">
+
+                        @if (AppConfiguration.ShowPremiumAOAIToggleSelection)
+                        {
+                            <MudItem xs="12">
+                                <MudToggleIconButton @bind-Toggled="@_gPT4ON" Icon="@Icons.Material.Filled.ToggleOff" Color="@Color.Default" Title="Off" ToggledIcon="@Icons.Material.Filled.ToggleOn" ToggledColor="@Color.Success" ToggledTitle="On" />
+                                <span>GPT-4</span>
+                            </MudItem>
+                        }  
+                        <MudItem xs="9" Class="pa-2">
+                            <MudFab Color="Color.Secondary" Size="Size.Large"
+                                    StartIcon=@Icons.Material.Filled.Send Class="full-width"
+                                    Label="Chat" aria-label="Ask question button."
+                                    OnClick="@OnAskClickedAsync"
+                                    Disabled=@(_isReceivingResponse || string.IsNullOrWhiteSpace(_userQuestion)) />
+                        </MudItem>
+                        <MudItem xs="3" Class="pa-2">
+                            <MudTooltip Arrow="true" Text="Reset chat" Placement="Placement.Top">
+                                <MudFab Color="Color.Error" Size="Size.Medium" StartIcon=@Icons.Material.Filled.DeleteForever aria-label="Clear chat." OnClick="@OnClearChat" Disabled=@(_isReceivingResponse) />
+                            </MudTooltip>
+                        </MudItem>
+
+                    </MudGrid>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+    </MudGrid>
+</div>
+
+<style>
+    .select-group .mud-list-item-icon   { display: none; }
+    .select-group .mud-list-item-text p { color: var(--mud-palette-text-primary);
+                                          font-weight: 500; }
+</style>

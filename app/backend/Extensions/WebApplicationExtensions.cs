@@ -15,6 +15,7 @@ internal static class WebApplicationExtensions
         var api = app.MapGroup("api");
 
         api.MapPost("openai/chat", OnPostChatPromptAsync);
+        api.MapPost("chat/streaming", OnPostChatStreamingAsync);
 
         // Process chat turn history
         api.MapGet("chat/history", OnGetHistoryAsync);
@@ -133,7 +134,16 @@ internal static class WebApplicationExtensions
         }
     }
 
-
+    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ReadRetrieveReadStreamingChatService chatService, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var userInfo = GetUserInfo(context);
+        var response = chatService.ReplyV2Async(request);
+        await foreach (var choice in response)
+        {
+            yield return choice;
+        }
+    }
+    
     private static async IAsyncEnumerable<DocumentResponse> OnGetDocumentsAsync(BlobContainerClient client, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         await foreach (var blob in client.GetBlobsAsync(cancellationToken: cancellationToken))

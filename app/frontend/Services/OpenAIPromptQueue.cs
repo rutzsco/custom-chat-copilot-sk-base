@@ -2,9 +2,7 @@
 
 namespace ClientApp.Services;
 
-public sealed class OpenAIPromptQueue(
-    IServiceProvider provider,
-    ILogger<OpenAIPromptQueue> logger)
+public sealed class OpenAIPromptQueue(IServiceProvider provider, ILogger<OpenAIPromptQueue> logger)
 {
     private readonly StringBuilder _responseBuffer = new();
     private Task? _processPromptTask = null;
@@ -67,6 +65,65 @@ public sealed class OpenAIPromptQueue(
                     await handler(
                         new PromptResponse(
                             prompt, responseText, true));
+                    _responseBuffer.Clear();
+                }
+
+                _processPromptTask = null;
+            }
+        });
+    }
+
+
+    public void EnqueueV2(ChatRequest chatRequest, Func<PromptResponse, Task> handler)
+    {
+        if (_processPromptTask is not null)
+        {
+            return;
+        }
+
+        _processPromptTask = Task.Run(async () =>
+        {
+            try
+            {
+                var options = SerializerOptions.Default;
+                var json = JsonSerializer.Serialize(chatRequest, options);
+
+                using var body = new StringContent(json, Encoding.UTF8, "application/json");
+                using var scope = provider.CreateScope();
+
+                var factory = scope.ServiceProvider.GetRequiredService<IHttpClientFactory>();
+                using var client = factory.CreateClient(typeof(ApiClient).Name);
+                var response = await client.PostAsync("api/chat/streaming", body);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    using var stream = await response.Content.ReadAsStreamAsync();
+
+                    await foreach (var chunk in JsonSerializer.DeserializeAsyncEnumerable<ChatChunkResponse>(stream, options))
+                    {
+                        if (chunk is null)
+                        {
+                            continue;
+                        }
+
+                        _responseBuffer.Append(chunk.Text);
+
+                        var responseText = NormalizeResponseText(_responseBuffer, logger);
+                        await handler(new PromptResponse("prompt", responseText));
+                        await Task.Delay(1);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await handler(new PromptResponse("prompt", ex.Message, true));
+            }
+            finally
+            {
+                if (_responseBuffer.Length > 0)
+                {
+                    var responseText = NormalizeResponseText(_responseBuffer, logger);
+                    await handler(new PromptResponse("prompt", responseText, true));
                     _responseBuffer.Clear();
                 }
 
