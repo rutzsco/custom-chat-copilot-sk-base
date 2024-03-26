@@ -1,7 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel;
 using MinimalApi.Services.ChatHistory;
+using Azure.Core;
 
 namespace MinimalApi.Extensions;
 
@@ -10,6 +13,8 @@ internal static class WebApplicationExtensions
     internal static WebApplication MapApi(this WebApplication app)
     {
         var api = app.MapGroup("api");
+
+        api.MapPost("openai/chat", OnPostChatPromptAsync);
 
         // Process chat turn history
         api.MapGet("chat/history", OnGetHistoryAsync);
@@ -103,6 +108,15 @@ internal static class WebApplicationExtensions
         }
 
         return Results.BadRequest();
+    }
+
+    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatPromptAsync(PromptRequest prompt, ReadRetrieveReadStreamingChatService chatService, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var response = chatService.ReplyAsync(prompt);
+        await foreach (var choice in response)
+        {
+            yield return choice;
+        }
     }
 
 
