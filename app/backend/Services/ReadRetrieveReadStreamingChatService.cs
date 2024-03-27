@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using Azure.AI.OpenAI;
+using Azure.Core;
 using ClientApp.Pages;
 using Microsoft.SemanticKernel.ChatCompletion;
 using MinimalApi.Extensions;
@@ -98,5 +99,9 @@ internal sealed class ReadRetrieveReadStreamingChatService
                 yield return new ChatChunkResponse(chatUpdate.Content.Length, chatUpdate.Content);
             }
         }
+        sw.Stop();
+
+        var result = context.BuildStreamingResoponse(request, sb.ToString(), _configuration, _openAIClientFacade.GetKernelDeploymentName(request.OptionFlags.IsChatGpt4Enabled()), sw.ElapsedMilliseconds);
+        yield return new ChatChunkResponse(0, string.Empty, result);
     }
 }

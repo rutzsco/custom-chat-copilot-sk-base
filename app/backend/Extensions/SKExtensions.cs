@@ -1,4 +1,5 @@
-﻿using Azure.Core;
+﻿using System.Text.RegularExpressions;
+using Azure.Core;
 using Microsoft.SemanticKernel.ChatCompletion;
 using MinimalApi.Services.Search;
 
@@ -71,6 +72,38 @@ namespace MinimalApi.Extensions
                 MessageId: request.ChatTurnId,
                 ChatId: request.ChatId,
                 Diagnostics: diagnostics);
+        }
+
+
+        public static ApproachResponse BuildStreamingResoponse(this KernelArguments context, ChatRequest request, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
+        {
+            var knowledgeSourceSummary = (KnowledgeSourceSummary)context[ContextVariableOptions.KnowledgeSummary];
+            var dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(), x.GetContent())).ToArray();
+
+            var chatDiagnostics = new CompletionsDiagnostics(0, 0, 0, 0);
+            var diagnostics = new Diagnostics(chatDiagnostics, modelDeploymentName, workflowDurationMilliseconds);
+            var systemMessagePrompt = (string)context["SystemMessagePrompt"];
+            var userMessage = (string)context["UserMessage"];
+
+            return new ApproachResponse(
+                DataPoints: dataSources,
+                Answer: NormalizeResponseText(answer),
+                Thoughts: $"Searched for:<br>{context["intent"]}<br><br>System:<br>{systemMessagePrompt.Replace("\n", "<br>")}<br><br>{userMessage.Replace("\n", "<br>")}<br><br>{answer.Replace("\n", "<br>")}",
+                CitationBaseUrl: configuration.ToCitationBaseUrl(),
+                MessageId: request.ChatTurnId,
+                ChatId: request.ChatId,
+                Diagnostics: diagnostics);
+        }
+
+        private static string NormalizeResponseText(string text)
+        {
+            text = text.StartsWith("null,") ? text[5..] : text;
+            text = text.Replace("\r", "\n")
+                .Replace("\\n\\r", "\n")
+                .Replace("\\n", "\n");
+
+            text = Regex.Unescape(text);
+            return text;
         }
     }
 }

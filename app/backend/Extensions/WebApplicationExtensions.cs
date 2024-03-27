@@ -14,17 +14,15 @@ internal static class WebApplicationExtensions
     {
         var api = app.MapGroup("api");
 
-        api.MapPost("openai/chat", OnPostChatPromptAsync);
+        // Process chat turn
         api.MapPost("chat/streaming", OnPostChatStreamingAsync);
+        api.MapPost("chat", OnPostChatAsync);
 
         // Process chat turn history
         api.MapGet("chat/history", OnGetHistoryAsync);
 
         // Process chat turn rating 
         api.MapPost("chat/rating", OnPostChatRatingAsync);
-
-        // Process chat turn
-        api.MapPost("chat", OnPostChatAsync);
 
         // Get all documents
         api.MapGet("documents", OnGetDocumentsAsync);
@@ -125,22 +123,18 @@ internal static class WebApplicationExtensions
         return Results.BadRequest();
     }
 
-    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatPromptAsync(PromptRequest prompt, ReadRetrieveReadStreamingChatService chatService, [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        var response = chatService.ReplyAsync(prompt);
-        await foreach (var choice in response)
-        {
-            yield return choice;
-        }
-    }
-
-    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ReadRetrieveReadStreamingChatService chatService, [EnumeratorCancellation] CancellationToken cancellationToken)
+    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ReadRetrieveReadStreamingChatService chatService, ChatHistoryService chatHistoryService, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var userInfo = GetUserInfo(context);
         var response = chatService.ReplyV2Async(request);
+      
         await foreach (var choice in response)
         {
             yield return choice;
+            if(choice.FinalResult != null)
+            {
+                await chatHistoryService.RecordChatMessageAsync(userInfo, request, choice.FinalResult);
+            }
         }
     }
     

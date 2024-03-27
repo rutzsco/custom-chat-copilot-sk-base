@@ -11,7 +11,9 @@ public sealed partial class StreamingChatV2
     private string _lastReferenceQuestion = "";
     private bool _isReceivingResponse = false;
     private bool _filtersSelected = false;
-    private readonly Dictionary<UserQuestion, string?> _questionAndAnswerMap = [];
+
+    private readonly Dictionary<UserQuestion, ApproachResponse?> _questionAndAnswerMap = [];
+
     private readonly MarkdownPipeline _pipeline = new MarkdownPipelineBuilder()
     .ConfigureNewLine("\n")
     .UseAdvancedExtensions()
@@ -51,7 +53,10 @@ public sealed partial class StreamingChatV2
 
         try
         {
-            var history = _questionAndAnswerMap.Where(x => x.Value is not null).Select(x => new ChatTurn(x.Key.Question, x.Value)).ToList();
+            var history = _questionAndAnswerMap.Where(x => x.Value is not null)
+                .Select(x => new ChatTurn(x.Key.Question, x.Value.Answer))
+                .ToList();
+
             history.Add(new ChatTurn(_userQuestion));
 
             var options = new Dictionary<string, bool>();
@@ -61,11 +66,19 @@ public sealed partial class StreamingChatV2
             OpenAIPrompts.EnqueueV2(request,
                 async (PromptResponse response) => await InvokeAsync(() =>
                 {
-                    (string prompt, string responseText, bool isComplete) = response;
+                    (string prompt, string responseText, bool isComplete, ApproachResponse? result) = response;
                     var html = Markdown.ToHtml(responseText, _pipeline);
 
-                    _questionAndAnswerMap[_currentQuestion] = html;
-
+                    if (response.Result != null)
+                    {
+                        var ar = new ApproachResponse(html, response.Result.Thoughts, response.Result.DataPoints, response.Result.CitationBaseUrl, response.Result.MessageId, response.Result.ChatId, response.Result.Diagnostics);
+                        _questionAndAnswerMap[_currentQuestion] = ar;
+                    }
+                    else
+                    {
+                        _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(html, null, null, null, Guid.Empty, Guid.Empty, null);
+                    }
+      
                     _isReceivingResponse = isComplete is false;
                     if (isComplete)
                     {

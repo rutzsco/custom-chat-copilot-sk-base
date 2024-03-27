@@ -76,6 +76,7 @@ public sealed class OpenAIPromptQueue(IServiceProvider provider, ILogger<OpenAIP
 
     public void EnqueueV2(ChatRequest chatRequest, Func<PromptResponse, Task> handler)
     {
+        var prompt = chatRequest.LastUserQuestion;
         if (_processPromptTask is not null)
         {
             return;
@@ -106,24 +107,28 @@ public sealed class OpenAIPromptQueue(IServiceProvider provider, ILogger<OpenAIP
                             continue;
                         }
 
+                        if(chunk.FinalResult != null)
+                        {
+                            await handler(new PromptResponse(prompt, _responseBuffer.ToString(), true, chunk.FinalResult));
+                            continue;
+                        }
+
                         _responseBuffer.Append(chunk.Text);
 
                         var responseText = NormalizeResponseText(_responseBuffer, logger);
-                        await handler(new PromptResponse("prompt", responseText));
+                        await handler(new PromptResponse(prompt, responseText));
                         await Task.Delay(1);
                     }
                 }
             }
             catch (Exception ex)
             {
-                await handler(new PromptResponse("prompt", ex.Message, true));
+                await handler(new PromptResponse(prompt, ex.Message, true));
             }
             finally
             {
                 if (_responseBuffer.Length > 0)
                 {
-                    var responseText = NormalizeResponseText(_responseBuffer, logger);
-                    await handler(new PromptResponse("prompt", responseText, true));
                     _responseBuffer.Clear();
                 }
 

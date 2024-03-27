@@ -53,7 +53,7 @@ public sealed partial class VoiceChat : IDisposable
             _userQuestion,
             async (PromptResponse response) => await InvokeAsync(() =>
             {
-                var (_, responseText, isComplete) = response;
+                var (_, responseText, isComplete, result) = response;
                 var html = Markdown.ToHtml(responseText, _pipeline);
 
                 _questionAndAnswerMap[_currentQuestion] = html;

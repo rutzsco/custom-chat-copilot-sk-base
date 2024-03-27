@@ -40,16 +40,30 @@
                                             </MudPaper>
                                         </MudBadge>
                                     }
+                                    else if (answer is { Error.Length: > 0 })
+                                    {
+                                        <MudBadge Origin="Origin.TopLeft" Overlap="true" Color="Color.Error" Icon="@Icons.Material.Filled.Error">
+                                            <AnswerError Error="@answer" Question="@question" OnRetryClicked="@OnAskQuestionAsync" />
+                                        </MudBadge>
+                                    }
                                     else
+                                    {
+                                        <MudBadge Origin="Origin.TopLeft" Overlap="true" Color="Color.Secondary" Icon="@Icons.Material.Filled.AutoAwesome">
+                                            <Answer Retort="@answer" FollowupQuestionClicked="@OnAskQuestionAsync" />
+                                        </MudBadge>
+                                    }
+@*                                     else
                                     {
                                         <MudBadge Origin="Origin.TopLeft" Overlap="true" Color="Color.Secondary" Icon="@Icons.Material.Filled.AutoAwesome">
                                             <MudPaper Class="pa-6" Elevation="3">
                                                 <MudText Typo="Typo.body1">
-                                                    @((MarkupString)answer)
+                                                    @((MarkupString)answer.Answer)
                                                 </MudText>
                                             </MudPaper>
                                         </MudBadge>
-                                    }
+
+
+                                    } *@
                             </div>
                         </MudStack>
                     }
