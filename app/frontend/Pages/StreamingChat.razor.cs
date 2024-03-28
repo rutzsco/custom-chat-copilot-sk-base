@@ -4,7 +4,7 @@ using ClientApp.Models;
 
 namespace ClientApp.Pages;
 
-public sealed partial class StreamingChatV2
+public sealed partial class StreamingChat
 {
     private string _userQuestion = "";
     private UserQuestion _currentQuestion;
