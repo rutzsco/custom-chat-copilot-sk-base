@@ -1,7 +1,9 @@
 ﻿using System.Text.RegularExpressions;
 using Azure.Core;
 using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.VisualBasic;
 using MinimalApi.Services.Search;
+using TiktokenSharp;
 
 namespace MinimalApi.Extensions
 {
@@ -75,12 +77,14 @@ namespace MinimalApi.Extensions
         }
 
 
-        public static ApproachResponse BuildStreamingResoponse(this KernelArguments context, ChatRequest request, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
+        public static ApproachResponse BuildStreamingResoponse(this KernelArguments context, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
         {
             var knowledgeSourceSummary = (KnowledgeSourceSummary)context[ContextVariableOptions.KnowledgeSummary];
             var dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(), x.GetContent())).ToArray();
 
-            var chatDiagnostics = new CompletionsDiagnostics(0, 0, 0, 0);
+            var completionTokens = GetTokenCount(answer);
+            var totalTokens = completionTokens + requestTokenCount;
+            var chatDiagnostics = new CompletionsDiagnostics(completionTokens, requestTokenCount, totalTokens, 0);
             var diagnostics = new Diagnostics(chatDiagnostics, modelDeploymentName, workflowDurationMilliseconds);
             var systemMessagePrompt = (string)context["SystemMessagePrompt"];
             var userMessage = (string)context["UserMessage"];
@@ -104,6 +108,18 @@ namespace MinimalApi.Extensions
 
             text = Regex.Unescape(text);
             return text;
+        }
+        public static int GetTokenCount(this ChatHistory chatHistory)
+        {
+            string requestContent = string.Join("", chatHistory.Select(x => x.Content));
+            var tikToken = TikToken.EncodingForModel("gpt-3.5-turbo");
+            return tikToken.Encode(requestContent).Count;
+        }
+
+        public static int GetTokenCount(string text)
+        {
+            var tikToken = TikToken.EncodingForModel("gpt-3.5-turbo");
+            return tikToken.Encode(text).Count;
         }
     }
 }

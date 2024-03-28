@@ -126,7 +126,7 @@ internal static class WebApplicationExtensions
     private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ReadRetrieveReadStreamingChatService chatService, ChatHistoryService chatHistoryService, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var userInfo = GetUserInfo(context);
-        var response = chatService.ReplyV2Async(request);
+        var response = chatService.ReplyAsync(request);
       
         await foreach (var choice in response)
         {
@@ -181,16 +181,29 @@ internal static class WebApplicationExtensions
         var response = await chatHistoryService.GetMostRecentRatingsItemsAsync(userInfo);
         foreach (var item in response)
         {
-            yield return new FeedbackResponse(
-                item.Prompt,
-                item.Content,
-                item.Rating.Rating,
-                item.Rating.Feedback,
-                item.Diagnostics.ModelDeploymentName,
-                item.Diagnostics.WorkflowDurationMilliseconds,
-                item.Rating.Timestamp);
+            if (item.Diagnostics == null)
+            {
+                yield return new FeedbackResponse(
+                    item.Prompt,
+                    item.Content,
+                    item.Rating.Rating,
+                    item.Rating.Feedback,
+                    string.Empty,
+                    0,
+                    item.Rating.Timestamp);
+            }
+            else
+            {
+                yield return new FeedbackResponse(
+                    item.Prompt,
+                    item.Content,
+                    item.Rating.Rating,
+                    item.Rating.Feedback,
+                    item.Diagnostics.ModelDeploymentName,
+                    item.Diagnostics.WorkflowDurationMilliseconds,
+                    item.Rating.Timestamp);
+            }
         }
-
     }
 
     private static UserInformation GetUserInfo(HttpContext context)
