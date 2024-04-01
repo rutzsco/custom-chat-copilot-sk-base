@@ -98,6 +98,24 @@ namespace MinimalApi.Extensions
                 ChatId: request.ChatId,
                 Diagnostics: diagnostics);
         }
+        public static ApproachResponse BuildChatSimpleResoponse(this KernelArguments context, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
+        {
+            var completionTokens = GetTokenCount(answer);
+            var totalTokens = completionTokens + requestTokenCount;
+            var chatDiagnostics = new CompletionsDiagnostics(completionTokens, requestTokenCount, totalTokens, 0);
+            var diagnostics = new Diagnostics(chatDiagnostics, modelDeploymentName, workflowDurationMilliseconds);
+            var systemMessagePrompt = (string)context["SystemMessagePrompt"];
+            var userMessage = (string)context["UserMessage"];
+
+            return new ApproachResponse(
+                DataPoints: null,
+                Answer: NormalizeResponseText(answer),
+                Thoughts: $"System:<br>{systemMessagePrompt.Replace("\n", "<br>")}<br><br>{userMessage.Replace("\n", "<br>")}<br><br>{answer.Replace("\n", "<br>")}",
+                CitationBaseUrl: string.Empty,
+                MessageId: request.ChatTurnId,
+                ChatId: request.ChatId,
+                Diagnostics: diagnostics);
+        }
 
         private static string NormalizeResponseText(string text)
         {

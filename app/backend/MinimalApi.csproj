@@ -12,6 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Services\Prompts\ChatSimpleSystemPrompt.txt" />
+    <None Remove="Services\Prompts\ChatSimpleUserPrompt.txt" />
     <None Remove="Services\Prompts\ChatSystemPrompt.txt" />
     <None Remove="Services\Prompts\ChatUserPrompt.txt" />
     <None Remove="Services\Prompts\SearchSystemPrompt.txt" />
@@ -19,7 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Services\Prompts\ChatSimpleSystemPrompt.txt" />
     <EmbeddedResource Include="Services\Prompts\ChatSystemPrompt.txt" />
+    <EmbeddedResource Include="Services\Prompts\ChatSimpleUserPrompt.txt" />
     <EmbeddedResource Include="Services\Prompts\ChatUserPrompt.txt" />
     <EmbeddedResource Include="Services\Prompts\SearchSystemPrompt.txt" />
     <EmbeddedResource Include="Services\Prompts\SearchUserPrompt.txt" />

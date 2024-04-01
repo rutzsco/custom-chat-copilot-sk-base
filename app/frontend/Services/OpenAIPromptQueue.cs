@@ -137,6 +137,69 @@ public sealed class OpenAIPromptQueue(IServiceProvider provider, ILogger<OpenAIP
         });
     }
 
+    public void EnqueueSimple(ChatRequest chatRequest, Func<PromptResponse, Task> handler)
+    {
+        var prompt = chatRequest.LastUserQuestion;
+        if (_processPromptTask is not null)
+        {
+            return;
+        }
+
+        _processPromptTask = Task.Run(async () =>
+        {
+            try
+            {
+                var options = SerializerOptions.Default;
+                var json = JsonSerializer.Serialize(chatRequest, options);
+
+                using var body = new StringContent(json, Encoding.UTF8, "application/json");
+                using var scope = provider.CreateScope();
+
+                var factory = scope.ServiceProvider.GetRequiredService<IHttpClientFactory>();
+                using var client = factory.CreateClient(typeof(ApiClient).Name);
+                var response = await client.PostAsync("api/chat-simple", body);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    using var stream = await response.Content.ReadAsStreamAsync();
+
+                    await foreach (var chunk in JsonSerializer.DeserializeAsyncEnumerable<ChatChunkResponse>(stream, options))
+                    {
+                        if (chunk is null)
+                        {
+                            continue;
+                        }
+
+                        if (chunk.FinalResult != null)
+                        {
+                            await handler(new PromptResponse(prompt, _responseBuffer.ToString(), true, chunk.FinalResult));
+                            continue;
+                        }
+
+                        _responseBuffer.Append(chunk.Text);
+
+                        var responseText = NormalizeResponseText(_responseBuffer, logger);
+                        await handler(new PromptResponse(prompt, responseText));
+                        await Task.Delay(1);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                await handler(new PromptResponse(prompt, ex.Message, true));
+            }
+            finally
+            {
+                if (_responseBuffer.Length > 0)
+                {
+                    _responseBuffer.Clear();
+                }
+
+                _processPromptTask = null;
+            }
+        });
+    }
+
     private static string NormalizeResponseText(StringBuilder builder, ILogger logger)
     {
         if (builder is null or { Length: 0 })

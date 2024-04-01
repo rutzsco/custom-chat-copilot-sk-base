@@ -96,6 +96,8 @@ internal static class ServiceCollectionExtensions
         });
 
         services.AddSingleton<ChatHistoryService>();
+
+        services.AddSingleton<ChatService>();
         services.AddSingleton<ReadRetrieveReadChatService>();
         services.AddSingleton<ReadRetrieveReadStreamingChatService>();
         

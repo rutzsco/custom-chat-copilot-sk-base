@@ -10,6 +10,9 @@ public static class PromptService
     public static string SearchSystemPrompt = "SearchSystemPrompt";
     public static string SearchUserPrompt = "SearchUserPrompt";
 
+    public static string ChatSimpleSystemPrompt = "ChatSimpleSystemPrompt";
+    public static string ChatSimpleUserPrompt = "ChatSimpleUserPrompt";
+
     public static string GetPromptByName(string prompt)
     {
         var resourceName = $"MinimalApi.Services.Prompts.{prompt}.txt";

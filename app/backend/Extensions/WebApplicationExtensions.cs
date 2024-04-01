@@ -14,6 +14,9 @@ internal static class WebApplicationExtensions
     {
         var api = app.MapGroup("api");
 
+        //
+        api.MapPost("chat-simple", OnPostChatSimpleStreamingAsync);
+
         // Process chat turn
         api.MapPost("chat/streaming", OnPostChatStreamingAsync);
         api.MapPost("chat", OnPostChatAsync);
@@ -137,7 +140,22 @@ internal static class WebApplicationExtensions
             }
         }
     }
-    
+
+    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatSimpleStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ChatHistoryService chatHistoryService, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var userInfo = GetUserInfo(context);
+        var response = chatService.ReplyAsync(request);
+
+        await foreach (var choice in response)
+        {
+            yield return choice;
+            if (choice.FinalResult != null)
+            {
+                await chatHistoryService.RecordChatMessageAsync(userInfo, request, choice.FinalResult);
+            }
+        }
+    }
+
     private static async IAsyncEnumerable<DocumentResponse> OnGetDocumentsAsync(BlobContainerClient client, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         await foreach (var blob in client.GetBlobsAsync(cancellationToken: cancellationToken))
