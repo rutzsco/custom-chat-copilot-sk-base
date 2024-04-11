@@ -129,12 +129,12 @@ internal static class WebApplicationExtensions
     private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ReadRetrieveReadStreamingChatService chatService, ChatHistoryService chatHistoryService, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var userInfo = GetUserInfo(context);
-        var response = chatService.ReplyAsync(request);
+        var response = chatService.ReplyAsync(request, cancellationToken);
       
         await foreach (var choice in response)
         {
             yield return choice;
-            if(choice.FinalResult != null)
+            if (choice.FinalResult != null)
             {
                 await chatHistoryService.RecordChatMessageAsync(userInfo, request, choice.FinalResult);
             }

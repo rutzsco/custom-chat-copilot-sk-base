@@ -55,12 +55,13 @@ internal sealed class ReadRetrieveReadStreamingChatService
        
 
         var sb = new StringBuilder();
-        await foreach (StreamingChatMessageContent chatUpdate in chatGpt.GetStreamingChatMessageContentsAsync(chatHistory, DefaultSettings.AIChatRequestSettings))
+        await foreach (StreamingChatMessageContent chatUpdate in chatGpt.GetStreamingChatMessageContentsAsync(chatHistory, DefaultSettings.AIChatRequestSettings, null, cancellationToken))
         {
             if (chatUpdate.Content != null)
             {
+                await Task.Delay(1);
                 sb.Append(chatUpdate.Content);
-                yield return new ChatChunkResponse(chatUpdate.Content.Length, chatUpdate.Content);
+                yield return new ChatChunkResponse( chatUpdate.Content);
             }
         }
         sw.Stop();
@@ -68,6 +69,48 @@ internal sealed class ReadRetrieveReadStreamingChatService
 
         var requestTokenCount = chatHistory.GetTokenCount();
         var result = context.BuildStreamingResoponse(request, requestTokenCount, sb.ToString(), _configuration, _openAIClientFacade.GetKernelDeploymentName(request.OptionFlags.IsChatGpt4Enabled()), sw.ElapsedMilliseconds);
-        yield return new ChatChunkResponse(0, string.Empty, result);
+        yield return new ChatChunkResponse(string.Empty, result);
     }
+
+    //public async IAsyncEnumerable<ChatChunkResponse> ReplyStubAsync(ChatRequest request, CancellationToken cancellationToken = default)
+    //{
+    //    var kernel = _openAIClientFacade.GetKernel(false);
+
+    //    var generateSearchQueryFunction = kernel.Plugins.GetFunction(DefaultSettings.GenerateSearchQueryPluginName, DefaultSettings.GenerateSearchQueryPluginQueryFunctionName);
+    //    var documentLookupFunction = kernel.Plugins.GetFunction(DefaultSettings.DocumentRetrievalPluginName, DefaultSettings.DocumentRetrievalPluginQueryFunctionName);
+    //    var chatFunction = kernel.Plugins.GetFunction(DefaultSettings.ChatPluginName, DefaultSettings.ChatPluginFunctionName);
+
+
+    //    var context = new KernelArguments().AddUserParameters(request.History);
+
+    //    await kernel.InvokeAsync(generateSearchQueryFunction, context);
+    //    await kernel.InvokeAsync(documentLookupFunction, context);
+
+    //    // Chat Step
+    //    var chatGpt = kernel.Services.GetService<IChatCompletionService>();
+    //    var systemMessagePrompt = PromptService.GetPromptByName(PromptService.ChatSystemPrompt);
+    //    context["SystemMessagePrompt"] = systemMessagePrompt;
+
+    //    var chatHistory = new Microsoft.SemanticKernel.ChatCompletion.ChatHistory(systemMessagePrompt).AddChatHistory(request.History);
+    //    var userMessage = await PromptService.RenderPromptAsync(kernel, PromptService.GetPromptByName(PromptService.ChatUserPrompt), context);
+    //    context["UserMessage"] = userMessage;
+    //    chatHistory.AddUserMessage(userMessage);
+
+    //    yield return new ChatChunkResponse("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+    //    await Task.Delay(2000);
+    //    yield return new ChatChunkResponse("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+    //    await Task.Delay(2000);
+    //    yield return new ChatChunkResponse("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
+    //    await Task.Delay(2000);
+    //    yield return new ChatChunkResponse("DDDDDDDDDDDDDDDDD");
+
+    //    await foreach (StreamingChatMessageContent chatUpdate in chatGpt.GetStreamingChatMessageContentsAsync(chatHistory, DefaultSettings.AIChatRequestSettings, null, cancellationToken))
+    //    {
+    //        if (chatUpdate.Content != null)
+    //        {
+    //            await Task.Delay(1000);
+    //            yield return new ChatChunkResponse(chatUpdate.Content);
+    //        }
+    //    }
+    //}
 }
