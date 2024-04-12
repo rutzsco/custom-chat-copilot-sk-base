@@ -56,7 +56,7 @@ internal sealed class ChatService
             if (chatUpdate.Content != null)
             {
                 sb.Append(chatUpdate.Content);
-                yield return new ChatChunkResponse(chatUpdate.Content.Length, chatUpdate.Content);
+                yield return new ChatChunkResponse(chatUpdate.Content);
             }
         }
         sw.Stop();
@@ -64,6 +64,6 @@ internal sealed class ChatService
 
         var requestTokenCount = chatHistory.GetTokenCount();
         var result = context.BuildChatSimpleResoponse(request, requestTokenCount, sb.ToString(), _configuration, _openAIClientFacade.GetKernelDeploymentName(request.OptionFlags.IsChatGpt4Enabled()), sw.ElapsedMilliseconds);
-        yield return new ChatChunkResponse(0, string.Empty, result);
+        yield return new ChatChunkResponse(string.Empty, result);
     }
 }

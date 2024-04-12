@@ -4,6 +4,13 @@ namespace ClientApp.Components;
 
 public sealed partial class Answer
 {
+    private static readonly MarkdownPipeline _pipeline = new MarkdownPipelineBuilder()
+    .ConfigureNewLine("\n")
+    .UseAdvancedExtensions()
+    .UseEmojiAndSmiley()
+    .UseSoftlineBreakAsHardlineBreak()
+    .Build();
+
     internal static HtmlParsedAnswer ParseAnswerToHtml(string answer, string citationBaseUrl)
     {
         var citations = new List<CitationDetails>();
@@ -45,11 +52,10 @@ public sealed partial class Answer
             }
         });
 
-        return new HtmlParsedAnswer(
-            string.Join("", fragments),
-            citations,
-            followupQuestions.Select(f => f.Replace("<<", "").Replace(">>", ""))
-                .ToHashSet());
+        var raw = string.Join(string.Empty, fragments);
+        var html = Markdown.ToHtml(raw, _pipeline);
+        var followUpQuestions = followupQuestions.Select(f => f.Replace("<<", "").Replace(">>", "")).ToHashSet();
+        return new HtmlParsedAnswer(html,citations, followUpQuestions);
     }
 
     [GeneratedRegex(@"<<([^>>]+)>>", RegexOptions.Multiline | RegexOptions.Compiled)]

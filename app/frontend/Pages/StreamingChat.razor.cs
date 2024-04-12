@@ -14,21 +14,14 @@ public sealed partial class StreamingChat
     private bool _isReceivingResponse = false;
     private bool _filtersSelected = false;
 
-    private readonly Dictionary<UserQuestion, ApproachResponse?> _questionAndAnswerMap = [];
+    private string _selectedProfile = "General Chat";
 
-    private readonly MarkdownPipeline _pipeline = new MarkdownPipelineBuilder()
-    .ConfigureNewLine("\n")
-    .UseAdvancedExtensions()
-    .UseEmojiAndSmiley()
-    .UseSoftlineBreakAsHardlineBreak()
-    .Build();
+    private readonly Dictionary<UserQuestion, ApproachResponse?> _questionAndAnswerMap = [];
 
     private bool _gPT4ON = false;
     private Guid _chatId = Guid.NewGuid();
 
-    [Inject] public required OpenAIPromptQueue OpenAIPrompts { get; set; }
 
-    [Inject] public required ApiClient ApiClient { get; set; }
     [Inject] public required HttpClient HttpClient { get; set; }
 
     [CascadingParameter(Name = nameof(Settings))]
@@ -36,6 +29,11 @@ public sealed partial class StreamingChat
 
     [CascadingParameter(Name = nameof(IsReversed))]
     public required bool IsReversed { get; set; }
+
+    private void OnProfileClick(string selection)
+    {
+        _selectedProfile = selection;
+    }
 
     private Task OnAskQuestionAsync(string question)
     {
@@ -81,18 +79,19 @@ public sealed partial class StreamingChat
             await foreach (ChatChunkResponse chunk in JsonSerializer.DeserializeAsyncEnumerable<ChatChunkResponse>(responseStream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, DefaultBufferSize = 128 }))
             {
                 responseBuffer.Append(chunk.Text);
-                var html = Markdown.ToHtml(responseBuffer.ToString(), _pipeline);
+                var restponseText = responseBuffer.ToString();
+
                 var isComplete = chunk.FinalResult != null;
 
                
                 if (chunk.FinalResult != null)
                 {
-                    var ar = new ApproachResponse(html, chunk.FinalResult.Thoughts, chunk.FinalResult.DataPoints, chunk.FinalResult.CitationBaseUrl, chunk.FinalResult.MessageId, chunk.FinalResult.ChatId, chunk.FinalResult.Diagnostics);
+                    var ar = new ApproachResponse(restponseText, chunk.FinalResult.Thoughts, chunk.FinalResult.DataPoints, chunk.FinalResult.CitationBaseUrl, chunk.FinalResult.MessageId, chunk.FinalResult.ChatId, chunk.FinalResult.Diagnostics);
                     _questionAndAnswerMap[_currentQuestion] = ar;
                 }
                 else
                 {
-                    _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(html, null, null, null, Guid.Empty, Guid.Empty, null);
+                    _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(restponseText, null, null, null, Guid.Empty, Guid.Empty, null);
                 }
 
                 _isReceivingResponse = isComplete is false;
@@ -103,41 +102,7 @@ public sealed partial class StreamingChat
                 }
 
                 StateHasChanged();
-
-                //Console.WriteLine(chunk.Text);
-                //_questionAndAnswerMap[_currentQuestion] = new ApproachResponse(responseBuffer.ToString(), null, null, null, Guid.Empty, Guid.Empty, null);
-
-                //StateHasChanged();
             }
-
-
-
-            //OpenAIPrompts.EnqueueV2(request,
-            //    async (PromptResponse response) => await InvokeAsync(() =>
-            //    {
-            //        (string prompt, string responseText, bool isComplete, ApproachResponse? result) = response;
-            //        var html = Markdown.ToHtml(responseText, _pipeline);
-
-            //        if (response.Result != null)
-            //        {
-            //            var ar = new ApproachResponse(html, response.Result.Thoughts, response.Result.DataPoints, response.Result.CitationBaseUrl, response.Result.MessageId, response.Result.ChatId, response.Result.Diagnostics);
-            //            _questionAndAnswerMap[_currentQuestion] = ar;
-            //        }
-            //        else
-            //        {
-            //            _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(html, null, null, null, Guid.Empty, Guid.Empty, null);
-            //        }
-
-            //        _isReceivingResponse = isComplete is false;
-            //        if (isComplete)
-            //        {
-            //            _userQuestion = "";
-            //            _currentQuestion = default;
-            //        }
-
-            //        StateHasChanged();
-            //    })
-            //);
         }
         finally
         {
