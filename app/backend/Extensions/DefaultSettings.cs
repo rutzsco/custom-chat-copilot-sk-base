@@ -8,7 +8,7 @@ public static class DefaultSettings
     {
         ExtensionData = new Dictionary<string, object>()
         {
-            { "MaxTokens", 1024 },
+            { "MaxTokens", 100 },
             { "Temperature", 0.0 }
         }
     };

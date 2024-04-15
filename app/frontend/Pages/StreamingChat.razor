@@ -67,14 +67,21 @@
         <MudItem xs="12" Class="rounded">
             <MudGrid>
 
-@*                 <MudItem xs="12" lg="12">
-                    <MudMenu Class="" Label="@_selectedProfile" Variant="Variant.Outlined" Color="Color.Primary" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" FullWidth="true" onselect="D">
-                        <ChildContent>
-                            <MudMenuItem OnClick="@(e => OnProfileClick("General Chat"))">General Chat</MudMenuItem>
-                            <MudMenuItem OnClick="@(e => OnProfileClick("Auto Service Advisor"))">Auto Service Advisor</MudMenuItem>
-                        </ChildContent>
-                    </MudMenu>
-                </MudItem> *@
+                @if(_profiles.Count() > 1)
+                {
+                    <MudItem xs="12" lg="12">
+                        <MudMenu Class="" Label="@_selectedProfile" Variant="Variant.Outlined" Color="Color.Primary" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" FullWidth="true">
+
+                            <ChildContent>
+                                @foreach (var profile in _profiles)
+                                {
+                                    <MudMenuItem OnClick="@(e => OnProfileClick(@profile.Name))">@profile.Name</MudMenuItem>
+                                }
+                            </ChildContent>
+                        </MudMenu>
+                    </MudItem>
+                }
+
                 <MudItem xs="12" lg="10">
                     <VoiceTextInput @bind-Value="_userQuestion" Label="Prompt"
                                     Icon="@Icons.Material.Filled.QuestionAnswer"

@@ -7,5 +7,4 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Shared.Models;
-
-public record class UserInformation(bool IsIdentityEnabled, string UserName,string UserId, IEnumerable<ProfileSummary> Profiles);
+public record ProfileSummary(string Name, string Description);

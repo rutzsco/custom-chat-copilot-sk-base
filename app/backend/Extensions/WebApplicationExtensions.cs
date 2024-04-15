@@ -5,6 +5,7 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel;
 using MinimalApi.Services.ChatHistory;
 using Azure.Core;
+using MinimalApi.Services.Profile;
 
 namespace MinimalApi.Extensions;
 
@@ -235,8 +236,9 @@ internal static class WebApplicationExtensions
         }
         
         var enableLogout = !string.IsNullOrEmpty(id);
-        var u = new UserInformation(enableLogout, name, id);
+        var profiles = ProfileDefinition.All.Select(x => new ProfileSummary(x.Name,""));
+        var user = new UserInformation(enableLogout, name, id, profiles);
 
-        return u;
+        return user;
     }
 }

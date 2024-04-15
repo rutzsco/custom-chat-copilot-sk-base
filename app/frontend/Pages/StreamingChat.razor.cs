@@ -15,6 +15,7 @@ public sealed partial class StreamingChat
     private bool _filtersSelected = false;
 
     private string _selectedProfile = "General Chat";
+    private List<ProfileSummary> _profiles = new();
 
     private readonly Dictionary<UserQuestion, ApproachResponse?> _questionAndAnswerMap = [];
 
@@ -24,11 +25,20 @@ public sealed partial class StreamingChat
 
     [Inject] public required HttpClient HttpClient { get; set; }
 
+    [Inject] public required ApiClient ApiClient { get; set; }
+
     [CascadingParameter(Name = nameof(Settings))]
     public required RequestSettingsOverrides Settings { get; set; }
 
     [CascadingParameter(Name = nameof(IsReversed))]
     public required bool IsReversed { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await ApiClient.GetUserAsync();
+        _profiles = user.Profiles.ToList();
+        _selectedProfile = _profiles.First().Name;
+    }
 
     private void OnProfileClick(string selection)
     {
