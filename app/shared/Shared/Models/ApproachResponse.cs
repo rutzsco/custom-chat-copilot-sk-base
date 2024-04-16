@@ -11,8 +11,6 @@ public record ResponseContext(SupportingContentRecord[] DataPoints, ThoughtRecor
 
 public record ApproachResponse(
     string Answer,
-    string? Thoughts,
-    SupportingContentRecord[] DataPoints,
     string CitationBaseUrl,
     ResponseContext Context,
     string? Error = null);

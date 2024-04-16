@@ -79,8 +79,6 @@ namespace MinimalApi.Extensions
 
             return new ApproachResponse(
                 Answer: result.Answer.Replace("\n", "<br>"),
-                Thoughts: $"Searched for:<br>{context["intent"]}<br><br>System:<br>{systemMessagePrompt.Replace("\n", "<br>")}<br><br>{userMessage.Replace("\n", "<br>")}<br><br>{result.Answer.Replace("\n", "<br>")}",
-                DataPoints: dataSources,
                 CitationBaseUrl: configuration.ToCitationBaseUrl(),
                 contextData);
         }
@@ -103,8 +101,6 @@ namespace MinimalApi.Extensions
 
             return new ApproachResponse(
                 Answer: NormalizeResponseText(answer),
-                Thoughts: $"Searched for:<br>{context["intent"]}<br><br>System:<br>{systemMessagePrompt.Replace("\n", "<br>")}<br><br>{userMessage.Replace("\n", "<br>")}<br><br>{answer.Replace("\n", "<br>")}",
-                DataPoints: dataSources,
                 CitationBaseUrl: configuration.ToCitationBaseUrl(),
                 contextData);
         }
@@ -122,8 +118,6 @@ namespace MinimalApi.Extensions
 
             return new ApproachResponse(
                 Answer: NormalizeResponseText(answer),
-                Thoughts: $"System:<br>{systemMessagePrompt.Replace("\n", "<br>")}<br><br>{userMessage.Replace("\n", "<br>")}<br><br>{answer.Replace("\n", "<br>")}",
-                DataPoints: null,
                 CitationBaseUrl: string.Empty,
                 contextData);
         }
@@ -160,7 +154,8 @@ namespace MinimalApi.Extensions
             var thoughts = new List<ThoughtRecord>
             {
                 new("Generated search query", intent.ToString()),
-                new("Prompt", $"System:<br>{systemMessagePrompt.Replace("\n", "<br>")}<br><br>{userMessage.Replace("\n", "<br>")}<br><br>{answer.Replace("\n", "<br>")}")
+                new("Prompt", $"System:\n\n{systemMessagePrompt}\n\nUser:\n\n{userMessage}"),
+                new("Answer", answer)
             };
 
             return thoughts;

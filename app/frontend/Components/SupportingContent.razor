@@ -15,7 +15,9 @@
 
         <MudListItem>
             <MudText Typo="Typo.subtitle1" Class="pb-2" Style="font-weight: bold;" Color="Color.Primary">@title</MudText>
-            <MudText Typo="Typo.body1">@((MarkupString)content!)</MudText>
+@*             <MudText Typo="Typo.body1">@((MarkupString)content!)</MudText> *@
+            <pre style="white-space: pre; font-size: 1em;">@content
+            </pre>
         </MudListItem>
     }
 </MudList>

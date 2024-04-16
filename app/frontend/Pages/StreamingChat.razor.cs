@@ -99,12 +99,12 @@ public sealed partial class StreamingChat
                
                 if (chunk.FinalResult != null)
                 {
-                    var ar = new ApproachResponse(restponseText, chunk.FinalResult.Thoughts, chunk.FinalResult.DataPoints, chunk.FinalResult.CitationBaseUrl, chunk.FinalResult.Context);
+                    var ar = new ApproachResponse(restponseText, chunk.FinalResult.CitationBaseUrl, chunk.FinalResult.Context);
                     _questionAndAnswerMap[_currentQuestion] = ar;
                 }
                 else
                 {
-                    _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(restponseText, null, null, null, null);
+                    _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(restponseText, null, null);
                 }
 
                 _isReceivingResponse = isComplete is false;

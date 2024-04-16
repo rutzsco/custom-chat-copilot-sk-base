@@ -140,15 +140,10 @@ public sealed class ApiClient(HttpClient httpClient)
             Approach: request.Approach,
             Request: request);
 
-        var json = JsonSerializer.Serialize(
-            request,
-            SerializerOptions.Default);
-
-        using var body = new StringContent(
-            json, Encoding.UTF8, "application/json");
+        var json = JsonSerializer.Serialize(request, SerializerOptions.Default);
+        using var body = new StringContent(json, Encoding.UTF8, "application/json");
 
         var response = await httpClient.PostAsync(apiRoute, body);
-
         if (response.IsSuccessStatusCode)
         {
             var answer = await response.Content.ReadFromJsonAsync<ApproachResponse>();
@@ -160,10 +155,7 @@ public sealed class ApiClient(HttpClient httpClient)
         }
         else
         {
-            var answer = new ApproachResponse($"HTTP {(int)response.StatusCode} : {response.ReasonPhrase ?? "☹️ Unknown error..."}",
-                null,
-                [],
-                "Unable to retrieve valid response from the server.", null);
+            var answer = new ApproachResponse($"HTTP {(int)response.StatusCode} : {response.ReasonPhrase ?? "☹️ Unknown error..."}","Unable to retrieve valid response from the server.", null);
 
             return result with
             {

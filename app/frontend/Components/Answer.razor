@@ -58,22 +58,31 @@
                     </MudPaper>
                 </ChildContent>
             </MudTabPanel>
-            <MudTabPanel Icon="@Icons.Material.Filled.Lightbulb" Text="Thought process" 
-                         ToolTip="Show thought process."
-                         Disabled="@(Retort is { Thoughts: null })">
+                <MudTabPanel Icon="@Icons.Material.Filled.Lightbulb" Text="Thought process" ToolTip="Show thought process." Disabled="@(!Retort.HasThoughts())">
                 <ChildContent>
                     <MudPaper Class="pa-6" Elevation="3">
-                        <pre style="white-space: normal; font-size: 1.2em;">
-                            @(RemoveLeadingAndTrailingLineBreaks(Retort.Thoughts!))
-                        </pre>
+                        @foreach (var thought in Retort.Context.Thoughts)
+                            {
+                                <MudCard Class="mb-6" Style="background-color: #fbfbfb;" Outlined="true">
+                                    <MudCardHeader>
+                                        <CardHeaderContent>
+                                            <MudText Typo="Typo.h6">@thought.Title</MudText>
+                                        </CardHeaderContent>
+                                    </MudCardHeader>
+                                    <MudCardContent>
+                                        <pre style="white-space: pre; font-size: 1em;">
+                                            @thought.Description
+                                        </pre>
+                                    </MudCardContent>
+                                </MudCard>
+                            }
                     </MudPaper>
                 </ChildContent>
             </MudTabPanel>
-            <MudTabPanel Icon="@Icons.Material.Filled.TextSnippet" Text="Supporting Content"
-                         ToolTip="Show the supporting content." Disabled="@(Retort is { DataPoints: null } or { DataPoints.Length: 0 })">
+            <MudTabPanel Icon="@Icons.Material.Filled.TextSnippet" Text="Supporting Content" ToolTip="Show the supporting content." Disabled="@(!Retort.HasDataPoints())">
                 <ChildContent>
                     <MudPaper Class="pa-2" Elevation="3">
-                        <SupportingContent DataPoints="Retort.DataPoints" />
+                        <SupportingContent DataPoints="Retort.Context.DataPoints" />
                     </MudPaper>
                 </ChildContent>
             </MudTabPanel>

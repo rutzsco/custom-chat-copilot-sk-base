@@ -71,12 +71,12 @@ public sealed partial class SimpleChat
 
                     if (response.Result != null)
                     {
-                        var ar = new ApproachResponse(html, response.Result.Thoughts, response.Result.DataPoints, response.Result.CitationBaseUrl, response.Result.Context);
+                        var ar = new ApproachResponse(html, response.Result.CitationBaseUrl, response.Result.Context);
                         _questionAndAnswerMap[_currentQuestion] = ar;
                     }
                     else
                     {
-                        _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(html, null, null, null, null);
+                        _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(html, null, null);
                     }
       
                     _isReceivingResponse = isComplete is false;
