@@ -44,7 +44,7 @@ internal sealed class ReadRetrieveReadChatService
 
             var result = context.BuildResoponse(request, _configuration, _openAIClientFacade.GetKernelDeploymentName(request.OptionFlags.IsChatGpt4Enabled()), sw.ElapsedMilliseconds);
 
-            var diagnostics = result.Diagnostics;
+            var diagnostics = result.Context.Diagnostics;
             _logger.LogInformation($"CHAT_DIAGNOSTICS: CompletionTokens={diagnostics.AnswerDiagnostics.CompletionTokens}, PromptTokens={diagnostics.AnswerDiagnostics.PromptTokens}, TotalTokens={diagnostics.AnswerDiagnostics.TotalTokens}, DurationMilliseconds={diagnostics.AnswerDiagnostics.AnswerDurationMilliseconds}");
 
             return result;

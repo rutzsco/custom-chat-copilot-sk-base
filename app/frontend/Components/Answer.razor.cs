@@ -20,8 +20,8 @@ public sealed partial class Answer
             new DialogParameters
             {
                 [nameof(FeedbackDialog.Rating)] = _newRating,
-                [nameof(FeedbackDialog.MessageId)] = Retort.MessageId.ToString(),
-                [nameof(FeedbackDialog.ChatId)] = Retort.ChatId.ToString(),
+                [nameof(FeedbackDialog.MessageId)] = Retort.Context.MessageId.ToString(),
+                [nameof(FeedbackDialog.ChatId)] = Retort.Context.ChatId.ToString(),
             },
             new DialogOptions
             {
@@ -38,8 +38,8 @@ public sealed partial class Answer
             new DialogParameters
             {
                 [nameof(FeedbackDialog.Rating)] = _newRating,
-                [nameof(FeedbackDialog.MessageId)] = Retort.MessageId.ToString(),
-                [nameof(FeedbackDialog.ChatId)] = Retort.ChatId.ToString(),
+                [nameof(FeedbackDialog.MessageId)] = Retort.Context.MessageId.ToString(),
+                [nameof(FeedbackDialog.ChatId)] = Retort.Context.ChatId.ToString(),
             },
             new DialogOptions
             {
@@ -56,8 +56,8 @@ public sealed partial class Answer
             new DialogParameters
             {
                 [nameof(FeedbackDialog.Rating)] = _newRating,
-                [nameof(FeedbackDialog.MessageId)] = Retort.MessageId.ToString(),
-                [nameof(FeedbackDialog.ChatId)] = Retort.ChatId.ToString(),
+                [nameof(FeedbackDialog.MessageId)] = Retort.Context.MessageId.ToString(),
+                [nameof(FeedbackDialog.ChatId)] = Retort.Context.ChatId.ToString(),
             },
             new DialogOptions
             {

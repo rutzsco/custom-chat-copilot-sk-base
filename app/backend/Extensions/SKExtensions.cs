@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using Azure.Core;
+using ClientApp.Components;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.VisualBasic;
 using MinimalApi.Services.Profile;
@@ -73,17 +74,14 @@ namespace MinimalApi.Extensions
             var systemMessagePrompt = (string)context["SystemMessagePrompt"];
             var userMessage = (string)context["UserMessage"];
 
-            var thoughts = GetThoughts(context);
-            var contextData = new ResponseContext(dataSources, thoughts.ToArray());
+            var thoughts = GetThoughtsRAG(context, result.Answer);
+            var contextData = new ResponseContext(dataSources, thoughts.ToArray(), request.ChatTurnId, request.ChatId, diagnostics);
 
             return new ApproachResponse(
                 Answer: result.Answer.Replace("\n", "<br>"),
                 Thoughts: $"Searched for:<br>{context["intent"]}<br><br>System:<br>{systemMessagePrompt.Replace("\n", "<br>")}<br><br>{userMessage.Replace("\n", "<br>")}<br><br>{result.Answer.Replace("\n", "<br>")}",
                 DataPoints: dataSources,
                 CitationBaseUrl: configuration.ToCitationBaseUrl(),
-                MessageId: request.ChatTurnId,
-                ChatId: request.ChatId,
-                Diagnostics: diagnostics,
                 contextData);
         }
 
@@ -100,17 +98,14 @@ namespace MinimalApi.Extensions
             var systemMessagePrompt = (string)context["SystemMessagePrompt"];
             var userMessage = (string)context["UserMessage"];
 
-            var thoughts = GetThoughts(context);
-            var contextData = new ResponseContext(dataSources, thoughts.ToArray());
+            var thoughts = GetThoughtsRAG(context, answer);
+            var contextData = new ResponseContext(dataSources, thoughts.ToArray(), request.ChatTurnId, request.ChatId, diagnostics);
 
             return new ApproachResponse(
                 Answer: NormalizeResponseText(answer),
                 Thoughts: $"Searched for:<br>{context["intent"]}<br><br>System:<br>{systemMessagePrompt.Replace("\n", "<br>")}<br><br>{userMessage.Replace("\n", "<br>")}<br><br>{answer.Replace("\n", "<br>")}",
                 DataPoints: dataSources,
                 CitationBaseUrl: configuration.ToCitationBaseUrl(),
-                MessageId: request.ChatTurnId,
-                ChatId: request.ChatId,
-                Diagnostics: diagnostics,
                 contextData);
         }
         public static ApproachResponse BuildChatSimpleResoponse(this KernelArguments context, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
@@ -123,16 +118,13 @@ namespace MinimalApi.Extensions
             var userMessage = (string)context["UserMessage"];
 
             var thoughts = GetThoughts(context);
-            var contextData = new ResponseContext(null,null);
+            var contextData = new ResponseContext(null,null, request.ChatTurnId, request.ChatId, diagnostics);
 
             return new ApproachResponse(
                 Answer: NormalizeResponseText(answer),
                 Thoughts: $"System:<br>{systemMessagePrompt.Replace("\n", "<br>")}<br><br>{userMessage.Replace("\n", "<br>")}<br><br>{answer.Replace("\n", "<br>")}",
                 DataPoints: null,
                 CitationBaseUrl: string.Empty,
-                MessageId: request.ChatTurnId,
-                ChatId: request.ChatId,
-                Diagnostics: diagnostics,
                 contextData);
         }
 
@@ -159,16 +151,29 @@ namespace MinimalApi.Extensions
             return tikToken.Encode(text).Count;
         }
 
-        private static IEnumerable<ThoughtRecord> GetThoughts(KernelArguments context)
+        private static IEnumerable<ThoughtRecord> GetThoughtsRAG(KernelArguments context, string answer)
         {
-            var intent = context["intent"];
+            var intent = (string)context["intent"];
             var systemMessagePrompt = (string)context["SystemMessagePrompt"];
             var userMessage = (string)context["UserMessage"];
 
             var thoughts = new List<ThoughtRecord>
             {
                 new("Generated search query", intent.ToString()),
-                new("Retrevial", systemMessagePrompt),
+                new("Prompt", $"System:<br>{systemMessagePrompt.Replace("\n", "<br>")}<br><br>{userMessage.Replace("\n", "<br>")}<br><br>{answer.Replace("\n", "<br>")}")
+            };
+
+            return thoughts;
+        }
+
+        private static IEnumerable<ThoughtRecord> GetThoughts(KernelArguments context)
+        {
+
+            var systemMessagePrompt = (string)context["SystemMessagePrompt"];
+            var userMessage = (string)context["UserMessage"];
+
+            var thoughts = new List<ThoughtRecord>
+            {
                 new("Prompt", userMessage)
             };
 
