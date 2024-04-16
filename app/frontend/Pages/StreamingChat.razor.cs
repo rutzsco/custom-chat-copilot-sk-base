@@ -64,18 +64,16 @@ public sealed partial class StreamingChat
 
         try
         {
-            var history = _questionAndAnswerMap.Where(x => x.Value is not null)
-                .Select(x => new ChatTurn(x.Key.Question, x.Value.Answer))
-                .ToList();
+            var history = _questionAndAnswerMap.Where(x => x.Value is not null).Select(x => new ChatTurn(x.Key.Question, x.Value.Answer)).ToList();
+            history.Add(new ChatTurn(_userQuestion.Trim()));
 
-            history.Add(new ChatTurn(_userQuestion));
-
-            var options = new Dictionary<string, bool>();
-            options["GPT4ENABLED"] = _gPT4ON;
+            var options = new Dictionary<string, string>();
+            options["GPT4ENABLED"] = _gPT4ON.ToString();
+            options["PROFILE"] = _selectedProfile;
 
             var request = new ChatRequest(_chatId, Guid.NewGuid(), [.. history], options, Settings.Approach, Settings.Overrides);
 
-            HttpRequestMessage httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming");
+            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming");
             httpRequest.Headers.Add("Accept", "application/json");
             httpRequest.SetBrowserResponseStreamingEnabled(true);
             httpRequest.Content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
@@ -88,6 +86,11 @@ public sealed partial class StreamingChat
             var responseBuffer = new StringBuilder();
             await foreach (ChatChunkResponse chunk in JsonSerializer.DeserializeAsyncEnumerable<ChatChunkResponse>(responseStream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, DefaultBufferSize = 128 }))
             {
+                if (chunk == null)
+                {
+                    continue;
+                }
+
                 responseBuffer.Append(chunk.Text);
                 var restponseText = responseBuffer.ToString();
 

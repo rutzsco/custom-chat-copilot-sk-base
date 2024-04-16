@@ -10,7 +10,7 @@ using Shared.Models;
 
 namespace MinimalApi.Services;
 
-internal sealed class ChatService
+internal sealed class ChatService : IChatService
 {
     private readonly ILogger<ReadRetrieveReadStreamingChatService> _logger;
     private readonly IConfiguration _configuration;
@@ -55,6 +55,7 @@ internal sealed class ChatService
         {
             if (chatUpdate.Content != null)
             {
+                await Task.Delay(1);
                 sb.Append(chatUpdate.Content);
                 yield return new ChatChunkResponse(chatUpdate.Content);
             }

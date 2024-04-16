@@ -2,6 +2,7 @@
 using Azure.Core;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.VisualBasic;
+using MinimalApi.Services.Profile;
 using MinimalApi.Services.Search;
 using TiktokenSharp;
 
@@ -49,10 +50,16 @@ namespace MinimalApi.Extensions
             return chatHistory;
         }
 
-        public static bool IsChatGpt4Enabled(this Dictionary<string, bool> options)
+        public static bool IsChatGpt4Enabled(this Dictionary<string, string> options)
         {
-            var value = options.GetValueOrDefault("GPT4ENABLED", false);
-            return value;
+            var value = options.GetValueOrDefault("GPT4ENABLED", "false");
+            return value.ToLower()  == "true";
+        }
+
+        public static bool IsChatProfile(this Dictionary<string, string> options, string profile)
+        {
+            var value = options.GetValueOrDefault("PROFILE", ProfileDefinition.General.Name);
+            return (value == profile);
         }
 
         public static ApproachResponse BuildResoponse(this KernelArguments context, ChatRequest request, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)

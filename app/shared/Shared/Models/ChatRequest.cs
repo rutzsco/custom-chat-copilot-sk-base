@@ -6,7 +6,7 @@ public record class ChatRequest(
     Guid ChatId,
     Guid ChatTurnId,
     ChatTurn[] History,
-    Dictionary<string, bool> OptionFlags,
+    Dictionary<string, string> OptionFlags,
     Approach Approach,
     RequestOverrides? Overrides = null) : ApproachRequest(Approach)
 {

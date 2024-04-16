@@ -10,7 +10,7 @@ using Shared.Models;
 
 namespace MinimalApi.Services;
 
-internal sealed class ReadRetrieveReadStreamingChatService
+internal sealed class ReadRetrieveReadStreamingChatService : IChatService
 {
     private readonly ILogger<ReadRetrieveReadStreamingChatService> _logger;
     private readonly IConfiguration _configuration;

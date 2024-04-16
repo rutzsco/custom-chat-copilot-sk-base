@@ -127,18 +127,32 @@ internal static class WebApplicationExtensions
         return Results.BadRequest();
     }
 
-    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ReadRetrieveReadStreamingChatService chatService, ChatHistoryService chatHistoryService, [EnumeratorCancellation] CancellationToken cancellationToken)
+    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, ChatHistoryService chatHistoryService, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+
         var userInfo = GetUserInfo(context);
-        var response = chatService.ReplyAsync(request, cancellationToken);
-      
-        await foreach (var choice in response)
+        var chat = ResolveChatService(request, chatService, ragChatService);
+        var resultChunks = chat.ReplyAsync(request);
+        await foreach (var chunk in resultChunks)
         {
-            yield return choice;
-            if (choice.FinalResult != null)
+            yield return chunk;
+            if (chunk.FinalResult != null)
             {
-                await chatHistoryService.RecordChatMessageAsync(userInfo, request, choice.FinalResult);
+                await chatHistoryService.RecordChatMessageAsync(userInfo, request, chunk.FinalResult);
             }
+        }
+    }
+
+
+    private static IChatService ResolveChatService(ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService)
+    {
+        if (request.OptionFlags.IsChatProfile(ProfileDefinition.Auto.Name))
+        {
+            return ragChatService;
+        }
+        else
+        {
+            return chatService;
         }
     }
 

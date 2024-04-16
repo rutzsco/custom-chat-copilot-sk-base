@@ -50,8 +50,8 @@ public sealed partial class Chat
 
             history.Add(new ChatTurn(_userQuestion));
 
-            var options = new Dictionary<string, bool>();
-            options["GPT4ENABLED"] = _gPT4ON;
+            var options = new Dictionary<string, string>();
+            options["GPT4ENABLED"] = _gPT4ON.ToString();
 
             var request = new ChatRequest(_chatId,Guid.NewGuid(),[.. history], options, Settings.Approach, Settings.Overrides);
             var result = await ApiClient.ChatConversationAsync(request);
