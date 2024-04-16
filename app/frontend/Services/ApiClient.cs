@@ -163,7 +163,7 @@ public sealed class ApiClient(HttpClient httpClient)
             var answer = new ApproachResponse($"HTTP {(int)response.StatusCode} : {response.ReasonPhrase ?? "☹️ Unknown error..."}",
                 null,
                 [],
-                "Unable to retrieve valid response from the server.", Guid.Empty, Guid.Empty, null);
+                "Unable to retrieve valid response from the server.", Guid.Empty, Guid.Empty, null, null);
 
             return result with
             {
