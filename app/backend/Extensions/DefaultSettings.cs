@@ -8,16 +8,18 @@ public static class DefaultSettings
     {
         ExtensionData = new Dictionary<string, object>()
         {
-            { "MaxTokens", 100 },
-            { "Temperature", 0.0 }
+            { "max_tokens", 100 },
+            { "temperature", 0.0 },
+            { "top_p", 1 }
         }
     };
     public static PromptExecutionSettings AIChatRequestSettings = new()
-    {
+    { 
         ExtensionData = new Dictionary<string, object>()
         {
-            { "MaxTokens", 1024 },
-            { "Temperature", 0.0 }
+            { "max_tokens", 1024 },
+            { "temperature", 0.0 },
+            { "top_p", 1 },
         }
     };
 

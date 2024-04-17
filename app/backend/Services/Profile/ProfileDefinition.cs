@@ -10,8 +10,8 @@ public class ProfileDefinition
 
     public static List<ProfileDefinition> All = new List<ProfileDefinition>
     {
-        Auto,
-        General
+        Auto
+        //General
     };
 
     public ProfileDefinition(string name, string approach, string securityModel)

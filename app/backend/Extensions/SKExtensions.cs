@@ -84,7 +84,7 @@ namespace MinimalApi.Extensions
         }
 
 
-        public static ApproachResponse BuildStreamingResoponse(this KernelArguments context, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
+        public static ApproachResponse BuildStreamingResoponse(this KernelArguments context, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds, Dictionary<string, string> requestSettings)
         {
             var knowledgeSourceSummary = (KnowledgeSourceSummary)context[ContextVariableOptions.KnowledgeSummary];
             var dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(), x.GetContent())).ToArray();
@@ -96,7 +96,7 @@ namespace MinimalApi.Extensions
             var systemMessagePrompt = (string)context["SystemMessagePrompt"];
             var userMessage = (string)context["UserMessage"];
 
-            var thoughts = GetThoughtsRAG(context, answer);
+            var thoughts = GetThoughtsRAGV2(context, answer, requestSettings);
             var contextData = new ResponseContext(dataSources, thoughts.ToArray(), request.ChatTurnId, request.ChatId, diagnostics);
 
             return new ApproachResponse(
@@ -161,6 +161,22 @@ namespace MinimalApi.Extensions
             return thoughts;
         }
 
+        private static IEnumerable<ThoughtRecord> GetThoughtsRAGV2(KernelArguments context, string answer, Dictionary<string, string> requestSettings)
+        {
+            var intent = (string)context["intent"];
+            var systemMessagePrompt = (string)context["SystemMessagePrompt"];
+            var userMessage = (string)context["UserMessage"];
+
+            var thoughts = new List<ThoughtRecord>
+            {
+                new("Generated search query", intent.ToString()),
+                new("Prompt", BuildPromptContext(requestSettings)),
+                new("Answer", answer)
+            };
+
+            return thoughts;
+        }
+
         private static IEnumerable<ThoughtRecord> GetThoughts(KernelArguments context)
         {
 
@@ -173,6 +189,23 @@ namespace MinimalApi.Extensions
             };
 
             return thoughts;
+        }
+
+        private static string BuildPromptContext(Dictionary<string, string> requestSettings)
+        {
+            var sb = new StringBuilder();
+            foreach (var setting in requestSettings.Where(x => x.Key.StartsWith("PROMPTMESSAGE:")))
+            {
+    
+                sb.AppendLine($"{setting.Key.Replace("PROMPTMESSAGE:", "")}:\n\n{setting.Value}\n");
+            }
+
+            sb.AppendLine("Settings: \n");
+            foreach (var setting in requestSettings.Where(x => x.Key.StartsWith("PROMPTKEY:")))
+            {
+                sb.AppendLine($"{setting.Key.Replace("PROMPTKEY:", "")}: {setting.Value}");
+            }
+            return sb.ToString();
         }
     }
 }

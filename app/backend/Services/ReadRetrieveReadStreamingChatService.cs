@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Data;
 using Azure.AI.OpenAI;
 using Azure.Core;
 using ClientApp.Pages;
@@ -17,8 +18,8 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
     private readonly OpenAIClientFacade _openAIClientFacade;
 
     public ReadRetrieveReadStreamingChatService(OpenAIClientFacade openAIClientFacade,
-                                       ILogger<ReadRetrieveReadStreamingChatService> logger,
-                                       IConfiguration configuration)
+                                                ILogger<ReadRetrieveReadStreamingChatService> logger,
+                                                IConfiguration configuration)
     {
         _openAIClientFacade = openAIClientFacade;
         _logger = logger;
@@ -48,8 +49,8 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
         var userMessage = await PromptService.RenderPromptAsync(kernel, PromptService.GetPromptByName(PromptService.ChatUserPrompt), context);
         context["UserMessage"] = userMessage;
         chatHistory.AddUserMessage(userMessage);
-       
 
+        var requestProperties = GenerateRequestProperties(chatHistory, DefaultSettings.AIChatRequestSettings);
         var sb = new StringBuilder();
         await foreach (StreamingChatMessageContent chatUpdate in chatGpt.GetStreamingChatMessageContentsAsync(chatHistory, DefaultSettings.AIChatRequestSettings, null, cancellationToken))
         {
@@ -64,7 +65,28 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
 
 
         var requestTokenCount = chatHistory.GetTokenCount();
-        var result = context.BuildStreamingResoponse(request, requestTokenCount, sb.ToString(), _configuration, _openAIClientFacade.GetKernelDeploymentName(request.OptionFlags.IsChatGpt4Enabled()), sw.ElapsedMilliseconds);
+        var result = context.BuildStreamingResoponse(request, requestTokenCount, sb.ToString(), _configuration, _openAIClientFacade.GetKernelDeploymentName(request.OptionFlags.IsChatGpt4Enabled()), sw.ElapsedMilliseconds, requestProperties);
         yield return new ChatChunkResponse(string.Empty, result);
+    }
+
+    private Dictionary<string, string> GenerateRequestProperties(Microsoft.SemanticKernel.ChatCompletion.ChatHistory chatHistory, PromptExecutionSettings settings)
+    {
+        var results = new Dictionary<string, string>();
+        foreach (var item in chatHistory)
+        {
+            if (item is ChatMessageContent chatMessageContent)
+            {
+                var content = chatMessageContent.Content;
+                var role = chatMessageContent.Role;
+                results.Add($"PROMPTMESSAGE:{role}", content);
+            }
+        }
+
+        foreach (var item in settings.ExtensionData)
+        {
+            results.Add($"PROMPTKEY:{item.Key}", item.Value.ToString());
+        }
+
+        return results;
     }
 }
