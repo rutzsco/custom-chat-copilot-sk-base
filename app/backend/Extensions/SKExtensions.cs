@@ -84,7 +84,7 @@ namespace MinimalApi.Extensions
         }
 
 
-        public static ApproachResponse BuildStreamingResoponse(this KernelArguments context, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds, Dictionary<string, string> requestSettings)
+        public static ApproachResponse BuildStreamingResoponse(this KernelArguments context, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds, List<KeyValuePair<string, string>> requestSettings)
         {
             var knowledgeSourceSummary = (KnowledgeSourceSummary)context[ContextVariableOptions.KnowledgeSummary];
             var dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(), x.GetContent())).ToArray();
@@ -161,7 +161,7 @@ namespace MinimalApi.Extensions
             return thoughts;
         }
 
-        private static IEnumerable<ThoughtRecord> GetThoughtsRAGV2(KernelArguments context, string answer, Dictionary<string, string> requestSettings)
+        private static IEnumerable<ThoughtRecord> GetThoughtsRAGV2(KernelArguments context, string answer, List<KeyValuePair<string, string>> requestSettings)
         {
             var intent = (string)context["intent"];
             var systemMessagePrompt = (string)context["SystemMessagePrompt"];
@@ -191,7 +191,7 @@ namespace MinimalApi.Extensions
             return thoughts;
         }
 
-        private static string BuildPromptContext(Dictionary<string, string> requestSettings)
+        private static string BuildPromptContext(List<KeyValuePair<string, string>> requestSettings)
         {
             var sb = new StringBuilder();
             foreach (var setting in requestSettings.Where(x => x.Key.StartsWith("PROMPTMESSAGE:")))

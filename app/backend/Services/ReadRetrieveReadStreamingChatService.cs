@@ -69,22 +69,22 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
         yield return new ChatChunkResponse(string.Empty, result);
     }
 
-    private Dictionary<string, string> GenerateRequestProperties(Microsoft.SemanticKernel.ChatCompletion.ChatHistory chatHistory, PromptExecutionSettings settings)
+    private List<KeyValuePair<string, string>> GenerateRequestProperties(Microsoft.SemanticKernel.ChatCompletion.ChatHistory chatHistory, PromptExecutionSettings settings)
     {
-        var results = new Dictionary<string, string>();
+        var results = new List<KeyValuePair<string,string>>();
         foreach (var item in chatHistory)
         {
             if (item is ChatMessageContent chatMessageContent)
             {
                 var content = chatMessageContent.Content;
                 var role = chatMessageContent.Role;
-                results.Add($"PROMPTMESSAGE:{role}", content);
+                results.Add(new KeyValuePair<string,string>($"PROMPTMESSAGE:{role}", content));
             }
         }
 
         foreach (var item in settings.ExtensionData)
         {
-            results.Add($"PROMPTKEY:{item.Key}", item.Value.ToString());
+            results.Add(new KeyValuePair<string, string>($"PROMPTKEY:{item.Key}", item.Value.ToString()));
         }
 
         return results;
