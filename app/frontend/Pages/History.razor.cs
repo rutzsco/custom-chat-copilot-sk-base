@@ -16,7 +16,7 @@ public sealed partial class History : IDisposable
 
 
     [Inject]
-    public required ILogger<Docs> Logger { get; set; }
+    public required ILogger<History> Logger { get; set; }
 
 
     protected override void OnInitialized()

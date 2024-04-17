@@ -16,7 +16,7 @@ public sealed partial class Feedback : IDisposable
 
 
     [Inject]
-    public required ILogger<Docs> Logger { get; set; }
+    public required ILogger<Feedback> Logger { get; set; }
 
 
     protected override void OnInitialized()
