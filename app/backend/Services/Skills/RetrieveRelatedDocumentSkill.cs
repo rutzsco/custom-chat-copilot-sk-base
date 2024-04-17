@@ -69,7 +69,7 @@ public sealed class RetrieveRelatedDocumentSkill
         arguments[ContextVariableOptions.Intent] = searchQuery;
         var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
 
-        var searchLogic = new SearchLogic<KwiecienCustomIndexDefinition>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalPluginName, _config["AOAIEmbeddingsDeployment"], KwiecienCustomIndexDefinition.EmbeddingsFieldName, KwiecienCustomIndexDefinition.SelectFieldNames);
+        var searchLogic = new SearchLogic<KwiecienCustomIndexDefinition>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], KwiecienCustomIndexDefinition.EmbeddingsFieldName, KwiecienCustomIndexDefinition.SelectFieldNames);
         var result = await searchLogic.SearchAsync(searchQuery);
 
         if (!result.Sources.Any())
