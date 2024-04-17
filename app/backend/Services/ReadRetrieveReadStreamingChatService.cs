@@ -34,9 +34,9 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
         // Kernel setup
         var kernel = _openAIClientFacade.GetKernel(false);
         
-        var generateSearchQueryFunction = kernel.Plugins.GetFunction(profile.RAGSettingsSummary.GenerateSearchQueryPluginName, profile.RAGSettingsSummary.GenerateSearchQueryPluginQueryFunctionName);
-        var documentLookupFunction = kernel.Plugins.GetFunction(profile.RAGSettingsSummary.DocumentRetrievalPluginName, profile.RAGSettingsSummary.DocumentRetrievalPluginQueryFunctionName);
-        var context = new KernelArguments().AddUserParameters(request.History);
+        var generateSearchQueryFunction = kernel.Plugins.GetFunction(profile.RAGSettings.GenerateSearchQueryPluginName, profile.RAGSettings.GenerateSearchQueryPluginQueryFunctionName);
+        var documentLookupFunction = kernel.Plugins.GetFunction(profile.RAGSettings.DocumentRetrievalPluginName, profile.RAGSettings.DocumentRetrievalPluginQueryFunctionName);
+        var context = new KernelArguments().AddUserParameters(request.History, profile);
 
         // RAG Steps
         await kernel.InvokeAsync(generateSearchQueryFunction, context);

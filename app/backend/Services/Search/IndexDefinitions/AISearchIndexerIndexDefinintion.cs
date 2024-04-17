@@ -2,7 +2,7 @@
 
 using System.Text.RegularExpressions;
 
-namespace MinimalApi.Services.Search;
+namespace MinimalApi.Services.Search.IndexDefinitions;
 
 public class AISearchIndexerIndexDefinintion : IKnowledgeSource
 {
@@ -45,7 +45,6 @@ public class AISearchIndexerIndexDefinintion : IKnowledgeSource
         }
     }
 
-    public static string IndexName = "manuals-vi";
     public static string EmbeddingsFieldName = "vector";
     public static List<string> SelectFieldNames = new List<string> { "title", "chunk_id", "chunk" };
 }

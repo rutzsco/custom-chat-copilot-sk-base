@@ -15,4 +15,6 @@ public class ContextVariableOptions
 
     public static string SystemMessagePrompt = "SystemMessagePrompt";
     public static string UserMessage = "UserMessage";
+
+    public static string Profile = "Profile";
 }

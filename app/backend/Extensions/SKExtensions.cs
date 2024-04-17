@@ -22,8 +22,9 @@ namespace MinimalApi.Extensions
             return new SKResult(answer, usage, sw.ElapsedMilliseconds);
         }
 
-        public static KernelArguments AddUserParameters(this KernelArguments arguments, ChatTurn[] history)
+        public static KernelArguments AddUserParameters(this KernelArguments arguments, ChatTurn[] history, ProfileDefinition profile)
         {
+            arguments[ContextVariableOptions.Profile] = profile;
             if (history.LastOrDefault()?.User is { } userQuestion)
             {
                 arguments[ContextVariableOptions.Question] = $"{userQuestion}";

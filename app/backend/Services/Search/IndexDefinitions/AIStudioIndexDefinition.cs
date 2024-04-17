@@ -1,6 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-namespace MinimalApi.Services.Search;
+namespace MinimalApi.Services.Search.IndexDefinitions;
 
 public class AIStudioIndexDefinition : IKnowledgeSource
 {
@@ -24,7 +24,6 @@ public class AIStudioIndexDefinition : IKnowledgeSource
     }
 
 
-    public static string IndexName = "manuals";
     public static string EmbeddingsFieldName = "contentVector";
     public static List<string> SelectFieldNames = new List<string> { "content", "filepath" };
 }

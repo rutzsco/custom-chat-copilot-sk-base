@@ -34,7 +34,7 @@ internal sealed class ChatService : IChatService
 
         var generateSearchQueryFunction = kernel.Plugins.GetFunction(DefaultSettings.GenerateSearchQueryPluginName, DefaultSettings.GenerateSearchQueryPluginQueryFunctionName);
 
-        var context = new KernelArguments().AddUserParameters(request.History);
+        var context = new KernelArguments().AddUserParameters(request.History, profile);
 
         // Search Query
         await kernel.InvokeAsync(generateSearchQueryFunction, context);

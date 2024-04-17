@@ -30,11 +30,11 @@ internal sealed class ReadRetrieveReadChatService
  
             var kernel = _openAIClientFacade.GetKernel(request.OptionFlags.IsChatGpt4Enabled());
 
-            var generateSearchQueryFunction = kernel.Plugins.GetFunction(profile.RAGSettingsSummary.GenerateSearchQueryPluginName, profile.RAGSettingsSummary.GenerateSearchQueryPluginQueryFunctionName);
-            var documentLookupFunction = kernel.Plugins.GetFunction(profile.RAGSettingsSummary.DocumentRetrievalPluginName, profile.RAGSettingsSummary.DocumentRetrievalPluginQueryFunctionName);
+            var generateSearchQueryFunction = kernel.Plugins.GetFunction(profile.RAGSettings.GenerateSearchQueryPluginName, profile.RAGSettings.GenerateSearchQueryPluginQueryFunctionName);
+            var documentLookupFunction = kernel.Plugins.GetFunction(profile.RAGSettings.DocumentRetrievalPluginName, profile.RAGSettings.DocumentRetrievalPluginQueryFunctionName);
             var chatFunction = kernel.Plugins.GetFunction(DefaultSettings.ChatPluginName, DefaultSettings.ChatPluginFunctionName);
 
-            var context = new KernelArguments().AddUserParameters(request.History);
+            var context = new KernelArguments().AddUserParameters(request.History, profile);
 
             await kernel.InvokeAsync(generateSearchQueryFunction, context);
             await kernel.InvokeAsync(documentLookupFunction, context);
