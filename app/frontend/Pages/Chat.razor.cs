@@ -6,7 +6,7 @@ using static System.Net.WebRequestMethods;
 
 namespace ClientApp.Pages;
 
-public sealed partial class StreamingChat
+public sealed partial class Chat
 {
     private string _userQuestion = "";
     private UserQuestion _currentQuestion;

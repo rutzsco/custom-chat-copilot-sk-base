@@ -36,7 +36,7 @@
     <Content Update="Components\FeedbackDialog.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
-    <Content Update="Pages\StreamingChat.razor">
+    <Content Update="Pages\Chat.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
     <Content Update="Pages\History.razor">
