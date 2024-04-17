@@ -5,6 +5,7 @@ using Azure.Core;
 using ClientApp.Pages;
 using Microsoft.SemanticKernel.ChatCompletion;
 using MinimalApi.Extensions;
+using MinimalApi.Services.Profile;
 using MinimalApi.Services.Prompts;
 using Shared.Models;
 
@@ -24,7 +25,7 @@ internal sealed class ChatService : IChatService
     }
 
 
-    public async IAsyncEnumerable<ChatChunkResponse> ReplyAsync(ChatRequest request, CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<ChatChunkResponse> ReplyAsync(ProfileDefinition profile, ChatRequest request, CancellationToken cancellationToken = default)
     {
 
         var sw = Stopwatch.StartNew();

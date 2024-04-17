@@ -6,6 +6,7 @@ using Azure.Core;
 using ClientApp.Pages;
 using Microsoft.SemanticKernel.ChatCompletion;
 using MinimalApi.Extensions;
+using MinimalApi.Services.Profile;
 using MinimalApi.Services.Prompts;
 using Shared.Models;
 
@@ -26,28 +27,29 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
         _configuration = configuration;
     }
 
-    public async IAsyncEnumerable<ChatChunkResponse> ReplyAsync(ChatRequest request, CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<ChatChunkResponse> ReplyAsync(ProfileDefinition profile, ChatRequest request, CancellationToken cancellationToken = default)
     {
-
         var sw = Stopwatch.StartNew();
 
+        // Kernel setup
         var kernel = _openAIClientFacade.GetKernel(false);
+        
+        var generateSearchQueryFunction = kernel.Plugins.GetFunction(profile.RAGSettingsSummary.GenerateSearchQueryPluginName, profile.RAGSettingsSummary.GenerateSearchQueryPluginQueryFunctionName);
+        var documentLookupFunction = kernel.Plugins.GetFunction(profile.RAGSettingsSummary.DocumentRetrievalPluginName, profile.RAGSettingsSummary.DocumentRetrievalPluginQueryFunctionName);
         var context = new KernelArguments().AddUserParameters(request.History);
 
-        var generateSearchQueryFunction = kernel.Plugins.GetFunction(DefaultSettings.GenerateSearchQueryPluginName, DefaultSettings.GenerateSearchQueryPluginQueryFunctionName);
-        var documentLookupFunction = kernel.Plugins.GetFunction(DefaultSettings.DocumentRetrievalPluginName, DefaultSettings.DocumentRetrievalPluginQueryFunctionName);
-     
+        // RAG Steps
         await kernel.InvokeAsync(generateSearchQueryFunction, context);
         await kernel.InvokeAsync(documentLookupFunction, context);
 
         // Chat Step
         var chatGpt = kernel.Services.GetService<IChatCompletionService>();
         var systemMessagePrompt = PromptService.GetPromptByName(PromptService.ChatSystemPrompt);
-        context["SystemMessagePrompt"] = systemMessagePrompt;
+        context[ContextVariableOptions.SystemMessagePrompt] = systemMessagePrompt;
 
         var chatHistory = new Microsoft.SemanticKernel.ChatCompletion.ChatHistory(systemMessagePrompt).AddChatHistory(request.History);
         var userMessage = await PromptService.RenderPromptAsync(kernel, PromptService.GetPromptByName(PromptService.ChatUserPrompt), context);
-        context["UserMessage"] = userMessage;
+        context[ContextVariableOptions.UserMessage] = userMessage;
         chatHistory.AddUserMessage(userMessage);
 
         var requestProperties = GenerateRequestProperties(chatHistory, DefaultSettings.AIChatRequestSettings);

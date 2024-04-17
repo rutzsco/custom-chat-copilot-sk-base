@@ -1,10 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel;
+
 using MinimalApi.Services.ChatHistory;
-using Azure.Core;
 using MinimalApi.Services.Profile;
 
 namespace MinimalApi.Extensions;
@@ -14,9 +12,6 @@ internal static class WebApplicationExtensions
     internal static WebApplication MapApi(this WebApplication app)
     {
         var api = app.MapGroup("api");
-
-        //
-        api.MapPost("chat-simple", OnPostChatSimpleStreamingAsync);
 
         // Process chat turn
         api.MapPost("chat/streaming", OnPostChatStreamingAsync);
@@ -28,14 +23,8 @@ internal static class WebApplicationExtensions
         // Process chat turn rating 
         api.MapPost("chat/rating", OnPostChatRatingAsync);
 
-        // Get all documents
-        api.MapGet("documents", OnGetDocumentsAsync);
-
         // Get recent feedback
         api.MapGet("feedback", OnGetFeedbackAsync);
-
-        // Get source file
-        api.MapGet("documents/{fileName}", OnGetSourceFileAsync);
 
         // Get enable logout
         api.MapGet("user", OnGetUser);
@@ -49,40 +38,13 @@ internal static class WebApplicationExtensions
         return TypedResults.Ok(userInfo);
     }
 
-    private static async Task<IResult> OnGetSourceFileAsync(string fileName, BlobServiceClient blobServiceClient, IConfiguration configuration)
-    {
-        try
-        {
-            var sourceContainer = configuration["AzureStorageContainer"];
-            var blobContainerClient = blobServiceClient.GetBlobContainerClient(sourceContainer);
-            var blobClient = blobContainerClient.GetBlobClient(fileName);
-
-            if (await blobClient.ExistsAsync())
-            {
-                var stream = new MemoryStream();
-                await blobClient.DownloadToAsync(stream);
-                stream.Position = 0; // Reset stream position to the beginning
-
-                return Results.File(stream, "application/pdf");
-            }
-            else
-            {
-                return Results.NotFound("File not found");
-            }
-        }
-        catch (Exception)
-        {
-            // Log the exception details
-            return Results.Problem("Internal server error");
-        }
-    }
-
     private static async Task<IResult> OnPostChatRatingAsync(HttpContext context, ChatRatingRequest request, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
     {
         var userInfo = GetUserInfo(context);
         await chatHistoryService.RecordRatingAsync(userInfo, request);
         return Results.Ok();
     }
+
     private static async IAsyncEnumerable<FeedbackResponse> OnGetHistoryAsync(HttpContext context, ChatHistoryService chatHistoryService)
     {
         var user = GetUserInfo(context);
@@ -119,7 +81,7 @@ internal static class WebApplicationExtensions
         var userInfo = GetUserInfo(context);
         if (request is { History.Length: > 0 })
         {
-            var response = await chatService.ReplyAsync(request, cancellationToken);
+            var response = await chatService.ReplyAsync(ProfileDefinition.RAG, request, cancellationToken);
             await chatHistoryService.RecordChatMessageAsync(userInfo, request, response);
             return TypedResults.Ok(response);
         }
@@ -129,10 +91,9 @@ internal static class WebApplicationExtensions
 
     private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, ChatHistoryService chatHistoryService, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-
         var userInfo = GetUserInfo(context);
         var chat = ResolveChatService(request, chatService, ragChatService);
-        var resultChunks = chat.ReplyAsync(request);
+        var resultChunks = chat.ReplyAsync(request.OptionFlags.GetChatProfile(),request);
         await foreach (var chunk in resultChunks)
         {
             yield return chunk;
@@ -146,65 +107,13 @@ internal static class WebApplicationExtensions
 
     private static IChatService ResolveChatService(ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService)
     {
-        if (request.OptionFlags.IsChatProfile(ProfileDefinition.Auto.Name))
+        if (request.OptionFlags.IsChatProfile(ProfileDefinition.RAG.Name))
         {
             return ragChatService;
         }
         else
         {
             return chatService;
-        }
-    }
-
-    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatSimpleStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ChatHistoryService chatHistoryService, [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        var userInfo = GetUserInfo(context);
-        var response = chatService.ReplyAsync(request);
-
-        await foreach (var choice in response)
-        {
-            yield return choice;
-            if (choice.FinalResult != null)
-            {
-                await chatHistoryService.RecordChatMessageAsync(userInfo, request, choice.FinalResult);
-            }
-        }
-    }
-
-    private static async IAsyncEnumerable<DocumentResponse> OnGetDocumentsAsync(BlobContainerClient client, [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        await foreach (var blob in client.GetBlobsAsync(cancellationToken: cancellationToken))
-        {
-            if (blob is not null and { Deleted: false })
-            {
-                var props = blob.Properties;
-                var baseUri = client.Uri;
-                var builder = new UriBuilder(baseUri);
-                builder.Path += $"/{blob.Name}";
-
-                var metadata = blob.Metadata;
-                var documentProcessingStatus = GetMetadataEnumOrDefault<DocumentProcessingStatus>(
-                    metadata, nameof(DocumentProcessingStatus), DocumentProcessingStatus.NotProcessed);
-                var embeddingType = GetMetadataEnumOrDefault<EmbeddingType>(
-                    metadata, nameof(EmbeddingType), EmbeddingType.AzureSearch);
-
-                yield return new(
-                    blob.Name,
-                    props.ContentType,
-                    props.ContentLength ?? 0,
-                    props.LastModified,
-                    builder.Uri,
-                    documentProcessingStatus,
-                    embeddingType);
-
-                static TEnum GetMetadataEnumOrDefault<TEnum>(
-                    IDictionary<string, string> metadata,
-                    string key,
-                    TEnum @default) where TEnum : struct => metadata.TryGetValue(key, out var value)
-                        && Enum.TryParse<TEnum>(value, out var status)
-                            ? status
-                            : @default;
-            }
         }
     }
 

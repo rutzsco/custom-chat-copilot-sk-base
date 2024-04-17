@@ -22,9 +22,9 @@ public sealed class RetrieveRelatedDocumentSkill
     public async Task<string> QueryAsync([Description("search query")] string searchQuery, KernelArguments arguments)
     {
         searchQuery = searchQuery.Replace("\"", string.Empty);
-        arguments["intent"] = searchQuery;
+        arguments[ContextVariableOptions.Intent] = searchQuery;
 
-        var searchLogic = new SearchLogic<ManualsAIStudioIndexDefinition>(_openAIClient, _searchClientFactory, ManualsAIStudioIndexDefinition.IndexName, _config["AOAIEmbeddingsDeployment"], ManualsAIStudioIndexDefinition.EmbeddingsFieldName, ManualsAIStudioIndexDefinition.SelectFieldNames);
+        var searchLogic = new SearchLogic<AIStudioIndexDefinition>(_openAIClient, _searchClientFactory, AIStudioIndexDefinition.IndexName, _config["AOAIEmbeddingsDeployment"], AIStudioIndexDefinition.EmbeddingsFieldName, AIStudioIndexDefinition.SelectFieldNames);
         var result = await searchLogic.SearchAsync(searchQuery);
 
         if (!result.Sources.Any())
@@ -42,9 +42,9 @@ public sealed class RetrieveRelatedDocumentSkill
     public async Task<string> QueryV2Async([Description("search query")] string searchQuery, KernelArguments arguments)
     {
         searchQuery = searchQuery.Replace("\"", string.Empty);
-        arguments["intent"] = searchQuery;
+        arguments[ContextVariableOptions.Intent] = searchQuery;
 
-        var searchLogic = new SearchLogic<ManualsSearchIndexerIndexDefinintion>(_openAIClient, _searchClientFactory, ManualsSearchIndexerIndexDefinintion.IndexName, _config["AOAIEmbeddingsDeployment"], ManualsSearchIndexerIndexDefinintion.EmbeddingsFieldName, ManualsSearchIndexerIndexDefinintion.SelectFieldNames);
+        var searchLogic = new SearchLogic<AISearchIndexerIndexDefinintion>(_openAIClient, _searchClientFactory, AISearchIndexerIndexDefinintion.IndexName, _config["AOAIEmbeddingsDeployment"], AISearchIndexerIndexDefinintion.EmbeddingsFieldName, AISearchIndexerIndexDefinintion.SelectFieldNames);
         var result = await searchLogic.SearchAsync(searchQuery);
 
         if (!result.Sources.Any())

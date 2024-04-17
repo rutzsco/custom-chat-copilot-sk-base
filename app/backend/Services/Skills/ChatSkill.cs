@@ -27,30 +27,4 @@ public class ChatSkill
 
         return result;
     }
-
-    [KernelFunction("ChatStreaming"), Description("Get a chat response for user question and sources")]
-    public async Task<SKResult> ChatStreamingAsync([Description("chat History")] ChatTurn[] chatTurns,
-        KernelArguments arguments,
-        Kernel kernel)
-    {
-        var chatGpt = kernel.Services.GetService<IChatCompletionService>();
-        var systemMessagePrompt = PromptService.GetPromptByName(PromptService.ChatSystemPrompt);
-        arguments["SystemMessagePrompt"] = systemMessagePrompt;
-
-        var chatHistory = new Microsoft.SemanticKernel.ChatCompletion.ChatHistory(systemMessagePrompt).AddChatHistory(chatTurns);
-        var userMessage = await PromptService.RenderPromptAsync(kernel, PromptService.GetPromptByName(PromptService.ChatUserPrompt), arguments);
-        arguments["UserMessage"] = userMessage;
-        chatHistory.AddUserMessage(userMessage);
-
-        var sb = new StringBuilder();
-        await foreach (StreamingChatMessageContent chatUpdate in chatGpt.GetStreamingChatMessageContentsAsync(chatHistory, DefaultSettings.AIChatRequestSettings))
-        {
-            sb.Append(chatUpdate.Content);
-        }
-
-        var result = new SKResult(sb.ToString(), null, 0);
-        arguments["ChatResult"] = result;
-
-        return result;
-    }
 }

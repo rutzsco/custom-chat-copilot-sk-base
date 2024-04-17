@@ -5,20 +5,27 @@ namespace MinimalApi.Services.Profile;
 public class ProfileDefinition
 {
 
-    public static ProfileDefinition Auto = new ProfileDefinition("Auto Service Advisor", "RAG", "UAL");
+    public static ProfileDefinition RAG = new ProfileDefinition("Auto Service Advisor", "RAG", "UAL", new RAGSettingsSummary(DefaultSettings.GenerateSearchQueryPluginName, DefaultSettings.GenerateSearchQueryPluginQueryFunctionName, DefaultSettings.DocumentRetrievalPluginName, DefaultSettings.DocumentRetrievalPluginQueryFunctionName));
     public static ProfileDefinition General = new ProfileDefinition("General", "Chat", "None");
 
     public static List<ProfileDefinition> All = new List<ProfileDefinition>
     {
-        Auto
-        //General
+        RAG,
+        General
     };
 
-    public ProfileDefinition(string name, string approach, string securityModel)
+    public static ProfileDefinition GetProfile(string name)
+    {
+        return All.FirstOrDefault(p => p.Name == name);
+    }
+
+
+    public ProfileDefinition(string name, string approach, string securityModel, RAGSettingsSummary? ragSettingsSummary = null)
     {
         Name = name;
         Approach = approach;
         SecurityModel = securityModel;
+        RAGSettingsSummary = ragSettingsSummary;
     }
 
     public string Name { get; set; }
@@ -27,6 +34,9 @@ public class ProfileDefinition
 
     public string SecurityModel { get; set; }
 
-    public string Index { get; set; }
+    public RAGSettingsSummary? RAGSettingsSummary { get; set; }
 
 }
+
+
+public record RAGSettingsSummary(string GenerateSearchQueryPluginName, string GenerateSearchQueryPluginQueryFunctionName, string DocumentRetrievalPluginName, string DocumentRetrievalPluginQueryFunctionName);

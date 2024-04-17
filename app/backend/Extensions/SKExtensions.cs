@@ -63,6 +63,15 @@ namespace MinimalApi.Extensions
             return (value == profile);
         }
 
+        public static ProfileDefinition GetChatProfile(this Dictionary<string, string> options)
+        {
+            var value = options.GetValueOrDefault("PROFILE", ProfileDefinition.General.Name);
+            if(value == ProfileDefinition.General.Name)
+                return ProfileDefinition.General;
+
+            return ProfileDefinition.RAG;
+        }
+
         public static ApproachResponse BuildResoponse(this KernelArguments context, ChatRequest request, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
         {
             var result = (SKResult)context["ChatResult"];

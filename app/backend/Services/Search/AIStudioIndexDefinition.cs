@@ -2,7 +2,7 @@
 
 namespace MinimalApi.Services.Search;
 
-public class ManualsAIStudioIndexDefinition : IKnowledgeSource
+public class AIStudioIndexDefinition : IKnowledgeSource
 {
     public required string filepath { get; set; }
 
@@ -23,10 +23,6 @@ public class ManualsAIStudioIndexDefinition : IKnowledgeSource
         return filepath;
     }
 
-    public int GetPage()
-    {
-        return 0;
-    }
 
     public static string IndexName = "manuals";
     public static string EmbeddingsFieldName = "contentVector";

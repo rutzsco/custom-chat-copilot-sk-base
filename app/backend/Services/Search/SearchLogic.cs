@@ -36,7 +36,7 @@ public class SearchLogic<T> where T : IKnowledgeSource
             Size = AppConfiguration.SearchIndexDocumentCount,
             VectorSearch = new()
             {
-                Queries = { new VectorizedQuery(queryEmbeddings.ToArray()) { KNearestNeighborsCount = 3, Fields = { _embeddingFieldName } } }
+                Queries = { new VectorizedQuery(queryEmbeddings.ToArray()) { KNearestNeighborsCount = DefaultSettings.KNearestNeighborsCount, Fields = { _embeddingFieldName } } }
             }
         };
 

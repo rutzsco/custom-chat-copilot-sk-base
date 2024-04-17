@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace MinimalApi.Services.Search;
 
-public class ManualsSearchIndexerIndexDefinintion : IKnowledgeSource
+public class AISearchIndexerIndexDefinintion : IKnowledgeSource
 {
     public required string title { get; set; }
 

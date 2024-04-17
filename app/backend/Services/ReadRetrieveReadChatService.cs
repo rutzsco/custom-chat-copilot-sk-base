@@ -2,6 +2,7 @@
 using ClientApp.Pages;
 using Microsoft.SemanticKernel.ChatCompletion;
 using MinimalApi.Extensions;
+using MinimalApi.Services.Profile;
 using MinimalApi.Services.Prompts;
 
 namespace MinimalApi.Services;
@@ -21,7 +22,7 @@ internal sealed class ReadRetrieveReadChatService
         _configuration = configuration;
     }
 
-    public async Task<ApproachResponse> ReplyAsync(ChatRequest request, CancellationToken cancellationToken = default)
+    public async Task<ApproachResponse> ReplyAsync(ProfileDefinition profile, ChatRequest request, CancellationToken cancellationToken = default)
     {   
         try
         {
@@ -29,8 +30,8 @@ internal sealed class ReadRetrieveReadChatService
  
             var kernel = _openAIClientFacade.GetKernel(request.OptionFlags.IsChatGpt4Enabled());
 
-            var generateSearchQueryFunction = kernel.Plugins.GetFunction(DefaultSettings.GenerateSearchQueryPluginName, DefaultSettings.GenerateSearchQueryPluginQueryFunctionName);
-            var documentLookupFunction = kernel.Plugins.GetFunction(DefaultSettings.DocumentRetrievalPluginName, DefaultSettings.DocumentRetrievalPluginQueryFunctionName);
+            var generateSearchQueryFunction = kernel.Plugins.GetFunction(profile.RAGSettingsSummary.GenerateSearchQueryPluginName, profile.RAGSettingsSummary.GenerateSearchQueryPluginQueryFunctionName);
+            var documentLookupFunction = kernel.Plugins.GetFunction(profile.RAGSettingsSummary.DocumentRetrievalPluginName, profile.RAGSettingsSummary.DocumentRetrievalPluginQueryFunctionName);
             var chatFunction = kernel.Plugins.GetFunction(DefaultSettings.ChatPluginName, DefaultSettings.ChatPluginFunctionName);
 
             var context = new KernelArguments().AddUserParameters(request.History);

@@ -3,6 +3,7 @@
 public static class DefaultSettings
 {
     public static int MaxRequestTokens = 6000;
+    public static int KNearestNeighborsCount = 3;
 
     public static PromptExecutionSettings AISearchRequestSettings = new()
     {
