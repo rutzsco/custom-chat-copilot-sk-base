@@ -26,10 +26,40 @@ internal static class WebApplicationExtensions
         // Get recent feedback
         api.MapGet("feedback", OnGetFeedbackAsync);
 
+        // Get source file
+        api.MapGet("documents/{fileName}", OnGetSourceFileAsync);
+
         // Get enable logout
         api.MapGet("user", OnGetUser);
 
         return app;
+    }
+    private static async Task<IResult> OnGetSourceFileAsync(string fileName, BlobServiceClient blobServiceClient, IConfiguration configuration)
+    {
+        try
+        {
+            var sourceContainer = configuration["AzureStorageContainer"];
+            var blobContainerClient = blobServiceClient.GetBlobContainerClient(sourceContainer);
+            var blobClient = blobContainerClient.GetBlobClient(fileName);
+
+            if (await blobClient.ExistsAsync())
+            {
+                var stream = new MemoryStream();
+                await blobClient.DownloadToAsync(stream);
+                stream.Position = 0; // Reset stream position to the beginning
+
+                return Results.File(stream, "application/pdf");
+            }
+            else
+            {
+                return Results.NotFound("File not found");
+            }
+        }
+        catch (Exception)
+        {
+            // Log the exception details
+            return Results.Problem("Internal server error");
+        }
     }
 
     private static IResult OnGetUser(HttpContext context)
