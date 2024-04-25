@@ -3,7 +3,6 @@ using ClientApp.Pages;
 using Microsoft.SemanticKernel.ChatCompletion;
 using MinimalApi.Extensions;
 using MinimalApi.Services.Profile;
-using MinimalApi.Services.Prompts;
 
 namespace MinimalApi.Services;
 

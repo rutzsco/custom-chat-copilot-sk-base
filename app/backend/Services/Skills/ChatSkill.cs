@@ -2,7 +2,7 @@
 
 using System.ComponentModel;
 using Microsoft.SemanticKernel.ChatCompletion;
-using MinimalApi.Services.Prompts;
+using MinimalApi.Services.Profile.Prompts;
 
 namespace MinimalApi.Services.Skills;
 

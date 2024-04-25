@@ -1,33 +1,29 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 using System.Reflection;
 
-namespace MinimalApi.Services.Prompts;
+namespace MinimalApi.Services.Profile.Prompts;
 
 public static class PromptService
 {
     public static string ChatSystemPrompt = "ChatSystemPrompt";
     public static string ChatUserPrompt = "ChatUserPrompt";
-    public static string SearchSystemPrompt = "SearchSystemPrompt";
-    public static string SearchUserPrompt = "SearchUserPrompt";
+    public static string RAGSearchSystemPrompt = "RAGSearchQuerySystemPrompt";
+    public static string RAGSearchUserPrompt = "RAGSearchUserPrompt";
 
     public static string ChatSimpleSystemPrompt = "ChatSimpleSystemPrompt";
     public static string ChatSimpleUserPrompt = "ChatSimpleUserPrompt";
 
     public static string GetPromptByName(string prompt)
     {
-        var resourceName = $"MinimalApi.Services.Prompts.{prompt}.txt";
+        var resourceName = $"MinimalApi.Services.Profile.Prompts.{prompt}.txt";
         var assembly = Assembly.GetExecutingAssembly();
         using (Stream stream = assembly.GetManifestResourceStream(resourceName))
         {
             if (stream == null)
-            {
                 throw new ArgumentException($"The resource {resourceName} was not found.");
-            }
 
             using (StreamReader reader = new StreamReader(stream))
-            {
                 return reader.ReadToEnd();
-            }
         }
     }
 
