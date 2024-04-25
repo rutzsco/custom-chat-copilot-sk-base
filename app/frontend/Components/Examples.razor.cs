@@ -4,6 +4,7 @@ namespace ClientApp.Components;
 
 public sealed partial class Examples
 {
+    [Parameter] public required ProfileSummary Profile { get; set; }
     [Parameter, EditorRequired] public required string Message { get; set; }
     [Parameter, EditorRequired] public EventCallback<string> OnExampleClicked { get; set; }
 

@@ -1,0 +1,28 @@
+[
+  {
+    "Name": "Auto Service Advisor",
+    "Approach": "RAG",
+    "SecurityModel": "None",
+    "SampleQuestions": [
+      "How do I change the oil?",
+      "What are the different maintenance intervals?",
+      "What is the air filter part number?"
+    ],
+    "RAGSettings": {
+      "GenerateSearchQueryPluginName": "GenerateSearchQuery",
+      "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
+      "DocumentRetrievalPluginName": "DocumentRetrieval",
+      "DocumentRetrievalPluginQueryFunctionName": "Query",
+      "DocumentRetrievalIndexName": "manuals"
+    }
+  },
+  {
+    "Name": "General",
+    "Approach": "Chat",
+    "SecurityModel": "None",
+    "SampleQuestions": [
+      "Write a function in C# that will invoke a rest API",
+      "Explain why popcorn pops to a kid who loves watching it in the microwave."
+    ]
+  }
+]

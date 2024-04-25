@@ -58,19 +58,18 @@ namespace MinimalApi.Extensions
             return value.ToLower()  == "true";
         }
 
-        public static bool IsChatProfile(this Dictionary<string, string> options, string profile)
+        public static bool IsChatProfile(this Dictionary<string, string> options)
         {
-            var value = options.GetValueOrDefault("PROFILE", ProfileDefinition.General.Name);
-            return (value == profile);
+            var profile = options.GetChatProfile();
+            var selected = ProfileDefinition.All.FirstOrDefault(x => x.Name == profile.Name);
+            return selected.Approach.ToUpper() == "CHAT";
         }
 
         public static ProfileDefinition GetChatProfile(this Dictionary<string, string> options)
         {
-            var value = options.GetValueOrDefault("PROFILE", ProfileDefinition.General.Name);
-            if(value == ProfileDefinition.General.Name)
-                return ProfileDefinition.General;
-
-            return ProfileDefinition.RAG;
+            var defaultProfile = ProfileDefinition.All.First();
+            var value = options.GetValueOrDefault("PROFILE", defaultProfile.Name);
+            return ProfileDefinition.All.FirstOrDefault(x => x.Name == value) ?? defaultProfile;
         }
 
         public static ApproachResponse BuildResoponse(this KernelArguments context, ChatRequest request, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)

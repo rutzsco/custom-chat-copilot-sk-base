@@ -109,9 +109,10 @@ internal static class WebApplicationExtensions
     private static async Task<IResult> OnPostChatAsync(HttpContext context, ChatRequest request, ReadRetrieveReadChatService chatService, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
     {
         var userInfo = GetUserInfo(context);
+        var profile = request.OptionFlags.GetChatProfile();
         if (request is { History.Length: > 0 })
         {
-            var response = await chatService.ReplyAsync(ProfileDefinition.RAG, request, cancellationToken);
+            var response = await chatService.ReplyAsync(profile, request, cancellationToken);
             await chatHistoryService.RecordChatMessageAsync(userInfo, request, response);
             return TypedResults.Ok(response);
         }
@@ -136,15 +137,11 @@ internal static class WebApplicationExtensions
 
 
     private static IChatService ResolveChatService(ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService)
-    {
-        if (request.OptionFlags.IsChatProfile(ProfileDefinition.RAG.Name))
-        {
-            return ragChatService;
-        }
-        else
-        {
+    {  
+        if (request.OptionFlags.IsChatProfile())
             return chatService;
-        }
+        
+        return ragChatService;
     }
 
     private static async IAsyncEnumerable<FeedbackResponse> OnGetFeedbackAsync(HttpContext context, ChatHistoryService chatHistoryService)
@@ -189,7 +186,7 @@ internal static class WebApplicationExtensions
         }
         
         var enableLogout = !string.IsNullOrEmpty(id);
-        var profiles = ProfileDefinition.All.Select(x => new ProfileSummary(x.Name,""));
+        var profiles = ProfileDefinition.All.Select(x => new ProfileSummary(x.Name,string.Empty, x.SampleQuestions));
         var user = new UserInformation(enableLogout, name, id, profiles);
 
         return user;

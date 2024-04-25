@@ -7,4 +7,4 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Shared.Models;
-public record ProfileSummary(string Name, string Description);
+public record ProfileSummary(string Name, string Description, List<string> SampleQuestions);

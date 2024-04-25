@@ -16,6 +16,7 @@ public sealed partial class Chat
 
     private string _selectedProfile = "General Chat";
     private List<ProfileSummary> _profiles = new();
+    private ProfileSummary? _selectedProfileSummary = null;
 
     private readonly Dictionary<UserQuestion, ApproachResponse?> _questionAndAnswerMap = [];
 
@@ -38,11 +39,14 @@ public sealed partial class Chat
         var user = await ApiClient.GetUserAsync();
         _profiles = user.Profiles.ToList();
         _selectedProfile = _profiles.First().Name;
+        _selectedProfileSummary = _profiles.First();
     }
 
     private void OnProfileClick(string selection)
     {
         _selectedProfile = selection;
+        _selectedProfileSummary = _profiles.FirstOrDefault(x => x.Name == selection);
+        OnClearChat();
     }
 
     private Task OnAskQuestionAsync(string question)

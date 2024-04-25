@@ -5,17 +5,22 @@
     <MudItem xs="12">
         <MudText Typo="Typo.h2" Align="Align.Center">@Message</MudText>
     </MudItem>
-       @if(AppConfiguration.ShowSampleQuestions)
-       {
+    @if (Profile != null)
+    {
+
+        @foreach (var question in Profile.SampleQuestions)
+        {
             <MudItem lg="3" xs="12">
-                <MudPaper Elevation="4" Height="12rem" onclick="@(async () => await OnClickedAsync(WhatIsIncluded))"
+                <MudPaper Elevation="4" Height="12rem" onclick="@(async () => await OnClickedAsync(question))"
                           Class="d-flex pa-8 clickable flex-column align-center justify-center mud-width-full rounded dim">
                     <MudText Typo="Typo.h5">
-                        @WhatIsIncluded
+                        @question
                     </MudText>
                 </MudPaper>
             </MudItem>
-            <MudItem lg="3" xs="12">
+        }
+
+@*             <MudItem lg="3" xs="12">
                 <MudPaper Elevation="4" Height="12rem" onclick="@(async () => await OnClickedAsync(WhatIsPerfReview))"
                           Class="d-flex pa-8 clickable flex-column align-center justify-center mud-width-full rounded dim">
                     <MudText Typo="Typo.h5">
@@ -30,6 +35,6 @@
                         @WhatDoesPmDo
                     </MudText>
                 </MudPaper>
-            </MudItem>
+            </MudItem> *@
         }
 </MudGrid>

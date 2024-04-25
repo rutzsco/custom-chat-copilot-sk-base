@@ -12,6 +12,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Services\Profile\profiles.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Services\Prompts\ChatSimpleSystemPrompt.txt" />
     <None Remove="Services\Prompts\ChatSimpleUserPrompt.txt" />
     <None Remove="Services\Prompts\ChatSystemPrompt.txt" />
@@ -21,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Services\Profile\profiles.json" />
     <EmbeddedResource Include="Services\Prompts\ChatSimpleSystemPrompt.txt" />
     <EmbeddedResource Include="Services\Prompts\ChatSystemPrompt.txt" />
     <EmbeddedResource Include="Services\Prompts\ChatSimpleUserPrompt.txt" />

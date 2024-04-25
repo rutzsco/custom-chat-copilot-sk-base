@@ -14,7 +14,7 @@
             @if (_questionAndAnswerMap is { Count: 0 })
             {
                 <div class="d-flex align-content-center flex-wrap flex-grow-1 full-height">
-                    <Examples Message="@AppConfiguration.HelloText" OnExampleClicked="@OnAskQuestionAsync" />
+                    <Examples Profile=@_selectedProfileSummary Message="@AppConfiguration.HelloText" OnExampleClicked="@OnAskQuestionAsync" />
                 </div>
             }
             else
