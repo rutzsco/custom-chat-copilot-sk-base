@@ -2,14 +2,21 @@
 
 namespace MinimalApi.Services;
 
-internal sealed class AzureBlobStorageService(BlobContainerClient container)
+internal sealed class AzureBlobStorageService(BlobServiceClient blobServiceClient, IConfiguration configuration)
 {
-    internal static DefaultAzureCredential DefaultCredential { get; } = new();
-
-    internal async Task<UploadDocumentsResponse> UploadFilesAsync(IEnumerable<IFormFile> files, CancellationToken cancellationToken)
+    internal async Task<UploadDocumentsResponse> UploadFilesAsync(UserInformation userInfo, IEnumerable<IFormFile> files, CancellationToken cancellationToken)
     {
         try
         {
+            var azureStorageContainer = configuration["AzureStorageUserUploadContainer"];
+            var container = blobServiceClient.GetBlobContainerClient(azureStorageContainer);
+            if (!await container.ExistsAsync())
+            {
+                // Create the container
+                await container.CreateAsync();
+                Console.WriteLine("Container created.");
+            }
+
             List<string> uploadedFiles = [];
             foreach (var file in files)
             {
@@ -34,9 +41,7 @@ internal sealed class AzureBlobStorageService(BlobContainerClient container)
 
             if (uploadedFiles.Count is 0)
             {
-                return UploadDocumentsResponse.FromError("""
-                    No files were uploaded. Either the files already exist or the files are not PDFs or images.
-                    """);
+                return UploadDocumentsResponse.FromError("No files were uploaded. Either the files already exist or the files are not PDFs or images.");
             }
 
             return new UploadDocumentsResponse([.. uploadedFiles]);

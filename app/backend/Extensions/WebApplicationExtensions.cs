@@ -64,14 +64,15 @@ internal static class WebApplicationExtensions
             return Results.Problem("Internal server error");
         }
     }
-    private static async Task<IResult> OnPostDocumentAsync([FromForm] IFormFileCollection files,
+    private static async Task<IResult> OnPostDocumentAsync(HttpContext context, [FromForm] IFormFileCollection files,
         [FromServices] AzureBlobStorageService service,
         [FromServices] ILogger<AzureBlobStorageService> logger,
         CancellationToken cancellationToken)
     {
         logger.LogInformation("Upload documents");
 
-        var response = await service.UploadFilesAsync(files, cancellationToken);
+        var userInfo = GetUserInfo(context);
+        var response = await service.UploadFilesAsync(userInfo, files, cancellationToken);
 
         logger.LogInformation("Upload documents: {x}", response);
 
