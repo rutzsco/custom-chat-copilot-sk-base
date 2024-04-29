@@ -2,12 +2,20 @@
 
 using ClientApp.Models;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.JSInterop;
 using static System.Net.WebRequestMethods;
 
 namespace ClientApp.Pages;
 
 public sealed partial class Chat
 {
+    private const long MaxIndividualFileSize = 1_024L * 1_024;
+    private IList<IBrowserFile> _files = new List<IBrowserFile>();
+    private MudForm _form = null!;
+    private MudFileUpload<IReadOnlyList<IBrowserFile>> _fileUpload = null!;
+    private bool _showFileUpload = false;
+
     private string _userQuestion = "";
     private UserQuestion _currentQuestion;
     private string _lastReferenceQuestion = "";
@@ -27,6 +35,9 @@ public sealed partial class Chat
     [Inject] public required HttpClient HttpClient { get; set; }
 
     [Inject] public required ApiClient ApiClient { get; set; }
+
+    [Inject]
+    public required IJSRuntime JSRuntime { get; set; }
 
     [CascadingParameter(Name = nameof(Settings))]
     public required RequestSettingsOverrides Settings { get; set; }
@@ -138,5 +149,37 @@ public sealed partial class Chat
         _currentQuestion = default;
         _questionAndAnswerMap.Clear();
         _chatId = Guid.NewGuid();
+    }
+    private void ToggleFileUpload()
+    {
+        if(_showFileUpload)
+        {
+            _showFileUpload = false;
+        }
+        else
+           _showFileUpload = true;
+    }
+    private async Task SubmitFilesForUploadAsync()
+    {
+        var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
+
+        Console.WriteLine("SubmitFilesForUploadAsync");
+        if (_fileUpload is { Files.Count: > 0 })
+        {
+
+            Console.WriteLine("SubmitFilesForUploadAsync");
+            var result = await ApiClient.UploadDocumentsAsync(_fileUpload.Files, MaxIndividualFileSize, cookie);
+            if (result.IsSuccessful)
+            {
+
+                Console.WriteLine("SubmitFilesForUploadAsync - Successful");
+                await _fileUpload.ResetAsync();
+
+            }
+            else
+            {
+                Console.WriteLine("SubmitFilesForUploadAsync - FAILED");
+            }
+        }
     }
 }

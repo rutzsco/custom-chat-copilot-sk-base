@@ -26,6 +26,9 @@ internal static class WebApplicationExtensions
         // Get recent feedback
         api.MapGet("feedback", OnGetFeedbackAsync);
 
+        // Upload a document
+        api.MapPost("documents", OnPostDocumentAsync);
+
         // Get source file
         api.MapGet("documents/{fileName}", OnGetSourceFileAsync);
 
@@ -60,6 +63,19 @@ internal static class WebApplicationExtensions
             // Log the exception details
             return Results.Problem("Internal server error");
         }
+    }
+    private static async Task<IResult> OnPostDocumentAsync([FromForm] IFormFileCollection files,
+        [FromServices] AzureBlobStorageService service,
+        [FromServices] ILogger<AzureBlobStorageService> logger,
+        CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Upload documents");
+
+        var response = await service.UploadFilesAsync(files, cancellationToken);
+
+        logger.LogInformation("Upload documents: {x}", response);
+
+        return TypedResults.Ok(response);
     }
 
     private static IResult OnGetUser(HttpContext context)

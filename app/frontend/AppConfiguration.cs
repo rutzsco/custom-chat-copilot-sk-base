@@ -22,6 +22,9 @@ public static class AppConfiguration
         ExampleQuestion1 = config.GetValue<string>("ExampleQuestion1", "Q1?");
         ExampleQuestion2 = config.GetValue<string>("ExampleQuestion2", "Q2?");
         ExampleQuestion3 = config.GetValue<string>("ExampleQuestion3", "Q3?");
+
+
+        ShowFileUploadSelection = config.GetValue<bool>("ShowFileUploadSelection", false);
     }
 
     public static string ExampleQuestion1 { get; set; } = "Q1?";
@@ -37,4 +40,6 @@ public static class AppConfiguration
     public static bool ShowSampleQuestions { get; set; } = true;
 
     public static bool ShowPremiumAOAIToggleSelection { get; set; } = true;
+
+    public static bool ShowFileUploadSelection { get; set; } = false;
 }
