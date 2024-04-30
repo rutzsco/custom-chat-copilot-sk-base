@@ -14,7 +14,9 @@
       "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
       "DocumentRetrievalPluginName": "DocumentRetrieval",
       "DocumentRetrievalPluginQueryFunctionName": "Query",
-      "DocumentRetrievalIndexName": "manuals"
+      "DocumentRetrievalIndexName": "manuals",
+      "ChatSystemMessage": "",
+      "StorageContianer" : "manuals"
     }
   },
   {

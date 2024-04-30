@@ -175,10 +175,8 @@ internal static class WebApplicationExtensions
         
         var enableLogout = !string.IsNullOrEmpty(id);
 
-        //get all group claims
-        
-        var p = ProfileDefinition.All.Where(p => p.SecurityModelGroupMembership.Any(userGroups.Contains)).Select(x => new ProfileSummary(x.Name, string.Empty, x.SampleQuestions));
-        var user = new UserInformation(enableLogout, name, id, p, userGroups);
+        var profiles = ProfileDefinition.All.GetAuthorizedProfiles(userGroups).Select(x => new ProfileSummary(x.Name, string.Empty, x.SampleQuestions));
+        var user = new UserInformation(enableLogout, name, id, profiles, userGroups);
 
         return user;
     }
