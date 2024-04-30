@@ -21,7 +21,7 @@ public class ChatMessageRecord
                              string chatTurnId,
                              string message,
                              string content,
-                             Diagnostics diagnostics)
+                             ResponseContext context)
     {
         Timestamp = DateTimeOffset.Now;
         UserId = userId;
@@ -30,7 +30,7 @@ public class ChatMessageRecord
         Prompt = message;
         Type = "Message";
         Id = chatTurnId;
-        Diagnostics = diagnostics;
+        Context = context;
     }
 
     /// <summary>
@@ -78,6 +78,6 @@ public class ChatMessageRecord
     [JsonProperty("rating")]
     public ChatRating Rating { get; set; }
 
-    [JsonProperty("diagnostics")]
-    public Diagnostics Diagnostics { get; set; }
+    [JsonProperty("context")]
+    public ResponseContext Context { get; set; }
 }

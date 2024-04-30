@@ -92,37 +92,6 @@ internal static class WebApplicationExtensions
         return Results.Ok();
     }
 
-    private static async IAsyncEnumerable<FeedbackResponse> OnGetHistoryAsync(HttpContext context, ChatHistoryService chatHistoryService)
-    {
-        var user = GetUserInfo(context);
-        var response = await chatHistoryService.GetMostRecentChatItemsAsync(user);
-        foreach (var item in response)
-        {
-            if (item.Diagnostics != null)
-            {
-                yield return new FeedbackResponse(
-                    item.Prompt,
-                    item.Content,
-                    0,
-                    string.Empty,
-                    item.Diagnostics.ModelDeploymentName,
-                    item.Diagnostics.WorkflowDurationMilliseconds,
-                    item.Timestamp);
-            }
-            else
-            {
-                yield return new FeedbackResponse(
-                    item.Prompt,
-                    item.Content,
-                    0,
-                    string.Empty,
-                    "Unavialable",
-                    0,
-                    item.Timestamp);
-            }
-        }
-    }
-
     private static async Task<IResult> OnPostChatAsync(HttpContext context, ChatRequest request, ReadRetrieveReadChatService chatService, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
     {
         var userInfo = GetUserInfo(context);
@@ -161,41 +130,26 @@ internal static class WebApplicationExtensions
         return ragChatService;
     }
 
-    private static async IAsyncEnumerable<FeedbackResponse> OnGetFeedbackAsync(HttpContext context, ChatHistoryService chatHistoryService)
+    private static async Task<IEnumerable<FeedbackResponse>> OnGetHistoryAsync(HttpContext context, ChatHistoryService chatHistoryService)
+    {
+        var user = GetUserInfo(context);
+        var response = await chatHistoryService.GetMostRecentChatItemsAsync(user);
+        return response.AsFeedbackResponse();
+    }
+
+    private static async Task<IEnumerable<FeedbackResponse>> OnGetFeedbackAsync(HttpContext context, ChatHistoryService chatHistoryService)
     {
         var userInfo = GetUserInfo(context);
         var response = await chatHistoryService.GetMostRecentRatingsItemsAsync(userInfo);
-        foreach (var item in response)
-        {
-            if (item.Diagnostics == null)
-            {
-                yield return new FeedbackResponse(
-                    item.Prompt,
-                    item.Content,
-                    item.Rating.Rating,
-                    item.Rating.Feedback,
-                    string.Empty,
-                    0,
-                    item.Rating.Timestamp);
-            }
-            else
-            {
-                yield return new FeedbackResponse(
-                    item.Prompt,
-                    item.Content,
-                    item.Rating.Rating,
-                    item.Rating.Feedback,
-                    item.Diagnostics.ModelDeploymentName,
-                    item.Diagnostics.WorkflowDurationMilliseconds,
-                    item.Rating.Timestamp);
-            }
-        }
+        return response.AsFeedbackResponse();
     }
 
     private static UserInformation GetUserInfo(HttpContext context)
     {
         var id = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-ID"];
         var name = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-NAME"];
+        var pr = context.Request.Headers["X-MS-CLIENT-PRINCIPAL"];
+
         if (string.IsNullOrEmpty(id))
         {
             id = "LocalDevUser";
@@ -204,7 +158,7 @@ internal static class WebApplicationExtensions
         
         var enableLogout = !string.IsNullOrEmpty(id);
         var profiles = ProfileDefinition.All.Select(x => new ProfileSummary(x.Name,string.Empty, x.SampleQuestions));
-        var user = new UserInformation(enableLogout, name, id, profiles);
+        var user = new UserInformation(enableLogout, name, id, profiles, pr);
 
         return user;
     }
