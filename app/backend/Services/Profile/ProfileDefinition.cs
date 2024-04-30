@@ -13,15 +13,7 @@ public class ProfileDefinition
         Load();
     }
 
-    public static ProfileDefinition RAG = new ProfileDefinition("Auto Service Advisor", "RAG", "UAL", new List<string> { "How do I change the oil?","What are the different maintenance intervals?","What is the air filter part number"}, new RAGSettingsSummary(DefaultSettings.GenerateSearchQueryPluginName, DefaultSettings.GenerateSearchQueryPluginQueryFunctionName, DefaultSettings.DocumentRetrievalPluginName, DefaultSettings.DocumentRetrievalPluginQueryFunctionName, "manuals"));
-    //public static ProfileDefinition General = new ProfileDefinition("General", "Chat", "None", new List<string> { "Write a funciton in C# that will invoke a rest API" });
     public static List<ProfileDefinition> All;
-
-    //public static ProfileDefinition GetProfile(string name)
-    //{
-    //    return All.FirstOrDefault(p => p.Name == name);
-    //}
-
 
     private static void Load()
     {
@@ -49,13 +41,18 @@ public class ProfileDefinition
         }
     }
 
-    public ProfileDefinition(string name, string approach, string securityModel, List<string> sampleQuestions, RAGSettingsSummary? ragSettingsSummary)
+    public ProfileDefinition(string name, string approach, string securityModel, List<string> securityModelGroupMembership, List<string> sampleQuestions, RAGSettingsSummary? ragSettingsSummary)
     {
         Name = name;
         Approach = approach;
         SecurityModel = securityModel;
         SampleQuestions = sampleQuestions;
         RAGSettings = ragSettingsSummary;
+
+        if(securityModelGroupMembership == null)
+            SecurityModelGroupMembership = new List<string>();
+        else
+           SecurityModelGroupMembership = securityModelGroupMembership;
     }
 
     public string Name { get; set; }
@@ -63,6 +60,7 @@ public class ProfileDefinition
     public string Approach { get; set; }
 
     public string SecurityModel { get; set; }
+    public List<string> SecurityModelGroupMembership { get; set; }
 
     public RAGSettingsSummary? RAGSettings { get; set; }
 

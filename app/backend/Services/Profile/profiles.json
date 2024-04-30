@@ -2,7 +2,8 @@
   {
     "Name": "Auto Service Advisor",
     "Approach": "RAG",
-    "SecurityModel": "None",
+    "SecurityModel": "Group",
+    "SecurityModelGroupMembership": [ "LocalDevUser" ],
     "SampleQuestions": [
       "How do I change the oil?",
       "What are the different maintenance intervals?",

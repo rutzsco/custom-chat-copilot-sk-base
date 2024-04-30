@@ -4,6 +4,7 @@ using System;
 
 using MinimalApi.Services.ChatHistory;
 using MinimalApi.Services.Profile;
+using MinimalApi.Services.Security;
 
 namespace MinimalApi.Extensions;
 
@@ -94,8 +95,14 @@ internal static class WebApplicationExtensions
 
     private static async Task<IResult> OnPostChatAsync(HttpContext context, ChatRequest request, ReadRetrieveReadChatService chatService, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
     {
+        // Get user information
         var userInfo = GetUserInfo(context);
         var profile = request.OptionFlags.GetChatProfile();
+        if (!userInfo.HasAccess(profile))
+        {
+            throw new UnauthorizedAccessException("User does not have access to this profile");
+        }
+
         if (request is { History.Length: > 0 })
         {
             var response = await chatService.ReplyAsync(profile, request, cancellationToken);
@@ -108,7 +115,14 @@ internal static class WebApplicationExtensions
 
     private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, ChatHistoryService chatHistoryService, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
+        // Get user information
         var userInfo = GetUserInfo(context);
+        var profile = request.OptionFlags.GetChatProfile();
+        if (!userInfo.HasAccess(profile))
+        {
+            throw new UnauthorizedAccessException("User does not have access to this profile");
+        }
+
         var chat = ResolveChatService(request, chatService, ragChatService);
         var resultChunks = chat.ReplyAsync(request.OptionFlags.GetChatProfile(),request);
         await foreach (var chunk in resultChunks)
@@ -148,17 +162,23 @@ internal static class WebApplicationExtensions
     {
         var id = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-ID"];
         var name = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-NAME"];
-        var pr = context.Request.Headers["X-MS-CLIENT-PRINCIPAL"];
+        var claimsPrincipal = ClaimsPrincipalParser.Parse(context.Request);
+        var userGroups = claimsPrincipal.Claims.Where(c => c.Type == "groups").Select(c => c.Value).ToList();
+
 
         if (string.IsNullOrEmpty(id))
         {
             id = "LocalDevUser";
             name = "LocalDevUser";
+            userGroups = new List<string> { "LocalDevUser" };
         }
         
         var enableLogout = !string.IsNullOrEmpty(id);
-        var profiles = ProfileDefinition.All.Select(x => new ProfileSummary(x.Name,string.Empty, x.SampleQuestions));
-        var user = new UserInformation(enableLogout, name, id, profiles, pr);
+
+        //get all group claims
+        
+        var p = ProfileDefinition.All.Where(p => p.SecurityModelGroupMembership.Any(userGroups.Contains)).Select(x => new ProfileSummary(x.Name, string.Empty, x.SampleQuestions));
+        var user = new UserInformation(enableLogout, name, id, p, userGroups);
 
         return user;
     }
