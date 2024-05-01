@@ -16,8 +16,6 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddScoped<OpenAIPromptQueue>();
 builder.Services.AddLocalStorageServices();
 builder.Services.AddSessionStorageServices();
-builder.Services.AddSpeechSynthesisServices();
-builder.Services.AddSpeechRecognitionServices();
 builder.Services.AddMudServices();
 
 AppConfiguration.Load(builder.Configuration);

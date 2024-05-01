@@ -25,6 +25,8 @@ public static class AppConfiguration
 
 
         ShowFileUploadSelection = config.GetValue<bool>("ShowFileUploadSelection", false);
+
+        DisclaimerMessage = config.GetValue<string>("DisclaimerMessage", "DISCMLAIMER MESSAGE?");
     }
 
     public static string ExampleQuestion1 { get; set; } = "Q1?";
@@ -42,4 +44,6 @@ public static class AppConfiguration
     public static bool ShowPremiumAOAIToggleSelection { get; set; } = true;
 
     public static bool ShowFileUploadSelection { get; set; } = false;
+
+    public static string DisclaimerMessage { get; set; } = string.Empty;
 }
