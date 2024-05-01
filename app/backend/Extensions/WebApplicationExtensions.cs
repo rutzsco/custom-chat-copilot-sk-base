@@ -67,6 +67,7 @@ internal static class WebApplicationExtensions
     }
     private static async Task<IResult> OnPostDocumentAsync(HttpContext context, [FromForm] IFormFileCollection files,
         [FromServices] AzureBlobStorageService service,
+        [FromServices] DocumentService documentService,
         [FromServices] ILogger<AzureBlobStorageService> logger,
         CancellationToken cancellationToken)
     {
@@ -74,6 +75,10 @@ internal static class WebApplicationExtensions
 
         var userInfo = GetUserInfo(context);
         var response = await service.UploadFilesAsync(userInfo, files, cancellationToken);
+        foreach(var file in response.UploadedFiles)
+        {
+            await documentService.CreateDocumentUploadAsync(userInfo, file, file);
+        }
 
         logger.LogInformation("Upload documents: {x}", response);
 
