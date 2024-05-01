@@ -24,10 +24,10 @@ public static class GroupMembershipSecurityModel
                 if (userGroups.Any(g => profile.SecurityModelGroupMembership.Contains(g)))
                 {
                     yield return profile;
-                    continue;
                 }
             }
-            yield return profile;
+            else
+                yield return profile;
         }
     }
 }
