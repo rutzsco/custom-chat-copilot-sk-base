@@ -1,6 +1,7 @@
 [
   {
     "Name": "Auto Service Advisor",
+    "Id": "AutoServiceAdvisor",
     "Approach": "RAG",
     "SecurityModel": "Group",
     "SecurityModelGroupMembership": [ "LocalDevUser" ],
@@ -16,7 +17,7 @@
       "DocumentRetrievalPluginQueryFunctionName": "Query",
       "DocumentRetrievalIndexName": "manuals",
       "ChatSystemMessageFile": "RAGChatSystemPrompt",
-      "StorageContianer": "manuals"
+      "StorageContianer": "content"
     }
   },
   {

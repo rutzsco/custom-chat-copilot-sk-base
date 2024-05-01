@@ -41,9 +41,10 @@ public class ProfileDefinition
         }
     }
 
-    public ProfileDefinition(string name, string approach, string securityModel, List<string> securityModelGroupMembership, List<string> sampleQuestions, RAGSettingsSummary? ragSettingsSummary)
+    public ProfileDefinition(string name, string id, string approach, string securityModel, List<string> securityModelGroupMembership, List<string> sampleQuestions, RAGSettingsSummary? ragSettingsSummary)
     {
         Name = name;
+        Id = id;
         Approach = approach;
         SecurityModel = securityModel;
         SampleQuestions = sampleQuestions;
@@ -56,7 +57,7 @@ public class ProfileDefinition
     }
 
     public string Name { get; set; }
-
+    public string Id { get; set; }
     public string Approach { get; set; }
 
     public string SecurityModel { get; set; }

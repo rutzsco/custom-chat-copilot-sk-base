@@ -72,7 +72,7 @@ namespace MinimalApi.Extensions
             return ProfileDefinition.All.FirstOrDefault(x => x.Name == value) ?? defaultProfile;
         }
 
-        public static ApproachResponse BuildResoponse(this KernelArguments context, ChatRequest request, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
+        public static ApproachResponse BuildResoponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
         {
             var result = (SKResult)context["ChatResult"];
             var knowledgeSourceSummary = (KnowledgeSourceSummary)context[ContextVariableOptions.KnowledgeSummary];
@@ -84,16 +84,16 @@ namespace MinimalApi.Extensions
             var userMessage = (string)context["UserMessage"];
 
             var thoughts = GetThoughtsRAG(context, result.Answer);
-            var contextData = new ResponseContext(dataSources, thoughts.ToArray(), request.ChatTurnId, request.ChatId, diagnostics);
+            var contextData = new ResponseContext(profile.Name, dataSources, thoughts.ToArray(), request.ChatTurnId, request.ChatId, diagnostics);
 
             return new ApproachResponse(
                 Answer: result.Answer.Replace("\n", "<br>"),
-                CitationBaseUrl: configuration.ToCitationBaseUrl(),
+                CitationBaseUrl: profile.Id,
                 contextData);
         }
 
 
-        public static ApproachResponse BuildStreamingResoponse(this KernelArguments context, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds, List<KeyValuePair<string, string>> requestSettings)
+        public static ApproachResponse BuildStreamingResoponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds, List<KeyValuePair<string, string>> requestSettings)
         {
             var knowledgeSourceSummary = (KnowledgeSourceSummary)context[ContextVariableOptions.KnowledgeSummary];
             var dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(), x.GetContent())).ToArray();
@@ -106,14 +106,14 @@ namespace MinimalApi.Extensions
             var userMessage = (string)context["UserMessage"];
 
             var thoughts = GetThoughtsRAGV2(context, answer, requestSettings);
-            var contextData = new ResponseContext(dataSources, thoughts.ToArray(), request.ChatTurnId, request.ChatId, diagnostics);
+            var contextData = new ResponseContext(profile.Name, dataSources, thoughts.ToArray(), request.ChatTurnId, request.ChatId, diagnostics);
 
             return new ApproachResponse(
                 Answer: NormalizeResponseText(answer),
-                CitationBaseUrl: configuration.ToCitationBaseUrl(),
+                CitationBaseUrl: profile.Id,
                 contextData);
         }
-        public static ApproachResponse BuildChatSimpleResoponse(this KernelArguments context, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
+        public static ApproachResponse BuildChatSimpleResoponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
         {
             var completionTokens = GetTokenCount(answer);
             var totalTokens = completionTokens + requestTokenCount;
@@ -123,7 +123,7 @@ namespace MinimalApi.Extensions
             var userMessage = (string)context["UserMessage"];
 
             var thoughts = GetThoughts(context);
-            var contextData = new ResponseContext(null,null, request.ChatTurnId, request.ChatId, diagnostics);
+            var contextData = new ResponseContext(profile.Name,null, null, request.ChatTurnId, request.ChatId, diagnostics);
 
             return new ApproachResponse(
                 Answer: NormalizeResponseText(answer),

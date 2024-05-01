@@ -38,25 +38,47 @@ internal static class WebApplicationExtensions
 
         return app;
     }
-    private static async Task<IResult> OnGetSourceFileAsync(string fileName, BlobServiceClient blobServiceClient, IConfiguration configuration)
+    private static async Task<IResult> OnGetSourceFileAsync(HttpContext context, string fileName, BlobServiceClient blobServiceClient, IConfiguration configuration)
     {
         try
         {
-            var sourceContainer = configuration["AzureStorageContainer"];
-            var blobContainerClient = blobServiceClient.GetBlobContainerClient(sourceContainer);
-            var blobClient = blobContainerClient.GetBlobClient(fileName);
+            int underscoreIndex = fileName.IndexOf('_');  // Find the first underscore
 
-            if (await blobClient.ExistsAsync())
+            if (underscoreIndex != -1)
             {
-                var stream = new MemoryStream();
-                await blobClient.DownloadToAsync(stream);
-                stream.Position = 0; // Reset stream position to the beginning
+                string profileName = fileName.Substring(0, underscoreIndex); // Get the substring before the underscore
+                string blobName = fileName.Substring(underscoreIndex + 1); // Get the substring after the underscore
 
-                return Results.File(stream, "application/pdf");
+                Console.WriteLine($"Filename:{fileName} Container: {profileName} BlobName: {blobName}");
+
+
+                // Get user information
+                var userInfo = GetUserInfo(context);
+                var profile = ProfileDefinition.All.FirstOrDefault(x => x.Id == profileName);
+                if (profile == null || !userInfo.HasAccess(profile))
+                {
+                    throw new UnauthorizedAccessException("User does not have access to this profile");
+                }
+
+                var blobContainerClient = blobServiceClient.GetBlobContainerClient(profile.RAGSettings.StorageContianer);
+                var blobClient = blobContainerClient.GetBlobClient(blobName);
+
+                if (await blobClient.ExistsAsync())
+                {
+                    var stream = new MemoryStream();
+                    await blobClient.DownloadToAsync(stream);
+                    stream.Position = 0; // Reset stream position to the beginning
+
+                    return Results.File(stream, "application/pdf");
+                }
+                else
+                {
+                    return Results.NotFound("File not found");
+                }
             }
             else
             {
-                return Results.NotFound("File not found");
+                throw new ArgumentOutOfRangeException("Invalid file name format");
             }
         }
         catch (Exception)
