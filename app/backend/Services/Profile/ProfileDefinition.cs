@@ -69,4 +69,4 @@ public class ProfileDefinition
 }
 
 
-public record RAGSettingsSummary(string GenerateSearchQueryPluginName, string GenerateSearchQueryPluginQueryFunctionName, string DocumentRetrievalPluginName, string DocumentRetrievalPluginQueryFunctionName, string DocumentRetrievalIndexName);
+public record RAGSettingsSummary(string GenerateSearchQueryPluginName, string GenerateSearchQueryPluginQueryFunctionName, string DocumentRetrievalPluginName, string DocumentRetrievalPluginQueryFunctionName, string DocumentRetrievalIndexName, string ChatSystemMessageFile, string StorageContianer);

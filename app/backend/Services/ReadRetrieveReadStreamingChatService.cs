@@ -44,7 +44,7 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
 
         // Chat Step
         var chatGpt = kernel.Services.GetService<IChatCompletionService>();
-        var systemMessagePrompt = PromptService.GetPromptByName(PromptService.ChatSystemPrompt);
+        var systemMessagePrompt = PromptService.GetPromptByName(profile.RAGSettings.ChatSystemMessageFile);
         context[ContextVariableOptions.SystemMessagePrompt] = systemMessagePrompt;
 
         var chatHistory = new Microsoft.SemanticKernel.ChatCompletion.ChatHistory(systemMessagePrompt).AddChatHistory(request.History);

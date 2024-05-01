@@ -5,8 +5,8 @@ namespace MinimalApi.Services.Profile.Prompts;
 
 public static class PromptService
 {
-    public static string ChatSystemPrompt = "ChatSystemPrompt";
-    public static string ChatUserPrompt = "ChatUserPrompt";
+    public static string ChatSystemPrompt = "RAGChatSystemPrompt";
+    public static string ChatUserPrompt = "RAGChatUserPrompt";
     public static string RAGSearchSystemPrompt = "RAGSearchQuerySystemPrompt";
     public static string RAGSearchUserPrompt = "RAGSearchUserPrompt";
 

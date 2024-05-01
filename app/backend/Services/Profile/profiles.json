@@ -15,8 +15,8 @@
       "DocumentRetrievalPluginName": "DocumentRetrieval",
       "DocumentRetrievalPluginQueryFunctionName": "Query",
       "DocumentRetrievalIndexName": "manuals",
-      "ChatSystemMessage": "",
-      "StorageContianer" : "manuals"
+      "ChatSystemMessageFile": "RAGChatSystemPrompt",
+      "StorageContianer": "manuals"
     }
   },
   {
