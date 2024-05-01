@@ -88,7 +88,7 @@ public sealed partial class Answer
         Dialog.Show<PdfViewerDialog>($"📄 {citation.Name}",
             new DialogParameters
             {
-                [nameof(PdfViewerDialog.FileName)] = citation.Name.Replace(" ", "_"),
+                [nameof(PdfViewerDialog.FileName)] = citation.Name,
                 [nameof(PdfViewerDialog.BaseUrl)] = citation.BaseUrl,
             },
             new DialogOptions

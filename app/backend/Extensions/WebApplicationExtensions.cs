@@ -42,7 +42,7 @@ internal static class WebApplicationExtensions
     {
         try
         {
-            int underscoreIndex = fileName.IndexOf('_');  // Find the first underscore
+            int underscoreIndex = fileName.IndexOf('|');  // Find the first underscore
 
             if (underscoreIndex != -1)
             {

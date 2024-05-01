@@ -19,6 +19,6 @@ internal static class StringExtensions
 
     internal static string ToCitationUrlViaApi(this string fileName, string baseUrl)
     {
-        return $"/api/documents/{baseUrl}_{fileName}";
+        return $"/api/documents/{baseUrl}|{fileName}";
     }
 }
