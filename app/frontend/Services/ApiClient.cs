@@ -93,7 +93,7 @@ public sealed class ApiClient(HttpClient httpClient)
             }
         }
     }
-    public async IAsyncEnumerable<FeedbackResponse> GetFeedbackAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+    public async IAsyncEnumerable<ChatHistoryResponse> GetFeedbackAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var response = await httpClient.GetAsync("api/feedback", cancellationToken);
 
@@ -103,7 +103,7 @@ public sealed class ApiClient(HttpClient httpClient)
 
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
-            await foreach (var document in JsonSerializer.DeserializeAsyncEnumerable<FeedbackResponse>(stream, options, cancellationToken))
+            await foreach (var document in JsonSerializer.DeserializeAsyncEnumerable<ChatHistoryResponse>(stream, options, cancellationToken))
             {
                 if (document is null)
                 {

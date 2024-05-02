@@ -6,6 +6,7 @@ public sealed partial class History : IDisposable
 {
     private Task _getFeedbackTask = null!;
     private bool _isLoadingDocuments = false;
+    public bool _showFeeback { get; set; } = false;
 
     // Store a cancelation token that will be used to cancel if the user disposes of this component.
     private readonly CancellationTokenSource _cancellationTokenSource = new();
@@ -25,18 +26,40 @@ public sealed partial class History : IDisposable
         // and start it in the background. This way, we can await it in the UI.
         _getFeedbackTask = GetFeedbackAsync();
     }
+    private async Task OnChangeFeedbackFilerAsync()
+    {
+        if (_showFeeback == true)
+            _showFeeback = false;
+        else
+            _showFeeback = true;
+
+        await GetFeedbackAsync();
+    }
 
     private async Task GetFeedbackAsync()
     {
         _isLoadingDocuments = true;
+        _feedback.Clear();
 
         try
         {
-            var feedback = await Client.GetHistoryAsync(_cancellationTokenSource.Token).ToListAsync();
-            foreach (var item in feedback)
+            if (_showFeeback)
             {
-                _feedback.Add(item);
+                var feedback = await Client.GetFeedbackAsync(_cancellationTokenSource.Token).ToListAsync();
+                foreach (var item in feedback)
+                {
+                    _feedback.Add(item);
+                }
             }
+            else
+            {
+                var feedback = await Client.GetHistoryAsync(_cancellationTokenSource.Token).ToListAsync();
+                foreach (var item in feedback)
+                {
+                    _feedback.Add(item);
+                }
+            }
+
         }
         finally
         {

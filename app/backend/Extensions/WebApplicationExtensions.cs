@@ -176,14 +176,14 @@ internal static class WebApplicationExtensions
         return ragChatService;
     }
 
-    private static async Task<IEnumerable<FeedbackResponse>> OnGetHistoryAsync(HttpContext context, ChatHistoryService chatHistoryService)
+    private static async Task<IEnumerable<ChatHistoryResponse>> OnGetHistoryAsync(HttpContext context, ChatHistoryService chatHistoryService)
     {
         var user = GetUserInfo(context);
         var response = await chatHistoryService.GetMostRecentChatItemsAsync(user);
         return response.AsFeedbackResponse();
     }
 
-    private static async Task<IEnumerable<FeedbackResponse>> OnGetFeedbackAsync(HttpContext context, ChatHistoryService chatHistoryService)
+    private static async Task<IEnumerable<ChatHistoryResponse>> OnGetFeedbackAsync(HttpContext context, ChatHistoryService chatHistoryService)
     {
         var userInfo = GetUserInfo(context);
         var response = await chatHistoryService.GetMostRecentRatingsItemsAsync(userInfo);
