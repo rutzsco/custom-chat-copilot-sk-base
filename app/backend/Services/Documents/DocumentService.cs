@@ -24,13 +24,11 @@ public class DocumentService
         _cosmosContainer = db.Database.CreateContainerIfNotExistsAsync(DefaultSettings.CosmosDBUserDocumentsCollectionName, "/userId").GetAwaiter().GetResult();
     }
 
-    public async Task CreateDocumentUploadAsync(UserInformation user, string blobName, string fileName)
+    public async Task CreateDocumentUploadAsync(UserInformation user, string blobName, string fileName, string contentType = "application/pdf")
     {
-        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, blobName, fileName, "New");   
+        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, blobName, fileName, contentType, 0, DocumentProcessingStatus.New);   
         await _cosmosContainer.CreateItemAsync(document, partitionKey: new PartitionKey(document.UserId));
     }
-
-
 
 
     public async Task<List<DocumentUpload>> GetDocumentUploadsAsync(string userId)

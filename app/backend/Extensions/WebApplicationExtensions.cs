@@ -5,6 +5,7 @@ using System;
 using MinimalApi.Services.ChatHistory;
 using MinimalApi.Services.Profile;
 using MinimalApi.Services.Security;
+using Shared.Models;
 
 namespace MinimalApi.Extensions;
 
@@ -27,14 +28,14 @@ internal static class WebApplicationExtensions
         // Get recent feedback
         api.MapGet("feedback", OnGetFeedbackAsync);
 
-        // Upload a document
-        api.MapPost("documents", OnPostDocumentAsync);
-
         // Get source file
         api.MapGet("documents/{fileName}", OnGetSourceFileAsync);
 
         // Get enable logout
         api.MapGet("user", OnGetUser);
+
+        // User document
+        api.MapPost("documents", OnPostDocumentAsync);
         api.MapGet("user/documents", OnGetUserDocumentsAsync);
         return app;
     }
@@ -116,7 +117,7 @@ internal static class WebApplicationExtensions
     {
         var userInfo = GetUserInfo(context);
         var documents = await documentService.GetDocumentUploadsAsync(userInfo.UserId);
-        return TypedResults.Ok(documents.Select(d => new DocumentSummary(d.Id, d.SourceName, d.Timestamp)));
+        return TypedResults.Ok(documents.Select(d => new DocumentSummary(d.Id, d.SourceName, d.ContentType, d.Size, DocumentProcessingStatus.Succeeded, d.Timestamp)));
     }
     private static async Task<IResult> OnPostChatRatingAsync(HttpContext context, ChatRatingRequest request, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
     {

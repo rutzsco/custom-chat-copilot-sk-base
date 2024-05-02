@@ -14,7 +14,7 @@ public sealed partial class Docs : IDisposable
 
     // Store a cancelation token that will be used to cancel if the user disposes of this component.
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private readonly HashSet<DocumentResponse> _documents = [];
+    private readonly HashSet<DocumentSummary> _documents = [];
 
     [Inject]
     public required ApiClient Client { get; set; }
@@ -35,7 +35,7 @@ public sealed partial class Docs : IDisposable
         // and start it in the background. This way, we can await it in the UI.
         _getDocumentsTask = GetDocumentsAsync();
 
-    private bool OnFilter(DocumentResponse document) => document is not null
+    private bool OnFilter(DocumentSummary document) => document is not null
         && (string.IsNullOrWhiteSpace(_filter) || document.Name.Contains(_filter, StringComparison.OrdinalIgnoreCase));
 
     private async Task GetDocumentsAsync()
@@ -98,7 +98,7 @@ public sealed partial class Docs : IDisposable
         }
     }
 
-    private void OnShowDocumentAsync(DocumentResponse document)
+    private void OnShowDocumentAsync(DocumentSummary document)
     {
     }
 

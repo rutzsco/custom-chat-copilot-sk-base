@@ -71,18 +71,16 @@ public sealed class ApiClient(HttpClient httpClient)
         }
     }
 
-    public async IAsyncEnumerable<DocumentResponse> GetDocumentsAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+    public async IAsyncEnumerable<DocumentSummary> GetDocumentsAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var response = await httpClient.GetAsync("api/documents", cancellationToken);
-
+        var response = await httpClient.GetAsync("api/user/documents", cancellationToken);
         if (response.IsSuccessStatusCode)
         {
             var options = SerializerOptions.Default;
 
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
-            await foreach (var document in
-                JsonSerializer.DeserializeAsyncEnumerable<DocumentResponse>(stream, options, cancellationToken))
+            await foreach (var document in JsonSerializer.DeserializeAsyncEnumerable<DocumentSummary>(stream, options, cancellationToken))
             {
                 if (document is null)
                 {
@@ -93,6 +91,7 @@ public sealed class ApiClient(HttpClient httpClient)
             }
         }
     }
+
     public async IAsyncEnumerable<ChatHistoryResponse> GetFeedbackAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var response = await httpClient.GetAsync("api/feedback", cancellationToken);

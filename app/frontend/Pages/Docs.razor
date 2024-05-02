@@ -121,23 +121,23 @@
                     Preview
                 </MudTh>
                 <MudTh Style="text-align:center">
-                    <MudTableSortLabel SortBy="new Func<DocumentResponse, object>(d => d.Status)">
+                    <MudTableSortLabel SortBy="new Func<DocumentSummary, object>(d => d.Status)">
                         Status
                     </MudTableSortLabel>
                 </MudTh>
                 <MudTh>
-                    <MudTableSortLabel SortBy="new Func<DocumentResponse, object>(d => d.Name)">
+                    <MudTableSortLabel SortBy="new Func<DocumentSummary, object>(d => d.Name)">
                         Name
                     </MudTableSortLabel>
                 </MudTh>
                 <MudTh>Content Type</MudTh>
                 <MudTh>
-                    <MudTableSortLabel SortBy="new Func<DocumentResponse, object>(d => d.Size)">
+                    <MudTableSortLabel SortBy="new Func<DocumentSummary, object>(d => d.Size)">
                         Size
                     </MudTableSortLabel>
                 </MudTh>
                 <MudTh>
-                    <MudTableSortLabel SortBy="new Func<DocumentResponse, object>(d => d.LastModified.GetValueOrDefault())">
+                    <MudTableSortLabel SortBy="new Func<DocumentSummary, object>(d => d.Timestamp)">
                         Last Modified
                     </MudTableSortLabel>
                 </MudTh>
@@ -175,7 +175,7 @@
                     </MudChip>
                 </MudTd>
                 <MudTd DataLabel="Last Modified">
-                    @($"{context.LastModified.GetValueOrDefault():G}")
+                    @($"{context.Timestamp:G}")
                 </MudTd>
             </RowTemplate>
             <PagerContent>

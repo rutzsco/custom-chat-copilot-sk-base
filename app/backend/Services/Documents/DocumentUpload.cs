@@ -6,13 +6,15 @@ namespace MinimalApi.Services.Documents;
 
 public class DocumentUpload
 {
-    public DocumentUpload(string id, string userId, string blobName, string sourceName, string status)
+    public DocumentUpload(string id, string userId, string blobName, string sourceName, string contentType, long size, DocumentProcessingStatus status)
     {
         Timestamp = DateTimeOffset.Now;
         Id = id;
         UserId = userId;
         BlobName = blobName;
         SourceName = sourceName;
+        ContentType = contentType;
+        Size = size;
         Status = status;
     }
 
@@ -29,8 +31,14 @@ public class DocumentUpload
     [JsonProperty("sourceName")]
     public string SourceName { get; set; }
 
+    [JsonProperty("contentType")]
+    public string ContentType { get; set; }
+
+    [JsonProperty("size")]
+    public long Size { get; set; }
+
     [JsonProperty("status")]
-    public string Status { get; set; }
+    public DocumentProcessingStatus Status { get; set; }
 
     [JsonProperty("timestamp")]
     public DateTimeOffset Timestamp { get; set; }
