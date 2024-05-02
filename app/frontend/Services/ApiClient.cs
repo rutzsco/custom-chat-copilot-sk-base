@@ -21,6 +21,14 @@ public sealed class ApiClient(HttpClient httpClient)
         return await response.Content.ReadFromJsonAsync<UserInformation>();
     }
 
+    public async Task<List<DocumentSummary>> GetUserDocumentsAsync()
+    {
+        var response = await httpClient.GetAsync("api/user/documents");
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<List<DocumentSummary>>();
+    }
+
     public async Task<UploadDocumentsResponse> UploadDocumentsAsync(
         IReadOnlyList<IBrowserFile> files,
         long maxAllowedSize,

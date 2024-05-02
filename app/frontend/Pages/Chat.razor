@@ -69,11 +69,14 @@
                  <MudItem xs="12" lg="12">
   
     
-
+                     <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
                     @if (_profiles.Count() > 1)
                     {
-                        <MudMenu Class="" Label="@_selectedProfile" Variant="Variant.Outlined" Color="Color.Primary" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" FullWidth="true">
-                            <ChildContent>
+                        <MudMenu Class=""  Label="@_selectedProfile" Variant="Variant.Outlined" Color="Color.Primary" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" FullWidth="true">
+                                <ActivatorContent>
+                                    <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Category" EndIcon="@Icons.Material.Filled.KeyboardArrowDown">@_selectedProfile</MudButton>
+                                </ActivatorContent>
+                                <ChildContent>
                                 @foreach (var profile in _profiles)
                                 {
                                     <MudMenuItem OnClick="@(e => OnProfileClick(@profile.Name))">@profile.Name</MudMenuItem>
@@ -82,6 +85,24 @@
                         </MudMenu>
                     }
                     @if (AppConfiguration.ShowFileUploadSelection)
+                    {
+                        <MudMenu>
+                            <ActivatorContent>
+                                <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.AttachFile">@_selectedDocument</MudButton>
+                            </ActivatorContent>
+                            <ChildContent>
+                                <MudMenuItem Color="Color.Primary">Upload File</MudMenuItem>
+                                @foreach (var document in _userDocuments)
+                                {
+                                    <MudMenuItem OnClick="@(e => OnDocumentClick(@document.Name))" Color="Color.Primary">@document.Name</MudMenuItem>
+                                }
+                            </ChildContent>
+                        </MudMenu>
+
+                    }
+                    </MudButtonGroup>
+       
+                    @* @if (AppConfiguration.ShowFileUploadSelection)
                     { 
                         <MudIconButton Icon="@Icons.Material.Filled.AttachFile" Variant="Variant.Outlined" Color="Color.Primary" OnClick="ToggleFileUpload" />
                         @if (_showFileUpload)
@@ -161,8 +182,8 @@
                                 </MudCardActions>
                             </MudForm>
                         }
-                    }
-                </MudItem>
+                    }*@
+                </MudItem> 
                 <MudItem xs="12" lg="10">
                     <TextInput @bind-Value="_userQuestion" Label="Prompt"
                                     Icon="@Icons.Material.Filled.QuestionAnswer"

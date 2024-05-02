@@ -10,3 +10,5 @@ public record class DocumentResponse(
     Uri Url,
     DocumentProcessingStatus Status,
     EmbeddingType EmbeddingType);
+
+public record class DocumentSummary(string Id, string Name, DateTimeOffset Timestamp);

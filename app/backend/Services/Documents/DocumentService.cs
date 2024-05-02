@@ -26,31 +26,20 @@ public class DocumentService
 
     public async Task CreateDocumentUploadAsync(UserInformation user, string blobName, string fileName)
     {
-        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, string.Empty, fileName, "New");   
-        await _cosmosContainer.CreateItemAsync(document, partitionKey: new PartitionKey(document.User));
-    }
-
-    public async Task RecordRatingAsync(UserInformation user, ChatRatingRequest chatRatingRequest)
-    {
-        var chatRatingId = chatRatingRequest.MessageId.ToString();
-        var partitionKey = new PartitionKey(chatRatingRequest.ChatId.ToString());
-        var response = await _cosmosContainer.ReadItemAsync<ChatMessageRecord>(chatRatingId,partitionKey);
-        var existingChatRating = response.Resource;
-
-        var rating = new ChatRating(chatRatingRequest.Feedback, chatRatingRequest.Rating);
-        existingChatRating.Rating = rating;
-        await _cosmosContainer.UpsertItemAsync(existingChatRating, partitionKey: partitionKey);
+        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, blobName, fileName, "New");   
+        await _cosmosContainer.CreateItemAsync(document, partitionKey: new PartitionKey(document.UserId));
     }
 
 
-    public async Task<List<ChatMessageRecord>> GetMostRecentRatingsItemsAsync(UserInformation user)
+
+
+    public async Task<List<DocumentUpload>> GetDocumentUploadsAsync(string userId)
     {
+        var query = _cosmosContainer.GetItemQueryIterator<DocumentUpload>(
+            new QueryDefinition("SELECT TOP 100 * FROM c WHERE  c.userId = @username ORDER BY c.sourceName DESC")
+            .WithParameter("@username", userId));
 
-        var query = _cosmosContainer.GetItemQueryIterator<ChatMessageRecord>(
-            new QueryDefinition("SELECT TOP 100 * FROM c WHERE c.rating != null AND c.userId = @username ORDER BY c.rating.timestamp DESC")
-            .WithParameter("@username", user.UserId));
-
-        var results = new List<ChatMessageRecord>();
+        var results = new List<DocumentUpload>();
         while (query.HasMoreResults)
         {
             var response = await query.ReadNextAsync();

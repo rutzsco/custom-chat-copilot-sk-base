@@ -26,6 +26,9 @@ public sealed partial class Chat
     private List<ProfileSummary> _profiles = new();
     private ProfileSummary? _selectedProfileSummary = null;
 
+    private List<DocumentSummary> _userDocuments = new();
+    private string _selectedDocument = "";
+
     private readonly Dictionary<UserQuestion, ApproachResponse?> _questionAndAnswerMap = [];
 
     private bool _gPT4ON = false;
@@ -51,12 +54,21 @@ public sealed partial class Chat
         _profiles = user.Profiles.ToList();
         _selectedProfile = _profiles.First().Name;
         _selectedProfileSummary = _profiles.First();
+
+        var userDocuments = await ApiClient.GetUserDocumentsAsync();
+        _userDocuments = userDocuments.ToList();
     }
 
     private void OnProfileClick(string selection)
     {
         _selectedProfile = selection;
         _selectedProfileSummary = _profiles.FirstOrDefault(x => x.Name == selection);
+        OnClearChat();
+    }
+
+    private void OnDocumentClick(string selection)
+    {
+        _selectedDocument = selection;
         OnClearChat();
     }
 

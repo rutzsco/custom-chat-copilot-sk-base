@@ -35,7 +35,7 @@ internal static class WebApplicationExtensions
 
         // Get enable logout
         api.MapGet("user", OnGetUser);
-
+        api.MapGet("user/documents", OnGetUserDocumentsAsync);
         return app;
     }
     private static async Task<IResult> OnGetSourceFileAsync(HttpContext context, string fileName, BlobServiceClient blobServiceClient, IConfiguration configuration)
@@ -106,13 +106,18 @@ internal static class WebApplicationExtensions
 
         return TypedResults.Ok(response);
     }
-
+    
     private static IResult OnGetUser(HttpContext context)
     {
         var userInfo = GetUserInfo(context);
         return TypedResults.Ok(userInfo);
     }
-
+    private static async Task<IResult> OnGetUserDocumentsAsync(HttpContext context, DocumentService documentService)
+    {
+        var userInfo = GetUserInfo(context);
+        var documents = await documentService.GetDocumentUploadsAsync(userInfo.UserId);
+        return TypedResults.Ok(documents.Select(d => new DocumentSummary(d.Id, d.SourceName, d.Timestamp)));
+    }
     private static async Task<IResult> OnPostChatRatingAsync(HttpContext context, ChatRatingRequest request, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
     {
         var userInfo = GetUserInfo(context);
