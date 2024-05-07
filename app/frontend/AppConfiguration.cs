@@ -46,4 +46,9 @@ public static class AppConfiguration
     public static bool ShowFileUploadSelection { get; set; } = false;
 
     public static string DisclaimerMessage { get; set; } = string.Empty;
+
+    public static string GetAppBarBackgroundBar()
+    {
+        return $"background-color: {ColorPaletteLightAppbarBackground};";
+    }
 }
