@@ -138,7 +138,7 @@ internal static class WebApplicationExtensions
 
         if (request is { History.Length: > 0 })
         {
-            var response = await chatService.ReplyAsync(profile, request, cancellationToken);
+            var response = await chatService.ReplyAsync(userInfo, profile, request, cancellationToken);
             await chatHistoryService.RecordChatMessageAsync(userInfo, request, response);
             return TypedResults.Ok(response);
         }
@@ -157,7 +157,7 @@ internal static class WebApplicationExtensions
         }
 
         var chat = ResolveChatService(request, chatService, ragChatService);
-        var resultChunks = chat.ReplyAsync(request.OptionFlags.GetChatProfile(),request);
+        var resultChunks = chat.ReplyAsync(userInfo, request.OptionFlags.GetChatProfile(),request);
         await foreach (var chunk in resultChunks)
         {
             yield return chunk;
@@ -208,7 +208,7 @@ internal static class WebApplicationExtensions
         
         var enableLogout = !string.IsNullOrEmpty(id);
 
-        var profiles = ProfileDefinition.All.GetAuthorizedProfiles(userGroups).Select(x => new ProfileSummary(x.Name, string.Empty, x.SampleQuestions));
+        var profiles = ProfileDefinition.All.GetAuthorizedProfiles(userGroups).Select(x => new ProfileSummary(x.Name, string.Empty, (ProfileApproach)Enum.Parse(typeof(ProfileApproach), x.Approach, true), x.SampleQuestions));
         var user = new UserInformation(enableLogout, name, id, profiles, userGroups);
 
         return user;

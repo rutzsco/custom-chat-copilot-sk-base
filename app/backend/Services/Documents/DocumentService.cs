@@ -21,12 +21,16 @@ public class DocumentService
     public DocumentService(CosmosClient cosmosClient, HttpClient httpClient, IConfiguration configuration)
     {
         _cosmosClient = cosmosClient;
-        _httpClient = httpClient;
 
-        _httpClient.BaseAddress = new Uri(configuration["IngestionPipelineAPI"]);
-        _httpClient.DefaultRequestHeaders.Add("x-functions-key", configuration["IngestionPipelineAPIKey"]);
-        _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-        _configuration = configuration;
+        if (configuration["IngestionPipelineAPI"] != null)
+        {
+            _httpClient = httpClient;
+
+            _httpClient.BaseAddress = new Uri(configuration["IngestionPipelineAPI"]);
+            _httpClient.DefaultRequestHeaders.Add("x-functions-key", configuration["IngestionPipelineAPIKey"]);
+            _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+            _configuration = configuration;
+        }
 
         // Create database if it doesn't exist
         var db = _cosmosClient.CreateDatabaseIfNotExistsAsync(DefaultSettings.CosmosDBDatabaseName).GetAwaiter().GetResult();

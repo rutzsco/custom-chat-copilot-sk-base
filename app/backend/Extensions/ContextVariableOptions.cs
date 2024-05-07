@@ -17,4 +17,5 @@ public class ContextVariableOptions
     public static string UserMessage = "UserMessage";
 
     public static string Profile = "Profile";
+    public static string UserId = "UserId";
 }

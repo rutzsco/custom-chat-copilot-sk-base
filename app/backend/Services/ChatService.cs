@@ -25,7 +25,7 @@ internal sealed class ChatService : IChatService
     }
 
 
-    public async IAsyncEnumerable<ChatChunkResponse> ReplyAsync(ProfileDefinition profile, ChatRequest request, CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<ChatChunkResponse> ReplyAsync(UserInformation user, ProfileDefinition profile, ChatRequest request, CancellationToken cancellationToken = default)
     {
 
         var sw = Stopwatch.StartNew();
@@ -34,7 +34,7 @@ internal sealed class ChatService : IChatService
 
         var generateSearchQueryFunction = kernel.Plugins.GetFunction(DefaultSettings.GenerateSearchQueryPluginName, DefaultSettings.GenerateSearchQueryPluginQueryFunctionName);
 
-        var context = new KernelArguments().AddUserParameters(request.History, profile);
+        var context = new KernelArguments().AddUserParameters(request.History, profile, user);
 
         // Search Query
         await kernel.InvokeAsync(generateSearchQueryFunction, context);

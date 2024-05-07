@@ -7,4 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Shared.Models;
-public record ProfileSummary(string Name, string Description, List<string> SampleQuestions);
+public record ProfileSummary(string Name, string Description, ProfileApproach Approach, List<string> SampleQuestions);
+
+public enum ProfileApproach
+{
+    Chat,
+    UserDocumentChat,
+    RAG,
+};

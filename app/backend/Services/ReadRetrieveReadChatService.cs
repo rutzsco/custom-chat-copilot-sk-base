@@ -21,7 +21,7 @@ internal sealed class ReadRetrieveReadChatService
         _configuration = configuration;
     }
 
-    public async Task<ApproachResponse> ReplyAsync(ProfileDefinition profile, ChatRequest request, CancellationToken cancellationToken = default)
+    public async Task<ApproachResponse> ReplyAsync(UserInformation user, ProfileDefinition profile, ChatRequest request, CancellationToken cancellationToken = default)
     {   
         try
         {
@@ -33,7 +33,7 @@ internal sealed class ReadRetrieveReadChatService
             var documentLookupFunction = kernel.Plugins.GetFunction(profile.RAGSettings.DocumentRetrievalPluginName, profile.RAGSettings.DocumentRetrievalPluginQueryFunctionName);
             var chatFunction = kernel.Plugins.GetFunction(DefaultSettings.ChatPluginName, DefaultSettings.ChatPluginFunctionName);
 
-            var context = new KernelArguments().AddUserParameters(request.History, profile);
+            var context = new KernelArguments().AddUserParameters(request.History, profile, user);
 
             await kernel.InvokeAsync(generateSearchQueryFunction, context);
             await kernel.InvokeAsync(documentLookupFunction, context);

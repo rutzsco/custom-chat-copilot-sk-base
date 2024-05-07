@@ -13,7 +13,7 @@ builder.Services.AddOutputCache();
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddCrossOriginResourceSharing();
-builder.Services.AddAzureServices();
+builder.Services.AddAzureServices(builder.Configuration);
 
 AppConfiguration.Load(builder.Configuration);
 
