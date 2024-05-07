@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Data;
 using ClientApp.Models;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using Microsoft.Extensions.Logging;
@@ -54,6 +55,8 @@ public sealed partial class Chat
         _profiles = user.Profiles.ToList();
         _selectedProfile = _profiles.First().Name;
         _selectedProfileSummary = _profiles.First();
+
+        StateHasChanged();
 
         var userDocuments = await ApiClient.GetUserDocumentsAsync();
         _userDocuments = userDocuments.ToList();
