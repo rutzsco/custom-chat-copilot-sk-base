@@ -1,8 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Net.Http;
+using Azure;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Identity.Client;
 using MinimalApi.Services.Documents;
+using Newtonsoft.Json;
+using Shared.Json;
 using Shared.Models;
 
 namespace MinimalApi.Services.ChatHistory;
@@ -12,10 +16,17 @@ public class DocumentService
 {
     private readonly CosmosClient _cosmosClient;
     private readonly Container _cosmosContainer;
-
-    public DocumentService(CosmosClient cosmosClient)
+    private readonly HttpClient _httpClient;
+    private readonly IConfiguration _configuration;
+    public DocumentService(CosmosClient cosmosClient, HttpClient httpClient, IConfiguration configuration)
     {
         _cosmosClient = cosmosClient;
+        _httpClient = httpClient;
+
+        _httpClient.BaseAddress = new Uri(configuration["IngestionPipelineAPI"]);
+        _httpClient.DefaultRequestHeaders.Add("x-functions-key", configuration["IngestionPipelineAPIKey"]);
+        _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+        _configuration = configuration;
 
         // Create database if it doesn't exist
         var db = _cosmosClient.CreateDatabaseIfNotExistsAsync(DefaultSettings.CosmosDBDatabaseName).GetAwaiter().GetResult();
@@ -28,6 +39,27 @@ public class DocumentService
     {
         var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, blobName, fileName, contentType, 0, DocumentProcessingStatus.New);   
         await _cosmosContainer.CreateItemAsync(document, partitionKey: new PartitionKey(document.UserId));
+
+        var response = await _httpClient.GetAsync("api/get_active_index");
+        var content = response.Content.ReadAsStringAsync().Result; 
+        var indexData = JsonConvert.DeserializeObject<GetIndexResponse>(content);
+
+
+        var request = new ProcessingData()
+        {
+            SourceContainer = "source",
+            ExtractContainer = "extract",
+            PrefixPath = "prefix",
+            EntraId = user.UserName,
+            SessionId = "session",
+            IndexName = indexData.IndexStemName,
+            CosmosRecordId = document.Id,
+            AutomaticallyDelete = true
+        };
+
+        var json = System.Text.Json.JsonSerializer.Serialize(request, SerializerOptions.Default);
+        using var body = new StringContent(json, Encoding.UTF8, "application/json");
+        var triggerResponse = await _httpClient.PostAsync("/api/orchestrators/pdf_orchestration", body);
     }
 
 

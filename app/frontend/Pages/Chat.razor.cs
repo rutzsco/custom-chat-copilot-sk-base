@@ -58,8 +58,11 @@ public sealed partial class Chat
 
         StateHasChanged();
 
-        var userDocuments = await ApiClient.GetUserDocumentsAsync();
-        _userDocuments = userDocuments.ToList();
+        if (AppConfiguration.ShowFileUploadSelection)
+        {
+            var userDocuments = await ApiClient.GetUserDocumentsAsync();
+            _userDocuments = userDocuments.ToList();
+        }
     }
 
     private void OnProfileClick(string selection)
@@ -72,7 +75,7 @@ public sealed partial class Chat
     private void OnDocumentClick(string selection)
     {
         _selectedDocument = selection;
-        OnClearChat();
+        OnClearChatDocuumentSelection();
     }
 
     private Task OnAskQuestionAsync(string question)
@@ -157,12 +160,20 @@ public sealed partial class Chat
     {
         await JS.InvokeVoidAsync("scrollToBottom", "answerSection");
     }
+    private void OnClearChatDocuumentSelection()
+    {
+        _userQuestion = _lastReferenceQuestion = "";
+        _currentQuestion = default;
+        _questionAndAnswerMap.Clear();
+        _chatId = Guid.NewGuid();
+    }
 
     private void OnClearChat()
     {
         _userQuestion = _lastReferenceQuestion = "";
         _currentQuestion = default;
         _questionAndAnswerMap.Clear();
+        _selectedDocument = "";
         _chatId = Guid.NewGuid();
     }
     private void ToggleFileUpload()

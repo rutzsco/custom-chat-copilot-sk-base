@@ -17,6 +17,7 @@ internal static class ServiceCollectionExtensions
 
     internal static IServiceCollection AddAzureServices(this IServiceCollection services)
     {
+        services.AddHttpClient<DocumentService, DocumentService>();
         services.AddSingleton<BlobServiceClient>(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
