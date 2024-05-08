@@ -22,12 +22,11 @@ AppConfiguration.Load(builder.Configuration);
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddDistributedMemoryCache();
-    builder.Services.AddAntiforgery(options => { options.HeaderName = "X-CSRF-TOKEN-HEADER"; options.FormFieldName = "X-CSRF-TOKEN-FORM"; });
 }
 else
 {
     static string? GetEnvVar(string key) => Environment.GetEnvironmentVariable(key);
-
+    builder.Services.AddAntiforgery(options => { options.HeaderName = "X-CSRF-TOKEN-HEADER"; options.FormFieldName = "X-CSRF-TOKEN-FORM"; });
     // set application telemetry
     if (GetEnvVar("APPLICATIONINSIGHTS_CONNECTION_STRING") is string appInsightsConnectionString && !string.IsNullOrEmpty(appInsightsConnectionString))
     {
