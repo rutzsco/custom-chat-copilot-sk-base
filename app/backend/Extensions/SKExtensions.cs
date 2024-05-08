@@ -72,6 +72,11 @@ namespace MinimalApi.Extensions
             var value = options.GetValueOrDefault("PROFILE", defaultProfile.Name);
             return ProfileDefinition.All.FirstOrDefault(x => x.Name == value) ?? defaultProfile;
         }
+        public static string GetSelectedDocument(this Dictionary<string, string> options)
+        {
+            var value = options.GetValueOrDefault("SELECTEDDOCUMENT", null);
+            return value;
+        }
 
         public static ApproachResponse BuildResoponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
         {

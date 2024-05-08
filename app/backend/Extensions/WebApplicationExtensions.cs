@@ -146,7 +146,7 @@ internal static class WebApplicationExtensions
         return Results.BadRequest();
     }
 
-    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, ChatHistoryService chatHistoryService, [EnumeratorCancellation] CancellationToken cancellationToken)
+    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, ChatHistoryService chatHistoryService, DocumentService documentService, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         // Get user information
         var userInfo = GetUserInfo(context);
@@ -156,8 +156,16 @@ internal static class WebApplicationExtensions
             throw new UnauthorizedAccessException("User does not have access to this profile");
         }
 
+        if (profile.Approach == ProfileApproach.UserDocumentChat.ToString())
+        {
+            var selectedDocument = request.OptionFlags.GetSelectedDocument();
+            var documents = await documentService.GetDocumentUploadsAsync(userInfo.UserId);
+            var document = documents.FirstOrDefault(d => d.SourceName == selectedDocument);
+            profile.RAGSettings.DocumentRetrievalIndexName = document.RetrivalIndexName;
+        }
+
         var chat = ResolveChatService(request, chatService, ragChatService);
-        var resultChunks = chat.ReplyAsync(userInfo, request.OptionFlags.GetChatProfile(),request);
+        var resultChunks = chat.ReplyAsync(userInfo, profile, request);
         await foreach (var chunk in resultChunks)
         {
             yield return chunk;

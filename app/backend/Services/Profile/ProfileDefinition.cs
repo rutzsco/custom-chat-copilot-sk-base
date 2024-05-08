@@ -50,10 +50,10 @@ public class ProfileDefinition
         SampleQuestions = sampleQuestions;
         RAGSettings = ragSettingsSummary;
 
-        if(securityModelGroupMembership == null)
+        if (securityModelGroupMembership == null)
             SecurityModelGroupMembership = new List<string>();
         else
-           SecurityModelGroupMembership = securityModelGroupMembership;
+            SecurityModelGroupMembership = securityModelGroupMembership;
     }
 
     public string Name { get; set; }
@@ -66,8 +66,16 @@ public class ProfileDefinition
     public RAGSettingsSummary? RAGSettings { get; set; }
 
     public List<string> SampleQuestions { get; set; }
-
 }
 
 
-public record RAGSettingsSummary(string GenerateSearchQueryPluginName, string GenerateSearchQueryPluginQueryFunctionName, string DocumentRetrievalPluginName, string DocumentRetrievalPluginQueryFunctionName, string DocumentRetrievalIndexName, string ChatSystemMessageFile, string StorageContianer);
+public class RAGSettingsSummary
+{
+    public string GenerateSearchQueryPluginName { get; set; }
+    public string GenerateSearchQueryPluginQueryFunctionName { get; set; }
+    public string DocumentRetrievalPluginName { get; set; }
+    public string DocumentRetrievalPluginQueryFunctionName { get; set; }
+    public string DocumentRetrievalIndexName { get; set; }
+    public string ChatSystemMessageFile { get; set; }
+    public string StorageContianer { get; set; }
+}

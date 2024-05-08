@@ -50,7 +50,7 @@ public class DocumentService
 
         var indexName = await response.Content.ReadAsStringAsync();
 
-        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, blobName, fileName, contentType, 0, indexName, DocumentProcessingStatus.New);   
+        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, blobName, fileName, contentType, 0, indexName, "session", DocumentProcessingStatus.New);   
         await _cosmosContainer.CreateItemAsync(document, partitionKey: new PartitionKey(document.UserId));
 
         var request = new ProcessingData()

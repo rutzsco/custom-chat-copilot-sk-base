@@ -41,7 +41,7 @@
       "GenerateSearchQueryPluginName": "GenerateSearchQuery",
       "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
       "DocumentRetrievalPluginName": "DocumentRetrieval",
-      "DocumentRetrievalPluginQueryFunctionName": "QueryV3",
+      "DocumentRetrievalPluginQueryFunctionName": "QueryV4",
       "DocumentRetrievalIndexName": "rag-index-20240508144216",
       "ChatSystemMessageFile": "RAGChatSystemPrompt",
       "StorageContianer": "content"
