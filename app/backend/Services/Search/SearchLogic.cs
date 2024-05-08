@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Azure.AI.OpenAI;
 using Azure.Search.Documents;
@@ -30,8 +31,7 @@ public class SearchLogic<T> where T : IKnowledgeSource
     {
         // Generate the embedding for the query  
         var queryEmbeddings = await GenerateEmbeddingsAsync(query, _openAIClient);
-        var userId = arguments[ContextVariableOptions.UserId] as string;
-        var sessionId = arguments[ContextVariableOptions.SessionId] as string;
+
 
         // Configure the search options
         var searchOptions = new SearchOptions
@@ -48,8 +48,14 @@ public class SearchLogic<T> where T : IKnowledgeSource
             searchOptions.Select.Add(field);
         }
 
-        searchOptions.Filter = $"entra_id eq '{userId}' and session_id eq '{sessionId}'";
-
+        var selectedDocument = arguments[ContextVariableOptions.SelectedDocument] as string;
+        if (selectedDocument != null)
+        {
+            var userId = arguments[ContextVariableOptions.UserId] as string;
+            var sessionId = arguments[ContextVariableOptions.SessionId] as string;
+            var sourcefile = arguments[ContextVariableOptions.SelectedDocument] as string;
+            searchOptions.Filter = $"entra_id eq '{userId}' and session_id eq '{sessionId}' and sourcefile eq '{sourcefile}'";
+        }
 
         // Perform the search and build the results
         var response = await _searchClient.SearchAsync<T>(query, searchOptions);

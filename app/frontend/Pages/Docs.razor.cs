@@ -59,7 +59,10 @@ public sealed partial class Docs : IDisposable
             StateHasChanged();
         }
     }
-
+    private async Task RefreshAsync()
+    {
+        await GetDocumentsAsync();
+    }
     private async Task SubmitFilesForUploadAsync()
     {
         if (_fileUpload is { Files.Count: > 0 })

@@ -109,12 +109,15 @@
                     <MudText Typo="Typo.h5">
                         Existing Documents
                     </MudText>
+
+                    <MudIconButton Icon="@Icons.Material.Filled.Refresh"  OnClick="RefreshAsync" Class="ml-2" />
                 }
                 <MudSpacer />
                 <MudTextField @bind-Value="@_filter" Placeholder="Filter" Adornment="Adornment.Start"
                               AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"
                               DebounceInterval="500" Class="mt-0">
                 </MudTextField>
+                
             </ToolBarContent>
             <HeaderContent>
                 <MudTh Style="text-align:center">
@@ -147,7 +150,10 @@
                         case DocumentProcessingStatus.Failed:
                             <MudIcon Color="Color.Error" Icon="@Icons.Material.Filled.Close" />
                             break;
-                        case DocumentProcessingStatus.Succeeded:
+                        case DocumentProcessingStatus.Processing:
+                                <MudIcon Color="Color.Warning" Icon="@Icons.Material.Filled.Bolt" />
+                           break;
+                       case DocumentProcessingStatus.Succeeded:
                             <MudIcon Color="Color.Success" Icon="@Icons.Material.Filled.Check" />
                             break;
                         default:
