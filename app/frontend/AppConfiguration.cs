@@ -19,19 +19,11 @@ public static class AppConfiguration
         ShowSampleQuestions = config.GetValue<bool>("ShowSampleQuestions", true);
         ShowPremiumAOAIToggleSelection = config.GetValue<bool>("ShowPremiumAOAIToggleSelection", true);
 
-        ExampleQuestion1 = config.GetValue<string>("ExampleQuestion1", "Q1?");
-        ExampleQuestion2 = config.GetValue<string>("ExampleQuestion2", "Q2?");
-        ExampleQuestion3 = config.GetValue<string>("ExampleQuestion3", "Q3?");
-
-
-        ShowFileUploadSelection = config.GetValue<bool>("ShowFileUploadSelection", false);
+        ShowFileUploadSelection = config.GetValue<bool>("ShowFileUploadSelection", true);
 
         DisclaimerMessage = config.GetValue<string>("DisclaimerMessage", "DISCMLAIMER MESSAGE?");
     }
 
-    public static string ExampleQuestion1 { get; set; } = "Q1?";
-    public static string ExampleQuestion2 { get; set; } = "Q2?";
-    public static string ExampleQuestion3 { get; set; } = "Q3?";
     public static string ColorPaletteLightPrimary { get; set; } = "#005eb8";
     public static string ColorPaletteLightSecondary { get; set; } = "#287FA4";
     public static string ColorPaletteLightAppbarBackground { get; set; } = "#84B1CB";
