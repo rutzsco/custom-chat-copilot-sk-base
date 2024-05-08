@@ -118,9 +118,6 @@
             </ToolBarContent>
             <HeaderContent>
                 <MudTh Style="text-align:center">
-                    Preview
-                </MudTh>
-                <MudTh Style="text-align:center">
                     <MudTableSortLabel SortBy="new Func<DocumentSummary, object>(d => d.Status)">
                         Status
                     </MudTableSortLabel>
@@ -143,10 +140,6 @@
                 </MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="Preview" Style="text-align:center">
-                    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Pageview"
-                            Size="Size.Small" OnClick="@(() => OnShowDocumentAsync(context))" />
-                </MudTd>
                 <MudTd DataLabel="Status" Style="text-align:center">
                 @{
                     switch (context.Status)

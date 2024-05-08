@@ -10,11 +10,6 @@ public class GetIndexRequest
     public string index_stem_name { get; set; }
 }
 
-//public class GetIndexRequest
-//{
-//    public string IndexStemName { get; set; }
-//}
-
 public class ProcessingData
 {
     [JsonProperty("source_container")]

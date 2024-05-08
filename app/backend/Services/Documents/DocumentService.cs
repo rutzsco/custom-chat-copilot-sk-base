@@ -72,11 +72,11 @@ public class DocumentService
     }
 
 
-    public async Task<List<DocumentUpload>> GetDocumentUploadsAsync(string userId)
+    public async Task<List<DocumentUpload>> GetDocumentUploadsAsync(UserInformation user)
     {
         var query = _cosmosContainer.GetItemQueryIterator<DocumentUpload>(
             new QueryDefinition("SELECT TOP 100 * FROM c WHERE  c.userId = @username ORDER BY c.sourceName DESC")
-            .WithParameter("@username", userId));
+            .WithParameter("@username", user.UserId));
 
         var results = new List<DocumentUpload>();
         while (query.HasMoreResults)

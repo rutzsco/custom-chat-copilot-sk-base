@@ -91,10 +91,13 @@
                                     <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.AttachFile" EndIcon="@Icons.Material.Filled.KeyboardArrowDown">@_selectedDocument</MudButton>
                             </ActivatorContent>
                             <ChildContent>
-                                <MudMenuItem Color="Color.Primary">Upload File</MudMenuItem>
+                                <MudMenuItem Color="Color.Primary" Href="/documents">Upload File</MudMenuItem>
                                 @foreach (var document in _userDocuments)
-                                {
-                                    <MudMenuItem OnClick="@(e => OnDocumentClick(@document.Name))" Color="Color.Primary">@document.Name</MudMenuItem>
+                                    {
+                                        if (document.Status == DocumentProcessingStatus.Succeeded)
+                                        {
+                                            <MudMenuItem OnClick="@(e => OnDocumentClick(@document.Name))" Color="Color.Primary">@document.Name</MudMenuItem>
+                                        }
                                 }
                             </ChildContent>
                         </MudMenu>

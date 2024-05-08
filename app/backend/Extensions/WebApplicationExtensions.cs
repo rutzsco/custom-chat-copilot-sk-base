@@ -116,8 +116,8 @@ internal static class WebApplicationExtensions
     private static async Task<IResult> OnGetUserDocumentsAsync(HttpContext context, DocumentService documentService)
     {
         var userInfo = GetUserInfo(context);
-        var documents = await documentService.GetDocumentUploadsAsync(userInfo.UserId);
-        return TypedResults.Ok(documents.Select(d => new DocumentSummary(d.Id, d.SourceName, d.ContentType, d.Size, DocumentProcessingStatus.Succeeded, d.Timestamp)));
+        var documents = await documentService.GetDocumentUploadsAsync(userInfo);
+        return TypedResults.Ok(documents.Select(d => new DocumentSummary(d.Id, d.SourceName, d.ContentType, d.Size, d.Status, d.Timestamp)));
     }
     private static async Task<IResult> OnPostChatRatingAsync(HttpContext context, ChatRatingRequest request, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
     {
@@ -159,7 +159,7 @@ internal static class WebApplicationExtensions
         if (profile.Approach == ProfileApproach.UserDocumentChat.ToString())
         {
             var selectedDocument = request.OptionFlags.GetSelectedDocument();
-            var documents = await documentService.GetDocumentUploadsAsync(userInfo.UserId);
+            var documents = await documentService.GetDocumentUploadsAsync(userInfo);
             var document = documents.FirstOrDefault(d => d.SourceName == selectedDocument);
             profile.RAGSettings.DocumentRetrievalIndexName = document.RetrivalIndexName;
         }
