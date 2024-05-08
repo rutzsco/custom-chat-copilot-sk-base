@@ -41,29 +41,34 @@ public class DocumentService
 
     public async Task CreateDocumentUploadAsync(UserInformation user, string blobName, string fileName, string contentType = "application/pdf")
     {
-        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, blobName, fileName, contentType, 0, DocumentProcessingStatus.New);   
+        // Get Ingestion Index Name
+        var indexRequest = new GetIndexRequest() { index_stem_name = "rag-index" };
+        var indexRequestJson = System.Text.Json.JsonSerializer.Serialize(indexRequest, SerializerOptions.Default);
+        using var indexRequestPayload = new StringContent(indexRequestJson, Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync("api/get_active_index", indexRequestPayload);
+        response.EnsureSuccessStatusCode();
+
+        var indexName = await response.Content.ReadAsStringAsync();
+
+        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, blobName, fileName, contentType, 0, indexName, DocumentProcessingStatus.New);   
         await _cosmosContainer.CreateItemAsync(document, partitionKey: new PartitionKey(document.UserId));
-
-        var response = await _httpClient.GetAsync("api/get_active_index");
-        var content = response.Content.ReadAsStringAsync().Result; 
-        var indexData = JsonConvert.DeserializeObject<GetIndexResponse>(content);
-
 
         var request = new ProcessingData()
         {
-            SourceContainer = "source",
-            ExtractContainer = "extract",
-            PrefixPath = "prefix",
-            EntraId = user.UserName,
-            SessionId = "session",
-            IndexName = indexData.IndexStemName,
-            CosmosRecordId = document.Id,
-            AutomaticallyDelete = true
+            source_container = "content",
+            extract_container = "content-extract",
+            prefix_path = fileName,
+            entra_id = user.UserName,
+            session_id = "session",
+            index_name = indexName,
+            index_stem_name = "rag-index",
+            cosmos_record_id = document.Id,
+            automatically_delete = false
         };
 
         var json = System.Text.Json.JsonSerializer.Serialize(request, SerializerOptions.Default);
         using var body = new StringContent(json, Encoding.UTF8, "application/json");
-        var triggerResponse = await _httpClient.PostAsync("/api/orchestrators/pdf_orchestration", body);
+        var triggerResponse = await _httpClient.PostAsync("/api/orchestrators/pdf_orchestrator", body);
     }
 
 

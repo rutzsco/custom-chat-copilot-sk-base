@@ -25,10 +25,10 @@ internal sealed class AzureBlobStorageService(BlobServiceClient blobServiceClien
                 await using var stream = file.OpenReadStream();
                 var blobName = BlobNameFromFilePage(fileName);
                 var blobClient = container.GetBlobClient(blobName);
-                if (await blobClient.ExistsAsync(cancellationToken))
-                {
-                    continue;
-                }
+                //if (await blobClient.ExistsAsync(cancellationToken))
+                //{
+                //    continue;
+                //}
 
                 var url = blobClient.Uri.AbsoluteUri;
                 await using var fileStream = file.OpenReadStream();

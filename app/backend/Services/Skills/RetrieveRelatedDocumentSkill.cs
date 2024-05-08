@@ -69,7 +69,28 @@ public sealed class RetrieveRelatedDocumentSkill
         arguments[ContextVariableOptions.Intent] = searchQuery;
         var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
 
-        var searchLogic = new SearchLogic<KwiecienCustomIndexDefinition>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], KwiecienCustomIndexDefinition.EmbeddingsFieldName, KwiecienCustomIndexDefinition.SelectFieldNames);
+        var searchLogic = new SearchLogic<KwiecienCustomIndexDefinitionV2>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], KwiecienCustomIndexDefinitionV2.EmbeddingsFieldName, KwiecienCustomIndexDefinitionV2.SelectFieldNames);
+        var result = await searchLogic.SearchAsync(searchQuery);
+
+        if (!result.Sources.Any())
+        {
+            arguments[ContextVariableOptions.Knowledge] = "NO_SOURCES";
+            return "NO_SOURCES";
+        }
+
+        arguments[ContextVariableOptions.Knowledge] = result.FormattedSourceText;
+        arguments[ContextVariableOptions.KnowledgeSummary] = result;
+        return result.FormattedSourceText;
+    }
+
+    [KernelFunction("QueryV4"), Description("Search more information")]
+    public async Task<string> QueryV4Async([Description("search query")] string searchQuery, KernelArguments arguments)
+    {
+        searchQuery = searchQuery.Replace("\"", string.Empty);
+        arguments[ContextVariableOptions.Intent] = searchQuery;
+        var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
+
+        var searchLogic = new SearchLogic<KwiecienCustomIndexDefinitionV2>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], KwiecienCustomIndexDefinitionV2.EmbeddingsFieldName, KwiecienCustomIndexDefinitionV2.SelectFieldNames);
         var result = await searchLogic.SearchAsync(searchQuery);
 
         if (!result.Sources.Any())

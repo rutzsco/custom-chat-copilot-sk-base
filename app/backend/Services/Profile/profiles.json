@@ -1,32 +1,50 @@
 [
-  {
-    "Name": "Auto Service Advisor",
-    "Id": "AutoServiceAdvisor",
-    "Approach": "RAG",
-    "SecurityModel": "Group",
-    "SecurityModelGroupMembership": [ "LocalDevUser" ],
-    "SampleQuestions": [
-      "How do I change the oil?",
-      "What are the different maintenance intervals?",
-      "What is the air filter part number?"
-    ],
-    "RAGSettings": {
-      "GenerateSearchQueryPluginName": "GenerateSearchQuery",
-      "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
-      "DocumentRetrievalPluginName": "DocumentRetrieval",
-      "DocumentRetrievalPluginQueryFunctionName": "Query",
-      "DocumentRetrievalIndexName": "manuals",
-      "ChatSystemMessageFile": "RAGChatSystemPrompt",
-      "StorageContianer": "content"
-    }
-  },
+  //{
+  //  "Name": "Auto Service Advisor",
+  //  "Id": "AutoServiceAdvisor",
+  //  "Approach": "RAG",
+  //  "SecurityModel": "Group",
+  //  "SecurityModelGroupMembership": [ "LocalDevUser" ],
+  //  "SampleQuestions": [
+  //    "How do I change the oil?",
+  //    "What are the different maintenance intervals?",
+  //    "What is the air filter part number?"
+  //  ],
+  //  "RAGSettings": {
+  //    "GenerateSearchQueryPluginName": "GenerateSearchQuery",
+  //    "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
+  //    "DocumentRetrievalPluginName": "DocumentRetrieval",
+  //    "DocumentRetrievalPluginQueryFunctionName": "Query",
+  //    "DocumentRetrievalIndexName": "manuals",
+  //    "ChatSystemMessageFile": "RAGChatSystemPrompt",
+  //    "StorageContianer": "content"
+  //  }
+  //},
   {
     "Name": "General",
+    "Id": "General",
     "Approach": "Chat",
     "SecurityModel": "None",
     "SampleQuestions": [
       "Write a function in C# that will invoke a rest API",
       "Explain why popcorn pops to a kid who loves watching it in the microwave."
     ]
+  },
+  {
+    "Name": "Document Chat",
+    "Id": "DocumentChat",
+    "Approach": "UserDocumentChat",
+    "SecurityModel": "None",
+    "SampleQuestions": [
+    ],
+    "RAGSettings": {
+      "GenerateSearchQueryPluginName": "GenerateSearchQuery",
+      "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
+      "DocumentRetrievalPluginName": "DocumentRetrieval",
+      "DocumentRetrievalPluginQueryFunctionName": "QueryV3",
+      "DocumentRetrievalIndexName": "rag-index-20240508144216",
+      "ChatSystemMessageFile": "RAGChatSystemPrompt",
+      "StorageContianer": "content"
+    }
   }
 ]
