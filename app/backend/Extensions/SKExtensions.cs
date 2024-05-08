@@ -26,6 +26,7 @@ namespace MinimalApi.Extensions
         {
             arguments[ContextVariableOptions.Profile] = profile;
             arguments[ContextVariableOptions.UserId] = user.UserId;
+            arguments[ContextVariableOptions.SessionId] = user.SessionId;
             if (history.LastOrDefault()?.User is { } userQuestion)
             {
                 arguments[ContextVariableOptions.Question] = $"{userQuestion}";
@@ -101,9 +102,13 @@ namespace MinimalApi.Extensions
 
         public static ApproachResponse BuildStreamingResoponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds, List<KeyValuePair<string, string>> requestSettings)
         {
-            var knowledgeSourceSummary = (KnowledgeSourceSummary)context[ContextVariableOptions.KnowledgeSummary];
-            var dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(), x.GetContent())).ToArray();
-
+            var dataSources = new SupportingContentRecord [] { };
+            if (context[ContextVariableOptions.Knowledge] != "NO_SOURCES")
+            {
+                var knowledgeSourceSummary = (KnowledgeSourceSummary)context[ContextVariableOptions.KnowledgeSummary];
+                dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(), x.GetContent())).ToArray();
+            }
+  
             var completionTokens = GetTokenCount(answer);
             var totalTokens = completionTokens + requestTokenCount;
             var chatDiagnostics = new CompletionsDiagnostics(completionTokens, requestTokenCount, totalTokens, 0);

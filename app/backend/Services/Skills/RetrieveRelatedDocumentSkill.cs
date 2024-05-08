@@ -28,7 +28,7 @@ public sealed class RetrieveRelatedDocumentSkill
         var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
 
         var searchLogic = new SearchLogic<AIStudioIndexDefinition>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], AIStudioIndexDefinition.EmbeddingsFieldName, AIStudioIndexDefinition.SelectFieldNames);
-        var result = await searchLogic.SearchAsync(searchQuery);
+        var result = await searchLogic.SearchAsync(searchQuery, arguments);
 
         if (!result.Sources.Any())
         {
@@ -49,7 +49,7 @@ public sealed class RetrieveRelatedDocumentSkill
         var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
 
         var searchLogic = new SearchLogic<AISearchIndexerIndexDefinintion>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], AISearchIndexerIndexDefinintion.EmbeddingsFieldName, AISearchIndexerIndexDefinintion.SelectFieldNames);
-        var result = await searchLogic.SearchAsync(searchQuery);
+        var result = await searchLogic.SearchAsync(searchQuery, arguments);
 
         if (!result.Sources.Any())
         {
@@ -70,7 +70,7 @@ public sealed class RetrieveRelatedDocumentSkill
         var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
 
         var searchLogic = new SearchLogic<KwiecienCustomIndexDefinitionV2>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], KwiecienCustomIndexDefinitionV2.EmbeddingsFieldName, KwiecienCustomIndexDefinitionV2.SelectFieldNames);
-        var result = await searchLogic.SearchAsync(searchQuery);
+        var result = await searchLogic.SearchAsync(searchQuery, arguments);
 
         if (!result.Sources.Any())
         {
@@ -91,7 +91,7 @@ public sealed class RetrieveRelatedDocumentSkill
         var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
 
         var searchLogic = new SearchLogic<KwiecienCustomIndexDefinitionV2>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], KwiecienCustomIndexDefinitionV2.EmbeddingsFieldName, KwiecienCustomIndexDefinitionV2.SelectFieldNames);
-        var result = await searchLogic.SearchAsync(searchQuery);
+        var result = await searchLogic.SearchAsync(searchQuery, arguments);
 
         if (!result.Sources.Any())
         {

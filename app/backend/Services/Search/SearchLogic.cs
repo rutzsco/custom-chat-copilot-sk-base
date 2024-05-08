@@ -5,6 +5,7 @@ using System.Linq;
 using Azure.AI.OpenAI;
 using Azure.Search.Documents;
 using MinimalApi.Extensions;
+using MinimalApi.Services.Profile;
 using TiktokenSharp;
 
 namespace MinimalApi.Services.Search;
@@ -25,10 +26,12 @@ public class SearchLogic<T> where T : IKnowledgeSource
         _selectFields = selectFields;
     }
 
-    public async Task<KnowledgeSourceSummary> SearchAsync(string query)
+    public async Task<KnowledgeSourceSummary> SearchAsync(string query, KernelArguments arguments)
     {
         // Generate the embedding for the query  
         var queryEmbeddings = await GenerateEmbeddingsAsync(query, _openAIClient);
+        var userId = arguments[ContextVariableOptions.UserId] as string;
+        var sessionId = arguments[ContextVariableOptions.SessionId] as string;
 
         // Configure the search options
         var searchOptions = new SearchOptions
@@ -44,6 +47,8 @@ public class SearchLogic<T> where T : IKnowledgeSource
         {
             searchOptions.Select.Add(field);
         }
+
+        searchOptions.Filter = $"entra_id eq '{userId}' and session_id eq '{sessionId}'";
 
 
         // Perform the search and build the results

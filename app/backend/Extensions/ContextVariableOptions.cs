@@ -18,4 +18,5 @@ public class ContextVariableOptions
 
     public static string Profile = "Profile";
     public static string UserId = "UserId";
+    public static string SessionId = "SessionId";
 }
