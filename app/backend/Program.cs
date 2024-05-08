@@ -14,7 +14,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddCrossOriginResourceSharing();
 builder.Services.AddAzureServices(builder.Configuration);
-
+builder.Services.AddAntiforgery(options => { options.HeaderName = "X-CSRF-TOKEN-HEADER"; options.FormFieldName = "X-CSRF-TOKEN-FORM"; });
 AppConfiguration.Load(builder.Configuration);
 
 
@@ -26,7 +26,7 @@ if (builder.Environment.IsDevelopment())
 else
 {
     static string? GetEnvVar(string key) => Environment.GetEnvironmentVariable(key);
-    builder.Services.AddAntiforgery(options => { options.HeaderName = "X-CSRF-TOKEN-HEADER"; options.FormFieldName = "X-CSRF-TOKEN-FORM"; });
+
     // set application telemetry
     if (GetEnvVar("APPLICATIONINSIGHTS_CONNECTION_STRING") is string appInsightsConnectionString && !string.IsNullOrEmpty(appInsightsConnectionString))
     {
