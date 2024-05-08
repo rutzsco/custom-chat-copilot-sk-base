@@ -2,6 +2,11 @@ param location string
 param workloadStackName string
 param acrName string
 
+@minLength(1)
+@maxLength(64)
+@description('Name of the environment that can be used as part of naming resource convention')
+param environmentName string = workloadStackName
+
 @description('Name of the storage account')
 param storageAccountName string
 
@@ -27,12 +32,17 @@ var logAnalyticsWorkspaceName = workloadStackName
 var searchServiceName = workloadStackName
 var containerAppsEnvironmentName = workloadStackName
 
+var tags = {
+  'azd-env-name': environmentName
+}
+
 // Log Analytics
 module logAnalytics 'log-analytics.bicep' = {
   name: 'logAnalytics' 
   params: {
     workspaceName: logAnalyticsWorkspaceName
     location: location
+    tags: tags
   }
 }
 
@@ -43,6 +53,7 @@ module db 'cosmosdb.bicep' = {
       location: location
       accountName: cosmosDbAccountName
       databaseName: 'ChatHistory'
+      tags: tags
 	}
 }
 
@@ -51,6 +62,7 @@ module searchService 'search-services.bicep' = {
   params: {
     name: searchServiceName
     location: location
+    tags: tags
     authOptions: {
       aadOrApiKey: {
         aadAuthFailureMode: 'http401WithBearerChallenge'
@@ -68,6 +80,7 @@ module storage 'storage-account.bicep' = {
   params: {
     name: storageAccountName
     location: location
+    tags: tags
     publicNetworkAccess: 'Enabled'
     allowBlobPublicAccess: false
     sku: {
@@ -86,12 +99,22 @@ module storage 'storage-account.bicep' = {
   }
 }
 
+module registry 'registry.bicep' = {
+  name: 'registry'
+  params: {
+    name: acrName
+    location: location
+    tags: tags
+  }
+}
+
 module aca 'aca.bicep' = {
   name: 'aca'
   params: {
     name: 'chatapp'
     environmentName: containerAppsEnvironmentName
     location: location
+    tags: tags
     logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
     containerImage: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
     envVars: []

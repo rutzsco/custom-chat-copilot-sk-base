@@ -24,6 +24,9 @@ param networkAcls object = {
 @allowed([ 'Enabled', 'Disabled' ])
 param publicNetworkAccess string = 'Enabled'
 param sku object = { name: 'Standard_LRS' }
+param keyVaultName string
+
+var storageAccountConnectionStringSecretName = 'storage-account-connection-string'
 
 resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: name
@@ -57,7 +60,15 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   }
 }
 
-var blobStorageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storage.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(storage.id, storage.apiVersion).keys[0].value}'
-output name string = storage.name
+module storageAccountConnectionStringSecret 'keyvault-secret.bicep' = {
+  name: storageAccountConnectionStringSecretName
+  params: {
+    keyVaultName: keyVaultName
+    name: storageAccountConnectionStringSecretName
+    secretValue: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storage.listKeys().keys[0].value}'
+  }
+}
+
 output primaryEndpoints object = storage.properties.primaryEndpoints
-output connectionString string  = blobStorageConnectionString
+output storageAccountName string = storage.name
+output storageAccountConnectionStringSecretName string = storageAccountConnectionStringSecretName

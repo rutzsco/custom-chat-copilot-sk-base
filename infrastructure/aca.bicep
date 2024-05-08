@@ -1,6 +1,7 @@
 param location string
 param name string
 param environmentName string
+param tags object = {}
 
 param storageConnectionString string
 param storageBlobEndpoint string
@@ -47,6 +48,7 @@ resource acr 'Microsoft.ContainerRegistry/registries@2021-06-01-preview' existin
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2023-04-01-preview' = {
   name: environmentName
   location: location
+  tags: tags
   properties: {
     appLogsConfiguration: {
       destination: 'log-analytics'
@@ -61,6 +63,7 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2023-04-01-
 resource containerApp 'Microsoft.App/containerApps@2022-03-01' = {
   name: name
   location: location
+  tags: union(tags, {'azd-service-name':  'web' })
   properties: {
     managedEnvironmentId: containerAppsEnvironment.id
     configuration: {

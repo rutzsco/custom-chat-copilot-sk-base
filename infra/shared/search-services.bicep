@@ -34,6 +34,9 @@ param replicaCount int = 1
   'standard'
 ])
 param semanticSearch string = 'disabled'
+param keyVaultName string
+
+var searchKeySecretName = 'search-key'
 
 resource search 'Microsoft.Search/searchServices@2021-04-01-preview' = {
   name: name
@@ -57,7 +60,16 @@ resource search 'Microsoft.Search/searchServices@2021-04-01-preview' = {
   sku: sku
 }
 
+module searchSecret 'keyvault-secret.bicep' = {
+  name: searchKeySecretName
+  params: {
+    keyVaultName: keyVaultName
+    name: searchKeySecretName
+    secretValue: search.listAdminKeys().primaryKey
+  }
+}
+
 output id string = search.id
 output endpoint string = 'https://${name}.search.windows.net/'
 output name string = search.name
-output key string = search.listQueryKeys().value[0].key
+output searchKeySecretName string = searchKeySecretName
