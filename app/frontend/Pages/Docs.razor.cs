@@ -30,10 +30,12 @@ public sealed partial class Docs : IDisposable
 
     private bool FilesSelected => _fileUpload is { Files.Count: > 0 };
 
-    protected override void OnInitialized() =>
+    protected override void OnInitialized()
+    {
         // Instead of awaiting this async enumerable here, let's capture it in a task
         // and start it in the background. This way, we can await it in the UI.
         _getDocumentsTask = GetDocumentsAsync();
+    }
 
     private bool OnFilter(DocumentSummary document) => document is not null
         && (string.IsNullOrWhiteSpace(_filter) || document.Name.Contains(_filter, StringComparison.OrdinalIgnoreCase));
@@ -44,10 +46,8 @@ public sealed partial class Docs : IDisposable
 
         try
         {
-            var documents =
-                await Client.GetDocumentsAsync(_cancellationTokenSource.Token)
-                    .ToListAsync();
-
+            var documents = await Client.GetDocumentsAsync(_cancellationTokenSource.Token).ToListAsync();
+            _documents.Clear();
             foreach (var document in documents)
             {
                 _documents.Add(document);
@@ -68,9 +68,7 @@ public sealed partial class Docs : IDisposable
         if (_fileUpload is { Files.Count: > 0 })
         {
             var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
-
-            var result = await Client.UploadDocumentsAsync(
-                _fileUpload.Files, MaxIndividualFileSize, cookie);
+            var result = await Client.UploadDocumentsAsync(_fileUpload.Files, MaxIndividualFileSize, cookie);
 
             Logger.LogInformation("Result: {x}", result);
 
@@ -99,6 +97,8 @@ public sealed partial class Docs : IDisposable
                     });
             }
         }
+
+        await GetDocumentsAsync();
     }
 
     private void OnShowDocumentAsync(DocumentSummary document)
