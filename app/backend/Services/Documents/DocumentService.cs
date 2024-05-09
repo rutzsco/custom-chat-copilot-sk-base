@@ -26,12 +26,12 @@ public class DocumentService
         _cosmosClient = cosmosClient;
         _blobStorageService = blobStorageService;
         
-        if (configuration["IngestionPipelineAPI"] != null)
+        if (configuration[AppConfigurationSetting.IngestionPipelineAPI] != null)
         {
             _httpClient = httpClient;
 
-            _httpClient.BaseAddress = new Uri(configuration["IngestionPipelineAPI"]);
-            _httpClient.DefaultRequestHeaders.Add("x-functions-key", configuration["IngestionPipelineAPIKey"]);
+            _httpClient.BaseAddress = new Uri(configuration[AppConfigurationSetting.IngestionPipelineAPI]);
+            _httpClient.DefaultRequestHeaders.Add("x-functions-key", configuration[AppConfigurationSetting.IngestionPipelineAPIKey]);
             _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
             _configuration = configuration;
         }

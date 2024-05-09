@@ -33,5 +33,8 @@ public static class AppConfigurationSetting
     public static string AzureStorageAccountConnectionString { get; } = "AzureStorageAccountConnectionString";
     public static string AzureStorageUserUploadContainer { get; } = "AzureStorageUserUploadContainer";
 
+    public static string IngestionPipelineAPI { get; } = "IngestionPipelineAPI";
+
+    public static string IngestionPipelineAPIKey { get; } = "IngestionPipelineAPIKey";
     
 }
