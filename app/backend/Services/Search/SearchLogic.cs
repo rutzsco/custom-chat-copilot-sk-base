@@ -47,9 +47,8 @@ public class SearchLogic<T> where T : IKnowledgeSource
         {
             searchOptions.Select.Add(field);
         }
-
-        var selectedDocument = arguments[ContextVariableOptions.SelectedDocument] as string;
-        if (selectedDocument != null)
+     
+        if (arguments.ContainsName(ContextVariableOptions.SelectedDocument))
         {
             var userId = arguments[ContextVariableOptions.UserId] as string;
             var sessionId = arguments[ContextVariableOptions.SessionId] as string;

@@ -52,8 +52,10 @@ public sealed class AzureBlobStorageService(BlobServiceClient blobServiceClient,
         }
     }
 
-    private static string BlobNameFromFilePage(string filename, long page = 0) =>
-        Path.GetExtension(filename).ToLower() is ".pdf"
+    private static string BlobNameFromFilePage(string filename, long page = 0)
+    {
+        return Path.GetExtension(filename).ToLower() is ".pdf"
             ? $"{Path.GetFileNameWithoutExtension(filename)}_{page}.pdf"
             : Path.GetFileName(filename);
+    }
 }
