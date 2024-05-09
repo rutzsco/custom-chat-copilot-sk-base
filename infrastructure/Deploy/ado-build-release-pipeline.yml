@@ -4,7 +4,7 @@ trigger:
     - main
   paths:
     include:
-    - infrastructure/*
+    - infra/*
 pool:
       vmImage: 'ubuntu-latest'
 
@@ -22,7 +22,7 @@ stages:
 
     - task: PublishPipelineArtifact@1
       inputs:
-        targetPath: 'infrastructure'
+        targetPath: 'infra'
         artifact: 'Infrastructure'
         publishLocation: 'pipeline'
 
