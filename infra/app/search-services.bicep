@@ -6,19 +6,8 @@ param sku object = {
   name: 'standard'
 }
 
-param authOptions object = {}
-param disableLocalAuth bool = false
-param disabledDataExfiltrationOptions array = []
-param encryptionWithCmk object = {
-  enforcement: 'Unspecified'
-}
-@allowed([
-  'default'
-  'highDensity'
-])
-param hostingMode string = 'default'
 param networkRuleSet object = {
-  bypass: 'None'
+  bypass: 'AzurePortal'
   ipRules: []
 }
 param partitionCount int = 1
@@ -28,12 +17,9 @@ param partitionCount int = 1
 ])
 param publicNetworkAccess string = 'enabled'
 param replicaCount int = 1
-@allowed([
-  'disabled'
-  'free'
-  'standard'
-])
-param semanticSearch string = 'disabled'
+param keyVaultName string
+
+var searchKeySecretName = 'search-key'
 
 resource search 'Microsoft.Search/searchServices@2021-04-01-preview' = {
   name: name
@@ -43,21 +29,24 @@ resource search 'Microsoft.Search/searchServices@2021-04-01-preview' = {
     type: 'SystemAssigned'
   }
   properties: {
-    authOptions: authOptions
-    disableLocalAuth: disableLocalAuth
-    disabledDataExfiltrationOptions: disabledDataExfiltrationOptions
-    encryptionWithCmk: encryptionWithCmk
-    hostingMode: hostingMode
     networkRuleSet: networkRuleSet
     partitionCount: partitionCount
     publicNetworkAccess: publicNetworkAccess
     replicaCount: replicaCount
-    semanticSearch: semanticSearch
   }
   sku: sku
+}
+
+module searchSecret '../shared/keyvault-secret.bicep' = {
+  name: searchKeySecretName
+  params: {
+    keyVaultName: keyVaultName
+    name: searchKeySecretName
+    secretValue: search.listAdminKeys().primaryKey
+  }
 }
 
 output id string = search.id
 output endpoint string = 'https://${name}.search.windows.net/'
 output name string = search.name
-output key string = search.listQueryKeys().value[0].key
+output searchKeySecretName string = searchKeySecretName

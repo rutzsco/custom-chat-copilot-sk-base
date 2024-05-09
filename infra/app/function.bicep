@@ -7,21 +7,26 @@ param storageAccountType string = 'Standard_LRS'
 @description('Location for all resources.')
 param location string = resourceGroup().location
 
-@description('Log Analytics workspace ID')
-param logAnalyticsWorkspaceId string
+param applicationInsightsName string
 
 @description('The language worker runtime to load in the function app.')
 param runtime string = 'dotnet'
 
+param tags object = {}
+
 var functionAppName = appName
 var hostingPlanName = appName
-var applicationInsightsName = appName
 var storageAccountName = '${uniqueString(resourceGroup().id)}azfunc'
 var functionWorkerRuntime = runtime
+
+resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
+  name: applicationInsightsName
+}
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: storageAccountName
   location: location
+  tags: tags
   sku: {
     name: storageAccountType
   }
@@ -35,6 +40,7 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
 resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
   name: hostingPlanName
   location: location
+  tags: tags
   sku: {
     name: 'Y1'
     tier: 'Dynamic'
@@ -45,6 +51,7 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
 resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
   name: functionAppName
   location: location
+  tags: tags
   kind: 'functionapp'
   identity: {
     type: 'SystemAssigned'
@@ -86,16 +93,5 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
       minTlsVersion: '1.2'
     }
     httpsOnly: true
-  }
-}
-
-resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: applicationInsightsName
-  location: location
-  kind: 'web'
-  properties: {
-    Application_Type: 'web'
-    RetentionInDays: 30
-    WorkspaceResourceId: logAnalyticsWorkspaceId
   }
 }

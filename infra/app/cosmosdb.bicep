@@ -7,9 +7,15 @@ param databaseName string
 @description('Location for the Cosmos DB account.')
 param location string = resourceGroup().location
 
+param tags object = {}
+
+var connectionStringSecretName = 'azure-cosmos-connection-string'
+param keyVaultName string
+
 resource account 'Microsoft.DocumentDB/databaseAccounts@2020-06-01-preview' = {
   name: toLower(accountName)
   location: location
+  tags: tags
   kind: 'GlobalDocumentDB'
   properties: {
     enableAutomaticFailover: false
@@ -45,6 +51,7 @@ resource account 'Microsoft.DocumentDB/databaseAccounts@2020-06-01-preview' = {
 resource database  'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2020-06-01-preview' = {
   parent: account
   name: databaseName
+  tags: tags
   properties: {
     resource: {
       id: databaseName
@@ -57,6 +64,7 @@ resource database  'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2020-06-0
 resource chatTurn  'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2020-06-01-preview' = {
   parent: database
   name: 'ChatTurn'
+  tags: tags
   properties: {
     resource: {
       id: 'ChatTurn'
@@ -93,5 +101,16 @@ resource chatTurn  'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
   }
 }
 
-output connectionString string = listConnectionStrings(account.id, '2019-12-12').connectionStrings[0].connectionString
-output primaryMasterKeyKey string = listKeys(account.id, '2019-08-01').primaryMasterKey
+module cosmosConnectionStringSecret '../shared/keyvault-secret.bicep' = {
+  name: connectionStringSecretName
+  params: {
+    keyVaultName: keyVaultName
+    name: connectionStringSecretName
+    secretValue: account.listConnectionStrings().connectionStrings[0].connectionString
+  }
+}
+
+output connectionStringSecretName string = connectionStringSecretName
+output endpoint string = account.properties.documentEndpoint
+output id string = account.id
+output name string = account.name
