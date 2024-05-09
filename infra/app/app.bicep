@@ -37,7 +37,7 @@ resource userIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-
   name: identityName
 }
 
-module fetchLatestImage '../modules/fetch-container-image.bicep' = {
+module fetchLatestImage '../shared/fetch-container-image.bicep' = {
   name: '${name}-fetch-image'
   params: {
     exists: exists
@@ -58,7 +58,7 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
     configuration: {
       ingress:  {
         external: true
-        targetPort: 80
+        targetPort: 8080
         transport: 'auto'
       }
       registries: [

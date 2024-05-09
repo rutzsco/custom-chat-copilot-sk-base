@@ -1,8 +1,6 @@
 param name string
 param location string = resourceGroup().location
 param tags object = {}
-@description('The custom subdomain name used to access the API. Defaults to the value of the name parameter.')
-param customSubDomainName string = name
 param deployments array = []
 param kind string = 'OpenAI'
 param publicNetworkAccess string = 'Enabled'
@@ -17,7 +15,6 @@ resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   tags: tags
   kind: kind
   properties: {
-    customSubDomainName: customSubDomainName
     publicNetworkAccess: publicNetworkAccess
     networkAcls: {
       defaultAction: 'Allow'
@@ -42,7 +39,7 @@ resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01
 
 var cognitiveServicesKeySecretName = 'cognitive-services-key'
 
-module cognitiveServicesSecret 'keyvault-secret.bicep' = {
+module cognitiveServicesSecret '../shared/keyvault-secret.bicep' = {
   name: cognitiveServicesKeySecretName
   params: {
     keyVaultName: keyVaultName

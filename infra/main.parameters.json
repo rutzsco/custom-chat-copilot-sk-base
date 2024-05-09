@@ -9,7 +9,7 @@
         "value": "${AZURE_LOCATION}"
       },
       "backendExists": {
-        "value": "${SERVICE_BACKEND_RESOURCE_EXISTS=false}"
+        "value": "${SERVICE_WEB_RESOURCE_EXISTS=false}"
       },
       "backendDefinition": {
         "value": {

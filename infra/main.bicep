@@ -17,16 +17,28 @@ param backendDefinition object
 param principalId string
 
 @description('Name of the chat GPT deployment')
-param azureChatGptDeploymentName string = 'chat'
+param azureChatGptStandardDeploymentName string = 'chat'
 
 @description('Name of the chat GPT model. Default: gpt-35-turbo')
 @allowed([ 'gpt-35-turbo', 'gpt-4', 'gpt-35-turbo-16k', 'gpt-4-16k' ])
-param azureOpenAIChatGptModelName string = 'gpt-35-turbo'
+param azureOpenAIChatGptStandardModelName string = 'gpt-35-turbo'
 
-param azureOpenAIChatGptModelVersion string ='0613'
+param azureOpenAIChatGptStandardModelVersion string ='0613'
 
 @description('Capacity of the chat GPT deployment. Default: 10')
-param chatGptDeploymentCapacity int = 10
+param chatGptStandardDeploymentCapacity int = 10
+
+@description('Name of the chat GPT deployment')
+param azureChatGptPremiumDeploymentName string = 'chat-gpt4'
+
+@description('Name of the chat GPT model. Default: gpt-35-turbo')
+@allowed([ 'gpt-35-turbo', 'gpt-4', 'gpt-35-turbo-16k', 'gpt-4-16k' ])
+param azureOpenAIChatGptPremiumModelName string = 'gpt-4'
+
+param azureOpenAIChatGptPremiumModelVersion string ='1106-Preview'
+
+@description('Capacity of the chat GPT deployment. Default: 10')
+param chatGptPremiumDeploymentCapacity int = 10
 
 @description('Name of the embedding deployment. Default: embedding')
 param azureEmbeddingDeploymentName string = 'embedding'
@@ -51,7 +63,7 @@ var tags = {
 var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(resourceGroup().id, environmentName, location))
 
-module monitoring './shared/monitoring.bicep' = {
+module monitoring './app/monitoring.bicep' = {
   name: 'monitoring'
   params: {
     location: location
@@ -61,7 +73,7 @@ module monitoring './shared/monitoring.bicep' = {
   }
 }
 
-module dashboard './shared/dashboard-web.bicep' = {
+module dashboard './app/dashboard-web.bicep' = {
   name: 'dashboard'
   params: {
     name: '${abbrs.portalDashboards}${resourceToken}'
@@ -71,7 +83,7 @@ module dashboard './shared/dashboard-web.bicep' = {
   }
 }
 
-module managedIdentity './shared/identity.bicep' = {
+module managedIdentity './app/identity.bicep' = {
   name: 'identity'
   params: {
     identityName: '${abbrs.managedIdentityUserAssignedIdentities}${resourceToken}'
@@ -80,7 +92,7 @@ module managedIdentity './shared/identity.bicep' = {
   }
 }
 
-module registry './shared/registry.bicep' = {
+module registry './app/registry.bicep' = {
   name: 'registry'
   params: {
     location: location
@@ -90,7 +102,7 @@ module registry './shared/registry.bicep' = {
   }
 }
 
-module cosmos './shared/cosmosdb.bicep' = {
+module cosmos './app/cosmosdb.bicep' = {
   name: 'cosmos'
   params: {
     accountName: '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
@@ -101,7 +113,7 @@ module cosmos './shared/cosmosdb.bicep' = {
   }
 }
 
-module keyVault './shared/keyvault.bicep' = {
+module keyVault './app/keyvault.bicep' = {
   name: 'keyvault'
   params: {
     location: location
@@ -112,7 +124,7 @@ module keyVault './shared/keyvault.bicep' = {
   }
 }
 
-module appsEnv './shared/apps-env.bicep' = {
+module appsEnv './app/apps-env.bicep' = {
   name: 'apps-env'
   params: {
     name: '${abbrs.appManagedEnvironments}${resourceToken}'
@@ -125,7 +137,7 @@ module appsEnv './shared/apps-env.bicep' = {
 
 var storageAccountContainerName = 'content'
 
-module storageAccount './shared/storage-account.bicep' = {
+module storageAccount './app/storage-account.bicep' = {
   name: 'storage'
   params: {
     name: '${abbrs.storageStorageAccounts}${resourceToken}'
@@ -140,7 +152,7 @@ module storageAccount './shared/storage-account.bicep' = {
   }
 }
 
-module search './shared/search-services.bicep' = {
+module search './app/search-services.bicep' = {
   name: 'search'
   params: {
     keyVaultName: keyVault.outputs.name
@@ -198,16 +210,15 @@ var appDefinition = {
     }
     {
       name: 'AOAIPremiumServiceEndpoint'
-      value: ''//aoaiPremiumServiceEndpoint
+      value: search.outputs.endpoint
     }
     {
       name: 'AOAIPremiumServiceKey'
       value: 'aoaipremiumservicekey'
-      //secret: true
     }
     {
       name: 'AOAIPremiumChatGptDeployment'
-      value: ''//aoaiPremiumChatGptDeployment
+      value: azureChatGptPremiumDeploymentName
     }
     {
       name: 'AOAIStandardServiceEndpoint'
@@ -215,7 +226,7 @@ var appDefinition = {
     }
     {
       name: 'AOAIStandardChatGptDeployment'
-      value: azureChatGptDeploymentName
+      value: azureChatGptStandardDeploymentName
     }
     {
       name: 'AOAIEmbeddingsDeployment'
@@ -239,7 +250,7 @@ module app './app/app.bicep' = {
   }
 }
 
-module azureOpenAi 'shared/cognitive-services.bicep' =  {
+module azureOpenAi './app/cognitive-services.bicep' =  {
   name: 'openai'
   params: {
     name: '${abbrs.cognitiveServicesAccounts}${resourceToken}'
@@ -260,15 +271,28 @@ module azureOpenAi 'shared/cognitive-services.bicep' =  {
       }
     ], [
       {
-        name: azureChatGptDeploymentName
+        name: azureChatGptStandardDeploymentName
         model: {
           format: 'OpenAI'
-          name: azureOpenAIChatGptModelName
-          version: azureOpenAIChatGptModelVersion
+          name: azureOpenAIChatGptStandardModelName
+          version: azureOpenAIChatGptStandardModelVersion
         }
         sku: {
           name: 'Standard'
-          capacity: chatGptDeploymentCapacity
+          capacity: chatGptStandardDeploymentCapacity
+        }
+      }
+    ], [
+      {
+        name: azureChatGptPremiumDeploymentName
+        model: {
+          format: 'OpenAI'
+          name: azureOpenAIChatGptPremiumModelName
+          version: azureOpenAIChatGptPremiumModelVersion
+        }
+        sku: {
+          name: 'Standard'
+          capacity: chatGptPremiumDeploymentCapacity
         }
       }
     ])

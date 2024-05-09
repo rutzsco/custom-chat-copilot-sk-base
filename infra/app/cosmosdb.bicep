@@ -9,7 +9,7 @@ param location string = resourceGroup().location
 
 param tags object = {}
 
-param connectionStringSecretName string = 'azure-cosmos-connection-string'
+var connectionStringSecretName = 'azure-cosmos-connection-string'
 param keyVaultName string
 
 resource account 'Microsoft.DocumentDB/databaseAccounts@2020-06-01-preview' = {
@@ -101,7 +101,7 @@ resource chatTurn  'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
   }
 }
 
-module cosmosConnectionStringSecret 'keyvault-secret.bicep' = {
+module cosmosConnectionStringSecret '../shared/keyvault-secret.bicep' = {
   name: connectionStringSecretName
   params: {
     keyVaultName: keyVaultName

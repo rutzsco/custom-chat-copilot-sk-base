@@ -1,6 +1,6 @@
 param identityName string
 param location string
-param tags object
+param tags object = {}
 
 resource userIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName

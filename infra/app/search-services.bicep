@@ -6,19 +6,8 @@ param sku object = {
   name: 'standard'
 }
 
-param authOptions object = {}
-param disableLocalAuth bool = false
-param disabledDataExfiltrationOptions array = []
-param encryptionWithCmk object = {
-  enforcement: 'Unspecified'
-}
-@allowed([
-  'default'
-  'highDensity'
-])
-param hostingMode string = 'default'
 param networkRuleSet object = {
-  bypass: 'None'
+  bypass: 'AzurePortal'
   ipRules: []
 }
 param partitionCount int = 1
@@ -28,12 +17,6 @@ param partitionCount int = 1
 ])
 param publicNetworkAccess string = 'enabled'
 param replicaCount int = 1
-@allowed([
-  'disabled'
-  'free'
-  'standard'
-])
-param semanticSearch string = 'disabled'
 param keyVaultName string
 
 var searchKeySecretName = 'search-key'
@@ -46,21 +29,15 @@ resource search 'Microsoft.Search/searchServices@2021-04-01-preview' = {
     type: 'SystemAssigned'
   }
   properties: {
-    authOptions: authOptions
-    disableLocalAuth: disableLocalAuth
-    disabledDataExfiltrationOptions: disabledDataExfiltrationOptions
-    encryptionWithCmk: encryptionWithCmk
-    hostingMode: hostingMode
     networkRuleSet: networkRuleSet
     partitionCount: partitionCount
     publicNetworkAccess: publicNetworkAccess
     replicaCount: replicaCount
-    semanticSearch: semanticSearch
   }
   sku: sku
 }
 
-module searchSecret 'keyvault-secret.bicep' = {
+module searchSecret '../shared/keyvault-secret.bicep' = {
   name: searchKeySecretName
   params: {
     keyVaultName: keyVaultName
