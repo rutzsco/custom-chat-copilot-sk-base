@@ -17,7 +17,7 @@ public sealed class AzureBlobStorageService(BlobServiceClient blobServiceClient,
                 Console.WriteLine("Container created.");
             }
 
-            List<string> uploadedFiles = [];
+            List<UploadDocumentFileSummary> uploadedFiles = [];
             foreach (var file in files)
             {
                 var fileName = file.FileName;
@@ -36,7 +36,7 @@ public sealed class AzureBlobStorageService(BlobServiceClient blobServiceClient,
                 {
                     ContentType = "image"
                 }, cancellationToken: cancellationToken);
-                uploadedFiles.Add(blobName);           
+                uploadedFiles.Add(new UploadDocumentFileSummary(blobName, file.Length));           
             }
 
             if (uploadedFiles.Count is 0)

@@ -29,10 +29,7 @@ public sealed class ApiClient(HttpClient httpClient)
         return await response.Content.ReadFromJsonAsync<List<DocumentSummary>>();
     }
 
-    public async Task<UploadDocumentsResponse> UploadDocumentsAsync(
-        IReadOnlyList<IBrowserFile> files,
-        long maxAllowedSize,
-        string cookie)
+    public async Task<UploadDocumentsResponse> UploadDocumentsAsync(IReadOnlyList<IBrowserFile> files, long maxAllowedSize, string cookie)
     {
         try
         {
@@ -40,10 +37,8 @@ public sealed class ApiClient(HttpClient httpClient)
 
             foreach (var file in files)
             {
-                // max allow size: 10mb
-                var max_size = maxAllowedSize * 1024 * 1024;
 #pragma warning disable CA2000 // Dispose objects before losing scope
-                var fileContent = new StreamContent(file.OpenReadStream(max_size));
+                var fileContent = new StreamContent(file.OpenReadStream(maxAllowedSize));
 #pragma warning restore CA2000 // Dispose objects before losing scope
                 fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
 

@@ -4,7 +4,7 @@ namespace ClientApp.Pages;
 
 public sealed partial class Docs : IDisposable
 {
-    private const long MaxIndividualFileSize = 1_024L * 1_024;
+    private const long MaxIndividualFileSize = 1_024 * 1_024 * 10;
 
     private MudForm _form = null!;
     private MudFileUpload<IReadOnlyList<IBrowserFile>> _fileUpload = null!;

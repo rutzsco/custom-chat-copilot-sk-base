@@ -48,13 +48,13 @@ public class DocumentService
         var response = await _blobStorageService.UploadFilesAsync(userInfo, files, cancellationToken);
         foreach (var file in response.UploadedFiles)
         {
-            await CreateDocumentUploadAsync(userInfo, file, file);
+            await CreateDocumentUploadAsync(userInfo, file);
         }
         return response;
     }
 
 
-    private async Task CreateDocumentUploadAsync(UserInformation user, string blobName, string fileName, string contentType = "application/pdf")
+    private async Task CreateDocumentUploadAsync(UserInformation user, UploadDocumentFileSummary fileSummary, string contentType = "application/pdf")
     {
         // Get Ingestion Index Name
         var indexRequest = new GetIndexRequest() { index_stem_name = "rag-index" };
@@ -65,14 +65,14 @@ public class DocumentService
 
         var indexName = await response.Content.ReadAsStringAsync();
 
-        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, blobName, fileName, contentType, 0, indexName, user.SessionId, DocumentProcessingStatus.New);   
+        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, fileSummary.FileName, fileSummary.FileName, contentType, fileSummary.Size, indexName, user.SessionId, DocumentProcessingStatus.New);   
         await _cosmosContainer.CreateItemAsync(document, partitionKey: new PartitionKey(document.UserId));
 
         var request = new ProcessingData()
         {
             source_container = "content",
             extract_container = "content-extract",
-            prefix_path = fileName,
+            prefix_path = fileSummary.FileName,
             entra_id = user.UserName,
             session_id = user.SessionId,
             index_name = indexName,
