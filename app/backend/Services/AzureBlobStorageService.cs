@@ -2,13 +2,13 @@
 
 namespace MinimalApi.Services;
 
-internal sealed class AzureBlobStorageService(BlobServiceClient blobServiceClient, IConfiguration configuration)
+public sealed class AzureBlobStorageService(BlobServiceClient blobServiceClient, IConfiguration configuration)
 {
     internal async Task<UploadDocumentsResponse> UploadFilesAsync(UserInformation userInfo, IEnumerable<IFormFile> files, CancellationToken cancellationToken)
     {
         try
         {
-            var azureStorageContainer = configuration["AzureStorageUserUploadContainer"];
+            var azureStorageContainer = configuration[AppConfigurationSetting.AzureStorageUserUploadContainer];
             var container = blobServiceClient.GetBlobContainerClient(azureStorageContainer);
             if (!await container.ExistsAsync())
             {

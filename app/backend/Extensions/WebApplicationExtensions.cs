@@ -95,14 +95,8 @@ internal static class WebApplicationExtensions
         CancellationToken cancellationToken)
     {
         logger.LogInformation("Upload documents");
-
         var userInfo = GetUserInfo(context);
-        var response = await service.UploadFilesAsync(userInfo, files, cancellationToken);
-        foreach(var file in response.UploadedFiles)
-        {
-            await documentService.CreateDocumentUploadAsync(userInfo, file, file);
-        }
-
+        var response = await documentService.CreateDocumentUploadAsync(userInfo, files, cancellationToken);
         logger.LogInformation("Upload documents: {x}", response);
 
         return TypedResults.Ok(response);

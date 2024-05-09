@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Net.Http;
+using System.Threading;
 using Azure;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Identity.Client;
@@ -16,12 +17,15 @@ public class DocumentService
 {
     private readonly CosmosClient _cosmosClient;
     private readonly Container _cosmosContainer;
+    private readonly AzureBlobStorageService _blobStorageService;
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
-    public DocumentService(CosmosClient cosmosClient, HttpClient httpClient, IConfiguration configuration)
+
+    public DocumentService(CosmosClient cosmosClient, AzureBlobStorageService blobStorageService, HttpClient httpClient, IConfiguration configuration)
     {
         _cosmosClient = cosmosClient;
-
+        _blobStorageService = blobStorageService;
+        
         if (configuration["IngestionPipelineAPI"] != null)
         {
             _httpClient = httpClient;
@@ -39,7 +43,18 @@ public class DocumentService
         _cosmosContainer = db.Database.CreateContainerIfNotExistsAsync(DefaultSettings.CosmosDBUserDocumentsCollectionName, "/userId").GetAwaiter().GetResult();
     }
 
-    public async Task CreateDocumentUploadAsync(UserInformation user, string blobName, string fileName, string contentType = "application/pdf")
+    public async Task<UploadDocumentsResponse> CreateDocumentUploadAsync(UserInformation userInfo, IFormFileCollection files, CancellationToken cancellationToken)
+    {
+        var response = await _blobStorageService.UploadFilesAsync(userInfo, files, cancellationToken);
+        foreach (var file in response.UploadedFiles)
+        {
+            await CreateDocumentUploadAsync(userInfo, file, file);
+        }
+        return response;
+    }
+
+
+    private async Task CreateDocumentUploadAsync(UserInformation user, string blobName, string fileName, string contentType = "application/pdf")
     {
         // Get Ingestion Index Name
         var indexRequest = new GetIndexRequest() { index_stem_name = "rag-index" };
@@ -80,22 +95,6 @@ public class DocumentService
             .WithParameter("@sessionId", user.SessionId));
 
         var results = new List<DocumentUpload>();
-        while (query.HasMoreResults)
-        {
-            var response = await query.ReadNextAsync();
-            results.AddRange(response.ToList());
-        }
-
-        return results;
-    }
-
-    public async Task<List<ChatMessageRecord>> GetMostRecentChatItemsAsync(UserInformation user)
-    {
-        var query = _cosmosContainer.GetItemQueryIterator<ChatMessageRecord>(
-            new QueryDefinition("SELECT TOP 100 * FROM c WHERE c.userId = @username ORDER BY c.timestamp DESC")
-            .WithParameter("@username", user.UserId));
-
-        var results = new List<ChatMessageRecord>();
         while (query.HasMoreResults)
         {
             var response = await query.ReadNextAsync();

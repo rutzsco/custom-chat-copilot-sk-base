@@ -22,9 +22,8 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<BlobServiceClient>(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
-            var azureStorageAccountEndpoint = config["AzureStorageAccountEndpoint"];
-            var azureStorageAccountConnectionString = config["AzureStorageAccountConnectionString"];
-            ArgumentNullException.ThrowIfNullOrEmpty(azureStorageAccountEndpoint);
+            var azureStorageAccountConnectionString = config[AppConfigurationSetting.AzureStorageAccountConnectionString];
+            ArgumentNullException.ThrowIfNullOrEmpty(azureStorageAccountConnectionString);
 
             var blobServiceClient = new BlobServiceClient(azureStorageAccountConnectionString);
 
