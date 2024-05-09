@@ -54,7 +54,7 @@ internal static class WebApplicationExtensions
 
 
                 // Get user information
-                var userInfo = GetUserInfo(context);
+                var userInfo = context.GetUserInfo();
                 var profile = ProfileDefinition.All.FirstOrDefault(x => x.Id == profileName);
                 if (profile == null || !userInfo.HasAccess(profile))
                 {
@@ -95,7 +95,7 @@ internal static class WebApplicationExtensions
         CancellationToken cancellationToken)
     {
         logger.LogInformation("Upload documents");
-        var userInfo = GetUserInfo(context);
+        var userInfo = context.GetUserInfo();
         var response = await documentService.CreateDocumentUploadAsync(userInfo, files, cancellationToken);
         logger.LogInformation("Upload documents: {x}", response);
 
@@ -104,18 +104,18 @@ internal static class WebApplicationExtensions
     
     private static IResult OnGetUser(HttpContext context)
     {
-        var userInfo = GetUserInfo(context);
+        var userInfo = context.GetUserInfo();
         return TypedResults.Ok(userInfo);
     }
     private static async Task<IResult> OnGetUserDocumentsAsync(HttpContext context, DocumentService documentService)
     {
-        var userInfo = GetUserInfo(context);
+        var userInfo = context.GetUserInfo();
         var documents = await documentService.GetDocumentUploadsAsync(userInfo);
         return TypedResults.Ok(documents.Select(d => new DocumentSummary(d.Id, d.SourceName, d.ContentType, d.Size, d.Status, d.Timestamp)));
     }
     private static async Task<IResult> OnPostChatRatingAsync(HttpContext context, ChatRatingRequest request, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
     {
-        var userInfo = GetUserInfo(context);
+        var userInfo = context.GetUserInfo();
         await chatHistoryService.RecordRatingAsync(userInfo, request);
         return Results.Ok();
     }
@@ -123,7 +123,7 @@ internal static class WebApplicationExtensions
     private static async Task<IResult> OnPostChatAsync(HttpContext context, ChatRequest request, ReadRetrieveReadChatService chatService, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
     {
         // Get user information
-        var userInfo = GetUserInfo(context);
+        var userInfo = context.GetUserInfo();
         var profile = request.OptionFlags.GetChatProfile();
         if (!userInfo.HasAccess(profile))
         {
@@ -143,7 +143,7 @@ internal static class WebApplicationExtensions
     private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, ChatHistoryService chatHistoryService, DocumentService documentService, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         // Get user information
-        var userInfo = GetUserInfo(context);
+        var userInfo = context.GetUserInfo();
         var profile = request.OptionFlags.GetChatProfile();
         if (!userInfo.HasAccess(profile))
         {
@@ -179,39 +179,15 @@ internal static class WebApplicationExtensions
 
     private static async Task<IEnumerable<ChatHistoryResponse>> OnGetHistoryAsync(HttpContext context, ChatHistoryService chatHistoryService)
     {
-        var user = GetUserInfo(context);
-        var response = await chatHistoryService.GetMostRecentChatItemsAsync(user);
+        var userInfo = context.GetUserInfo();
+        var response = await chatHistoryService.GetMostRecentChatItemsAsync(userInfo);
         return response.AsFeedbackResponse();
     }
 
     private static async Task<IEnumerable<ChatHistoryResponse>> OnGetFeedbackAsync(HttpContext context, ChatHistoryService chatHistoryService)
     {
-        var userInfo = GetUserInfo(context);
+        var userInfo = context.GetUserInfo();
         var response = await chatHistoryService.GetMostRecentRatingsItemsAsync(userInfo);
         return response.AsFeedbackResponse();
-    }
-
-    private static UserInformation GetUserInfo(HttpContext context)
-    {
-        var id = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-ID"];
-        var name = context.Request.Headers["X-MS-CLIENT-PRINCIPAL-NAME"];
-        var claimsPrincipal = ClaimsPrincipalParser.Parse(context.Request);
-        var userGroups = claimsPrincipal.Claims.Where(c => c.Type == "groups").Select(c => c.Value).ToList();
-        var session = claimsPrincipal.Claims.Where(c => c.Type == "nonce").Select(c => c.Value).FirstOrDefault();
-
-        if (string.IsNullOrEmpty(id))
-        {
-            id = "LocalDevUser";
-            name = "LocalDevUser";
-            userGroups = new List<string> { "LocalDevUser" };
-            session = "test-session";
-        }
-        
-        var enableLogout = !string.IsNullOrEmpty(id);
-
-        var profiles = ProfileDefinition.All.GetAuthorizedProfiles(userGroups).Select(x => new ProfileSummary(x.Name, string.Empty, (ProfileApproach)Enum.Parse(typeof(ProfileApproach), x.Approach, true), x.SampleQuestions));
-        var user = new UserInformation(enableLogout, name, id, session, profiles, userGroups);
-
-        return user;
     }
 }
