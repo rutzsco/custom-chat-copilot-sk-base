@@ -152,27 +152,32 @@ var appDefinition = {
   settings : (union(array(backendDefinition.settings), [
     {
       name: 'acrpassword'
-      value: '@Microsoft.KeyVault(VaultName=${keyVault.outputs.name};SecretName=${registry.outputs.registrySecretName})'
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${registry.outputs.registrySecretName}'
+      secretRef: 'acrpassword'
       secret: true
     }
     {
-      name: 'cosmosdbconnectionstring'
-      value: '@Microsoft.KeyVault(VaultName=${keyVault.outputs.name};SecretName=${cosmos.outputs.connectionStringSecretName})'
+      name: 'CosmosDBConnectionString'
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${cosmos.outputs.connectionStringSecretName}'
+      secretRef: 'cosmosdbconnectionstring'
       secret: true
     }
     {
-      name: 'azurestorageconnectionstring'
-      value: '@Microsoft.KeyVault(VaultName=${keyVault.outputs.name};SecretName=${storageAccount.outputs.storageAccountConnectionStringSecretName})'
+      name: 'AzureStorageConnectionString'
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${storageAccount.outputs.storageAccountConnectionStringSecretName}'
+      secretRef: 'azurestorageconnectionstring'
       secret: true
     }
     {
-      name: 'aoaistandardservicekey'
-      value: '@Microsoft.KeyVault(VaultName=${keyVault.outputs.name};SecretName=${azureOpenAi.outputs.cognitiveServicesKeySecretName})'
+      name: 'AOAIStandardServiceKey'
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${azureOpenAi.outputs.cognitiveServicesKeySecretName}'
+      secretRef: 'aoaistandardservicekey'
       secret: true
     }
     {
-      name: 'azuresearchservicekey'
-      value: '@Microsoft.KeyVault(VaultName=${keyVault.outputs.name};SecretName=${search.outputs.searchKeySecretName})'
+      name: 'AzureSearchServiceKey'
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${search.outputs.searchKeySecretName}'
+      secretRef: 'azuresearchservicekey'
       secret: true
     }
     {
@@ -182,18 +187,6 @@ var appDefinition = {
     {
       name: 'AzureStorageContainer'
       value: storageAccountContainerName
-    }
-    {
-      name: 'AzureStorageConnectionString'
-      secretRef: 'azurestorageconnectionstring'
-    }
-    {
-      name: 'CosmosDBConnectionString'
-      secretRef: 'cosmosdbconnectionstring'
-    }
-    {
-      name: 'AzureSearchServiceKey'
-      secretRef: 'azuresearchservicekey'
     }
     {
       name: 'AzureSearchServiceEndpoint'
@@ -209,7 +202,8 @@ var appDefinition = {
     }
     {
       name: 'AOAIPremiumServiceKey'
-      secretRef: 'aoaipremiumservicekey'
+      value: 'aoaipremiumservicekey'
+      //secret: true
     }
     {
       name: 'AOAIPremiumChatGptDeployment'
@@ -218,10 +212,6 @@ var appDefinition = {
     {
       name: 'AOAIStandardServiceEndpoint'
       value: azureOpenAi.outputs.endpoint
-    }
-    {
-      name: 'AOAIStandardServiceKey'
-      secretRef: 'aoaistandardservicekey'
     }
     {
       name: 'AOAIStandardChatGptDeployment'

@@ -63,7 +63,7 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
       }
       registries: [
         {
-          server: '${containerRegistryName}.azurecr.io'
+          server: containerRegistry.properties.loginServer
           username: containerRegistry.listCredentials().username
           passwordSecretRef: 'acrpassword'
         }
@@ -72,7 +72,8 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
       ],
       map(secrets, secret => {
         name: secret.secretRef
-        value: secret.value
+        keyVaultUrl: secret.value
+        identity: userIdentity.id
       }))
     }
     template: {
