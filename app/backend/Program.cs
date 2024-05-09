@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.DataProtection;
 using MinimalApi;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,6 +36,9 @@ else
             option.ConnectionString = appInsightsConnectionString;
         });
     }
+
+
+    builder.Services.AddDataProtection().PersistKeysToAzureBlobStorage(GetEnvVar("AzureStorageAccountConnectionString"), GetEnvVar("DataProtectionContainer"), "keys.xml");
 }
 
 var app = builder.Build();
