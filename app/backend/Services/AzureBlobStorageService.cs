@@ -23,7 +23,7 @@ public sealed class AzureBlobStorageService(BlobServiceClient blobServiceClient,
                 var fileName = file.FileName;
 
                 await using var stream = file.OpenReadStream();
-                var blobName = BlobNameFromFilePage(fileName);
+                var blobName = BlobNameFromFilePage(fileName, DateTime.UtcNow.Ticks);
                 var blobClient = container.GetBlobClient(blobName);
                 //if (await blobClient.ExistsAsync(cancellationToken))
                 //{
@@ -52,8 +52,8 @@ public sealed class AzureBlobStorageService(BlobServiceClient blobServiceClient,
         }
     }
 
-    private static string BlobNameFromFilePage(string filename, int page = 0) =>
+    private static string BlobNameFromFilePage(string filename, long page = 0) =>
         Path.GetExtension(filename).ToLower() is ".pdf"
-            ? $"{Path.GetFileNameWithoutExtension(filename)}-{page}.pdf"
+            ? $"{Path.GetFileNameWithoutExtension(filename)}_{page}.pdf"
             : Path.GetFileName(filename);
 }
