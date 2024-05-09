@@ -3,6 +3,7 @@
 
 using Azure;
 using Azure.Storage;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.DependencyInjection;
 using MinimalApi.Services.ChatHistory;
@@ -15,14 +16,14 @@ internal static class ServiceCollectionExtensions
 {
     private static readonly DefaultAzureCredential s_azureCredential = new();
 
-    internal static IServiceCollection AddAzureServices(this IServiceCollection services)
+    internal static IServiceCollection AddAzureServices(this IServiceCollection services, IConfiguration configuration)
     {
+        
         services.AddSingleton<BlobServiceClient>(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
-            var azureStorageAccountEndpoint = config["AzureStorageAccountEndpoint"];
-            var azureStorageAccountConnectionString = config["AzureStorageAccountConnectionString"];
-            ArgumentNullException.ThrowIfNullOrEmpty(azureStorageAccountEndpoint);
+            var azureStorageAccountConnectionString = config[AppConfigurationSetting.AzureStorageAccountConnectionString];
+            ArgumentNullException.ThrowIfNullOrEmpty(azureStorageAccountConnectionString);
 
             var blobServiceClient = new BlobServiceClient(azureStorageAccountConnectionString);
 
@@ -31,8 +32,7 @@ internal static class ServiceCollectionExtensions
 
         services.AddSingleton<BlobContainerClient>(sp =>
         {
-            var config = sp.GetRequiredService<IConfiguration>();
-            var azureStorageContainer = config["AzureStorageContainer"];
+            var azureStorageContainer = configuration["AzureStorageContainer"];
             return sp.GetRequiredService<BlobServiceClient>().GetBlobContainerClient(azureStorageContainer);
         });
 
@@ -100,7 +100,10 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<ChatService>();
         services.AddSingleton<ReadRetrieveReadChatService>();
         services.AddSingleton<ReadRetrieveReadStreamingChatService>();
-        
+        services.AddSingleton<AzureBlobStorageService>();
+        services.AddSingleton<DocumentService>();
+        services.AddHttpClient<DocumentService, DocumentService>();
+
         return services;
     }
 

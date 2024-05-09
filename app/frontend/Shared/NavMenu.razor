@@ -1,5 +1,8 @@
 ﻿<MudNavMenu Rounded="true" Margin=Margin.Normal Class="pa-2" Color=Color.Primary>
     <MudNavLink Href="" aria-label="Chat navigation option." Icon="@Icons.Material.Filled.QuestionAnswer" Match="NavLinkMatch.All">Chat</MudNavLink>
-    <MudNavLink Href="feedback" aria-label="View response feedback." Icon="@Icons.Material.Filled.Feedback">Feedback</MudNavLink>
+    @if (AppConfiguration.ShowFileUploadSelection)
+    {
+        <MudNavLink Href="documents" aria-label="View user documents." Icon="@Icons.Material.Filled.FileUpload">Documents</MudNavLink>
+    }
     <MudNavLink Href="history" aria-label="View chat history." Icon="@Icons.Material.Filled.List">History</MudNavLink>
 </MudNavMenu>

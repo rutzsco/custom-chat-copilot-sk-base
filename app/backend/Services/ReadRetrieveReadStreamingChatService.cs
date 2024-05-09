@@ -27,7 +27,7 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
         _configuration = configuration;
     }
 
-    public async IAsyncEnumerable<ChatChunkResponse> ReplyAsync(ProfileDefinition profile, ChatRequest request, CancellationToken cancellationToken = default)
+    public async IAsyncEnumerable<ChatChunkResponse> ReplyAsync(UserInformation user, ProfileDefinition profile, ChatRequest request, CancellationToken cancellationToken = default)
     {
         var sw = Stopwatch.StartNew();
 
@@ -36,7 +36,7 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
         
         var generateSearchQueryFunction = kernel.Plugins.GetFunction(profile.RAGSettings.GenerateSearchQueryPluginName, profile.RAGSettings.GenerateSearchQueryPluginQueryFunctionName);
         var documentLookupFunction = kernel.Plugins.GetFunction(profile.RAGSettings.DocumentRetrievalPluginName, profile.RAGSettings.DocumentRetrievalPluginQueryFunctionName);
-        var context = new KernelArguments().AddUserParameters(request.History, profile);
+        var context = new KernelArguments().AddUserParameters(request.History, profile, user, request.OptionFlags.GetSelectedDocument());
 
         // RAG Steps
         await kernel.InvokeAsync(generateSearchQueryFunction, context);
@@ -44,7 +44,7 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
 
         // Chat Step
         var chatGpt = kernel.Services.GetService<IChatCompletionService>();
-        var systemMessagePrompt = PromptService.GetPromptByName(PromptService.ChatSystemPrompt);
+        var systemMessagePrompt = PromptService.GetPromptByName(profile.RAGSettings.ChatSystemMessageFile);
         context[ContextVariableOptions.SystemMessagePrompt] = systemMessagePrompt;
 
         var chatHistory = new Microsoft.SemanticKernel.ChatCompletion.ChatHistory(systemMessagePrompt).AddChatHistory(request.History);
@@ -67,7 +67,7 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
 
 
         var requestTokenCount = chatHistory.GetTokenCount();
-        var result = context.BuildStreamingResoponse(request, requestTokenCount, sb.ToString(), _configuration, _openAIClientFacade.GetKernelDeploymentName(request.OptionFlags.IsChatGpt4Enabled()), sw.ElapsedMilliseconds, requestProperties);
+        var result = context.BuildStreamingResoponse(profile, request, requestTokenCount, sb.ToString(), _configuration, _openAIClientFacade.GetKernelDeploymentName(request.OptionFlags.IsChatGpt4Enabled()), sw.ElapsedMilliseconds, requestProperties);
         yield return new ChatChunkResponse(string.Empty, result);
     }
 

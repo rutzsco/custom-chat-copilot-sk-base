@@ -18,8 +18,8 @@
   <ItemGroup>
     <None Remove="Services\Profile\Prompts\ChatSimpleSystemPrompt.txt" />
     <None Remove="Services\Profile\Prompts\ChatSimpleUserPrompt.txt" />
-    <None Remove="Services\Profile\Prompts\ChatSystemPrompt.txt" />
-    <None Remove="Services\Profile\Prompts\ChatUserPrompt.txt" />
+    <None Remove="Services\Profile\Prompts\RAGChatSystemPrompt.txt" />
+    <None Remove="Services\Profile\Prompts\RAGChatUserPrompt.txt" />
     <None Remove="Services\Profile\Prompts\RAGSearchQuerySystemPrompt.txt" />
     <None Remove="Services\Profile\Prompts\RAGSearchUserPrompt.txt" />
   </ItemGroup>
@@ -27,9 +27,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Services\Profile\profiles.json" />
     <EmbeddedResource Include="Services\Profile\Prompts\ChatSimpleSystemPrompt.txt" />
-    <EmbeddedResource Include="Services\Profile\Prompts\ChatSystemPrompt.txt" />
+    <EmbeddedResource Include="Services\Profile\Prompts\RAGChatSystemPrompt.txt" />
     <EmbeddedResource Include="Services\Profile\Prompts\ChatSimpleUserPrompt.txt" />
-    <EmbeddedResource Include="Services\Profile\Prompts\ChatUserPrompt.txt" />
+    <EmbeddedResource Include="Services\Profile\Prompts\RAGChatUserPrompt.txt" />
     <EmbeddedResource Include="Services\Profile\Prompts\RAGSearchQuerySystemPrompt.txt" />
     <EmbeddedResource Include="Services\Profile\Prompts\RAGSearchUserPrompt.txt" />
   </ItemGroup>
@@ -37,6 +37,7 @@
   <ItemGroup>
     <PackageReference Include="Azure.AI.OpenAI" />
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" />
+    <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" />
     <PackageReference Include="Azure.Identity" />
     <PackageReference Include="Azure.Search.Documents" />
     <PackageReference Include="Azure.Storage.Blobs" />

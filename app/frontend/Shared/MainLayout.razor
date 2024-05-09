@@ -13,10 +13,11 @@
 </HeadContent>
 <MudRTLProvider RightToLeft="_isRightToLeft">
     <MudLayout class="@(_isRightToLeft ? "rtl-lang" : "")">
-        <MudAppBar Elevation="20">
-            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" id="nav-toggle"
+        <MudAppBar Elevation="5">
+@*             <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" id="nav-toggle"
                         Title="Toggle navigation sidebar"
-                        Size="Size.Large" Edge="Edge.Start" OnClick="@OnMenuClicked" />
+                        Size="Size.Large" Edge="Edge.Start" OnClick="@OnMenuClicked" /> *@
+            <MudImage Fluid="true" Src="@LogoImagePath" Class="rounded filter-shadow" Alt="Logo" Style="height: 60px;" />
             @if (SortDisabled is false)
             {
                 <MudTooltip Text="@(_isReversed ? "Sort conversations with latest answers on bottom" : "Sort conversations with latest answers on top")"
@@ -36,17 +37,12 @@
             }
             <MudToggleIconButton Toggled="@_isDarkTheme" ToggledChanged=@OnThemeChanged Size="Size.Large"
                                 ToggledSize="Size.Large"
-                                 Title="Switch to Dark theme" Icon=@Icons.Material.Filled.DarkMode Color="@Color.Inherit"
+                                Title="Switch to Dark theme" Icon=@Icons.Material.Filled.DarkMode Color="@Color.Inherit"
                                 ToggledTitle="Switch to Light theme" ToggledIcon=@Icons.Material.Filled.WbSunny ToggledColor=@Color.Warning />
            
             <LogoutDisplay />
         </MudAppBar>
-        <MudDrawer @bind-Open="_drawerOpen" Elevation="5" id="drawer">
-            <MudDrawerHeader>
-                <MudImage Fluid="true" Src="@LogoImagePath" Class="rounded filter-shadow" Alt="Logo" />
-                <MudSpacer />
-            </MudDrawerHeader>
-            <MudDivider Style="flex-grow: 0;" />
+        <MudDrawer @bind-Open="_drawerOpen" Elevation="20" id="drawer" ClipMode="DrawerClipMode.Always">
             <NavMenu />
         </MudDrawer>
         <MudMainContent>

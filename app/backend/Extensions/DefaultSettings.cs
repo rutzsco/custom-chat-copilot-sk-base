@@ -30,6 +30,7 @@ public static class DefaultSettings
 
     public static string CosmosDBDatabaseName = "ChatHistory";
     public static string CosmosDBCollectionName = "ChatTurn";
+    public static string CosmosDBUserDocumentsCollectionName = "UserDocuments";
 
     public static string GenerateSearchQueryPluginName = "GenerateSearchQuery";
     public static string GenerateSearchQueryPluginQueryFunctionName = "GenerateSearchQuery";

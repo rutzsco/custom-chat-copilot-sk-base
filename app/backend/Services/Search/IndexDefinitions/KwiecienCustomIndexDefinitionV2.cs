@@ -2,7 +2,7 @@
 
 namespace MinimalApi.Services.Search.IndexDefinitions;
 
-public class KwiecienCustomIndexDefinition : IKnowledgeSource
+public class KwiecienCustomIndexDefinitionV2 : IKnowledgeSource
 {
     public required string content { get; set; }
 
@@ -10,11 +10,11 @@ public class KwiecienCustomIndexDefinition : IKnowledgeSource
 
     public required string sourcepage { get; set; }
 
-    public required string pagenumber { get; set; }
+    public required int pagenumber { get; set; }
 
     public string FormatAsOpenAISourceText()
     {
-        return $"<source><name>{sourcepage}</name><content> {content.Replace('\r', ' ').Replace('\n', ' ')}</content></source>";
+        return $"<source><name>{sourcefile}#page={pagenumber}</name><content> {content.Replace('\r', ' ').Replace('\n', ' ')}</content></source>";
     }
 
     public string GetContent()
@@ -28,6 +28,6 @@ public class KwiecienCustomIndexDefinition : IKnowledgeSource
     }
 
 
-    public static string EmbeddingsFieldName = "embedding";
+    public static string EmbeddingsFieldName = "embeddings";
     public static List<string> SelectFieldNames = new List<string> { "content", "sourcefile", "sourcepage", "pagenumber" };
 }

@@ -28,7 +28,7 @@ public sealed class RetrieveRelatedDocumentSkill
         var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
 
         var searchLogic = new SearchLogic<AIStudioIndexDefinition>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], AIStudioIndexDefinition.EmbeddingsFieldName, AIStudioIndexDefinition.SelectFieldNames);
-        var result = await searchLogic.SearchAsync(searchQuery);
+        var result = await searchLogic.SearchAsync(searchQuery, arguments);
 
         if (!result.Sources.Any())
         {
@@ -49,7 +49,7 @@ public sealed class RetrieveRelatedDocumentSkill
         var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
 
         var searchLogic = new SearchLogic<AISearchIndexerIndexDefinintion>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], AISearchIndexerIndexDefinintion.EmbeddingsFieldName, AISearchIndexerIndexDefinintion.SelectFieldNames);
-        var result = await searchLogic.SearchAsync(searchQuery);
+        var result = await searchLogic.SearchAsync(searchQuery, arguments);
 
         if (!result.Sources.Any())
         {
@@ -69,8 +69,29 @@ public sealed class RetrieveRelatedDocumentSkill
         arguments[ContextVariableOptions.Intent] = searchQuery;
         var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
 
-        var searchLogic = new SearchLogic<KwiecienCustomIndexDefinition>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], KwiecienCustomIndexDefinition.EmbeddingsFieldName, KwiecienCustomIndexDefinition.SelectFieldNames);
-        var result = await searchLogic.SearchAsync(searchQuery);
+        var searchLogic = new SearchLogic<KwiecienCustomIndexDefinitionV2>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], KwiecienCustomIndexDefinitionV2.EmbeddingsFieldName, KwiecienCustomIndexDefinitionV2.SelectFieldNames);
+        var result = await searchLogic.SearchAsync(searchQuery, arguments);
+
+        if (!result.Sources.Any())
+        {
+            arguments[ContextVariableOptions.Knowledge] = "NO_SOURCES";
+            return "NO_SOURCES";
+        }
+
+        arguments[ContextVariableOptions.Knowledge] = result.FormattedSourceText;
+        arguments[ContextVariableOptions.KnowledgeSummary] = result;
+        return result.FormattedSourceText;
+    }
+
+    [KernelFunction("QueryV4"), Description("Search more information")]
+    public async Task<string> QueryV4Async([Description("search query")] string searchQuery, KernelArguments arguments)
+    {
+        searchQuery = searchQuery.Replace("\"", string.Empty);
+        arguments[ContextVariableOptions.Intent] = searchQuery;
+        var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
+
+        var searchLogic = new SearchLogic<KwiecienCustomIndexDefinitionV2>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], KwiecienCustomIndexDefinitionV2.EmbeddingsFieldName, KwiecienCustomIndexDefinitionV2.SelectFieldNames);
+        var result = await searchLogic.SearchAsync(searchQuery, arguments);
 
         if (!result.Sources.Any())
         {

@@ -3,6 +3,9 @@
 <PageTitle>Chat History</PageTitle>
 
 <MudGrid Justify="Justify.Center">
+     <MudItem xs="12">
+        <MudCheckBox T="bool" @bind-Value="@_showFeeback" Label="Show Feedback" CheckedChanged="OnChangeFeedbackFilerAsync"></MudCheckBox>
+     </MudItem>
     <MudItem xs="12">
         <MudTable Items="@_feedback" Dense="true" Hover="true" Bordered="true" FixedHeader="true" Elevation="4">
             <ToolBarContent>
@@ -22,6 +25,9 @@
                 <MudTh Style="text-align:center">
                     <MudTableSortLabel SortBy="new Func<ChatHistoryResponse, object>(d => d.Prompt)">Answer</MudTableSortLabel>
                 </MudTh>
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<ChatHistoryResponse, object>(d => d.Rating)">Rating</MudTableSortLabel>
+                </MudTh>
                 <MudTh Style="text-align:center">
                     <MudTableSortLabel SortBy="new Func<ChatHistoryResponse, object>(d => d.Model)">Model</MudTableSortLabel>
                 </MudTh>
@@ -35,8 +41,9 @@
             <RowTemplate>
                 <MudTd DataLabel="Question" Style="text-align:center"><strong>@context.Prompt</strong></MudTd>
                 <MudTd DataLabel="Answer">@context.Answer</MudTd>
-                    <MudTd DataLabel="Model">@context.Model</MudTd>
-                    <MudTd DataLabel="ElapsedMilliseconds">@context.ElapsedMilliseconds</MudTd>
+                <MudTd DataLabel="Rating">@context.Rating<br />@context.Feedback</MudTd>
+                <MudTd DataLabel="Model">@context.Model</MudTd>
+                <MudTd DataLabel="ElapsedMilliseconds">@context.ElapsedMilliseconds</MudTd>
                 <MudTd DataLabel="Timestamp">@($"{context.Timestamp:G}")</MudTd>
             </RowTemplate>
             <PagerContent>

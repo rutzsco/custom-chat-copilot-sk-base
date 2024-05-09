@@ -21,10 +21,15 @@ public sealed class ApiClient(HttpClient httpClient)
         return await response.Content.ReadFromJsonAsync<UserInformation>();
     }
 
-    public async Task<UploadDocumentsResponse> UploadDocumentsAsync(
-        IReadOnlyList<IBrowserFile> files,
-        long maxAllowedSize,
-        string cookie)
+    public async Task<List<DocumentSummary>> GetUserDocumentsAsync()
+    {
+        var response = await httpClient.GetAsync("api/user/documents");
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<List<DocumentSummary>>();
+    }
+
+    public async Task<UploadDocumentsResponse> UploadDocumentsAsync(IReadOnlyList<IBrowserFile> files, long maxAllowedSize, string cookie)
     {
         try
         {
@@ -32,10 +37,8 @@ public sealed class ApiClient(HttpClient httpClient)
 
             foreach (var file in files)
             {
-                // max allow size: 10mb
-                var max_size = maxAllowedSize * 1024 * 1024;
 #pragma warning disable CA2000 // Dispose objects before losing scope
-                var fileContent = new StreamContent(file.OpenReadStream(max_size));
+                var fileContent = new StreamContent(file.OpenReadStream(maxAllowedSize));
 #pragma warning restore CA2000 // Dispose objects before losing scope
                 fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
 
@@ -63,18 +66,16 @@ public sealed class ApiClient(HttpClient httpClient)
         }
     }
 
-    public async IAsyncEnumerable<DocumentResponse> GetDocumentsAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+    public async IAsyncEnumerable<DocumentSummary> GetDocumentsAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var response = await httpClient.GetAsync("api/documents", cancellationToken);
-
+        var response = await httpClient.GetAsync("api/user/documents", cancellationToken);
         if (response.IsSuccessStatusCode)
         {
             var options = SerializerOptions.Default;
 
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
-            await foreach (var document in
-                JsonSerializer.DeserializeAsyncEnumerable<DocumentResponse>(stream, options, cancellationToken))
+            await foreach (var document in JsonSerializer.DeserializeAsyncEnumerable<DocumentSummary>(stream, options, cancellationToken))
             {
                 if (document is null)
                 {
@@ -85,7 +86,8 @@ public sealed class ApiClient(HttpClient httpClient)
             }
         }
     }
-    public async IAsyncEnumerable<FeedbackResponse> GetFeedbackAsync([EnumeratorCancellation] CancellationToken cancellationToken)
+
+    public async IAsyncEnumerable<ChatHistoryResponse> GetFeedbackAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var response = await httpClient.GetAsync("api/feedback", cancellationToken);
 
@@ -95,7 +97,7 @@ public sealed class ApiClient(HttpClient httpClient)
 
             using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
 
-            await foreach (var document in JsonSerializer.DeserializeAsyncEnumerable<FeedbackResponse>(stream, options, cancellationToken))
+            await foreach (var document in JsonSerializer.DeserializeAsyncEnumerable<ChatHistoryResponse>(stream, options, cancellationToken))
             {
                 if (document is null)
                 {

@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Azure.AI.OpenAI;
 using Azure.Search.Documents;
 using MinimalApi.Extensions;
+using MinimalApi.Services.Profile;
 using TiktokenSharp;
 
 namespace MinimalApi.Services.Search;
@@ -25,10 +27,11 @@ public class SearchLogic<T> where T : IKnowledgeSource
         _selectFields = selectFields;
     }
 
-    public async Task<KnowledgeSourceSummary> SearchAsync(string query)
+    public async Task<KnowledgeSourceSummary> SearchAsync(string query, KernelArguments arguments)
     {
         // Generate the embedding for the query  
         var queryEmbeddings = await GenerateEmbeddingsAsync(query, _openAIClient);
+
 
         // Configure the search options
         var searchOptions = new SearchOptions
@@ -44,7 +47,14 @@ public class SearchLogic<T> where T : IKnowledgeSource
         {
             searchOptions.Select.Add(field);
         }
-
+     
+        if (arguments.ContainsName(ContextVariableOptions.SelectedDocument))
+        {
+            var userId = arguments[ContextVariableOptions.UserId] as string;
+            var sessionId = arguments[ContextVariableOptions.SessionId] as string;
+            var sourcefile = arguments[ContextVariableOptions.SelectedDocument] as string;
+            searchOptions.Filter = $"entra_id eq '{userId}' and session_id eq '{sessionId}' and sourcefile eq '{sourcefile}'";
+        }
 
         // Perform the search and build the results
         var response = await _searchClient.SearchAsync<T>(query, searchOptions);

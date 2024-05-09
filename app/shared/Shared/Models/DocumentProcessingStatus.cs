@@ -4,7 +4,8 @@ namespace Shared.Models;
 
 public enum DocumentProcessingStatus
 {
-    NotProcessed,
-    Succeeded,
-    Failed
+    New = 0,
+    Processing = 1,
+    Succeeded = 10,
+    Failed = 20
 };

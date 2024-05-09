@@ -1,22 +1,36 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Data;
 using ClientApp.Models;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.JSInterop;
 using static System.Net.WebRequestMethods;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ClientApp.Pages;
 
 public sealed partial class Chat
 {
+    private const long MaxIndividualFileSize = 1_024L * 1_024;
+    private IList<IBrowserFile> _files = new List<IBrowserFile>();
+    private MudForm _form = null!;
+    private MudFileUpload<IReadOnlyList<IBrowserFile>> _fileUpload = null!;
+    private bool _showFileUpload = false;
+
     private string _userQuestion = "";
     private UserQuestion _currentQuestion;
     private string _lastReferenceQuestion = "";
     private bool _isReceivingResponse = false;
     private bool _filtersSelected = false;
 
-    private string _selectedProfile = "General Chat";
+    private string _selectedProfile = "";
     private List<ProfileSummary> _profiles = new();
     private ProfileSummary? _selectedProfileSummary = null;
+    private ProfileSummary? _userUploadProfileSummary = null;
+
+    private List<DocumentSummary> _userDocuments = new();
+    private string _selectedDocument = "";
 
     private readonly Dictionary<UserQuestion, ApproachResponse?> _questionAndAnswerMap = [];
 
@@ -28,6 +42,9 @@ public sealed partial class Chat
 
     [Inject] public required ApiClient ApiClient { get; set; }
 
+    [Inject]
+    public required IJSRuntime JSRuntime { get; set; }
+
     [CascadingParameter(Name = nameof(Settings))]
     public required RequestSettingsOverrides Settings { get; set; }
 
@@ -37,9 +54,18 @@ public sealed partial class Chat
     protected override async Task OnInitializedAsync()
     {
         var user = await ApiClient.GetUserAsync();
-        _profiles = user.Profiles.ToList();
+        _profiles = user.Profiles.Where(x => x.Approach != ProfileApproach.UserDocumentChat).ToList();
+        _userUploadProfileSummary = user.Profiles.FirstOrDefault(x => x.Approach == ProfileApproach.UserDocumentChat);
         _selectedProfile = _profiles.First().Name;
         _selectedProfileSummary = _profiles.First();
+
+        StateHasChanged();
+
+        if (AppConfiguration.ShowFileUploadSelection)
+        {
+            var userDocuments = await ApiClient.GetUserDocumentsAsync();
+            _userDocuments = userDocuments.ToList();
+        }
     }
 
     private void OnProfileClick(string selection)
@@ -47,6 +73,12 @@ public sealed partial class Chat
         _selectedProfile = selection;
         _selectedProfileSummary = _profiles.FirstOrDefault(x => x.Name == selection);
         OnClearChat();
+    }
+
+    private void OnDocumentClick(string selection)
+    {
+        _selectedDocument = selection;
+        OnClearChatDocuumentSelection();
     }
 
     private Task OnAskQuestionAsync(string question)
@@ -74,9 +106,16 @@ public sealed partial class Chat
             var options = new Dictionary<string, string>();
             options["GPT4ENABLED"] = _gPT4ON.ToString();
             options["PROFILE"] = _selectedProfile;
+            if(_userUploadProfileSummary != null && !string.IsNullOrEmpty(_selectedDocument))
+            {
+                options["SELECTEDDOCUMENT"] = _selectedDocument;
+                if (!string.IsNullOrEmpty(_selectedDocument))
+                {
+                    options["PROFILE"] = _userUploadProfileSummary.Name;
+                }
+            }
 
             var request = new ChatRequest(_chatId, Guid.NewGuid(), [.. history], options, Settings.Approach, Settings.Overrides);
-
             var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming");
             httpRequest.Headers.Add("Accept", "application/json");
             httpRequest.SetBrowserResponseStreamingEnabled(true);
@@ -131,12 +170,52 @@ public sealed partial class Chat
     {
         await JS.InvokeVoidAsync("scrollToBottom", "answerSection");
     }
+    private void OnClearChatDocuumentSelection()
+    {
+        _userQuestion = _lastReferenceQuestion = "";
+        _currentQuestion = default;
+        _questionAndAnswerMap.Clear();
+        _chatId = Guid.NewGuid();
+    }
 
     private void OnClearChat()
     {
         _userQuestion = _lastReferenceQuestion = "";
         _currentQuestion = default;
         _questionAndAnswerMap.Clear();
+        _selectedDocument = "";
         _chatId = Guid.NewGuid();
+    }
+    private void ToggleFileUpload()
+    {
+        if(_showFileUpload)
+        {
+            _showFileUpload = false;
+        }
+        else
+           _showFileUpload = true;
+    }
+    private async Task SubmitFilesForUploadAsync()
+    {
+        var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
+
+        Console.WriteLine("SubmitFilesForUploadAsync");
+        if (_fileUpload is { Files.Count: > 0 })
+        {
+
+            Console.WriteLine("SubmitFilesForUploadAsync");
+            var result = await ApiClient.UploadDocumentsAsync(_fileUpload.Files, MaxIndividualFileSize, cookie);
+            if (result.IsSuccessful)
+            {
+
+                Console.WriteLine("SubmitFilesForUploadAsync - Successful");
+                await _fileUpload.ResetAsync();
+
+            }
+            else
+            {
+                Console.WriteLine("SubmitFilesForUploadAsync - FAILED");
+            }
+        }
     }
 }
