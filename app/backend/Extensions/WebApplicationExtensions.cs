@@ -142,7 +142,6 @@ internal static class WebApplicationExtensions
 
     private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, ChatHistoryService chatHistoryService, DocumentService documentService, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        // Get user information
         var userInfo = context.GetUserInfo();
         var profile = request.OptionFlags.GetChatProfile();
         if (!userInfo.HasAccess(profile))
@@ -159,8 +158,7 @@ internal static class WebApplicationExtensions
         }
 
         var chat = ResolveChatService(request, chatService, ragChatService);
-        var resultChunks = chat.ReplyAsync(userInfo, profile, request);
-        await foreach (var chunk in resultChunks)
+        await foreach (var chunk in chat.ReplyAsync(userInfo, profile, request).WithCancellation(cancellationToken))
         {
             yield return chunk;
             if (chunk.FinalResult != null)
