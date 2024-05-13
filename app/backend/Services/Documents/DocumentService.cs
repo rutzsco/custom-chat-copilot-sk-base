@@ -73,7 +73,7 @@ public class DocumentService
             source_container = "content",
             extract_container = "content-extract",
             prefix_path = fileSummary.FileName,
-            entra_id = user.UserName,
+            entra_id = user.UserId,
             session_id = user.SessionId,
             index_name = indexName,
             index_stem_name = "rag-index",
