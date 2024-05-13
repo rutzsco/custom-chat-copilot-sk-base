@@ -60,6 +60,7 @@ internal static class ServiceCollectionExtensions
             var openAIClient = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint3), new AzureKeyCredential(azureOpenAiServiceKey3));
             var retrieveRelatedDocumentPlugin = new RetrieveRelatedDocumentSkill(config, searchClientFactory, openAIClient);
             var generateSearchQueryPlugin = new GenerateSearchQuerySkill();
+            var weatherSkill = new WeatherSkill();
             var chatPlugin = new ChatSkill();
 
             // Build Kernels
@@ -74,9 +75,11 @@ internal static class ServiceCollectionExtensions
             kernel3.ImportPluginFromObject(retrieveRelatedDocumentPlugin, DefaultSettings.DocumentRetrievalPluginName);
             kernel3.ImportPluginFromObject(generateSearchQueryPlugin, DefaultSettings.GenerateSearchQueryPluginName);
             kernel3.ImportPluginFromObject(chatPlugin, DefaultSettings.ChatPluginName);
+            kernel3.ImportPluginFromObject(weatherSkill, "WeatherSkill");
             kernel4.ImportPluginFromObject(retrieveRelatedDocumentPlugin, DefaultSettings.DocumentRetrievalPluginName);
             kernel4.ImportPluginFromObject(generateSearchQueryPlugin, DefaultSettings.GenerateSearchQueryPluginName);
             kernel4.ImportPluginFromObject(chatPlugin, DefaultSettings.ChatPluginName);
+            kernel4.ImportPluginFromObject(weatherSkill, "WeatherSkill");
 
             return new OpenAIClientFacade(deployedModelName3, kernel3, deployedModelName4, kernel4, openAIClient);
         });
@@ -100,6 +103,7 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<ChatService>();
         services.AddSingleton<ReadRetrieveReadChatService>();
         services.AddSingleton<ReadRetrieveReadStreamingChatService>();
+        services.AddSingleton<WeatherChatService>();
         services.AddSingleton<AzureBlobStorageService>();
         services.AddSingleton<DocumentService>();
         services.AddHttpClient<DocumentService, DocumentService>();

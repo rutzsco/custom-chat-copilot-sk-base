@@ -13,6 +13,9 @@ public static class PromptService
     public static string ChatSimpleSystemPrompt = "ChatSimpleSystemPrompt";
     public static string ChatSimpleUserPrompt = "ChatSimpleUserPrompt";
 
+    public static string WeatherSystemPrompt = "WeatherSystemPrompt";
+    public static string WeatherUserPrompt = "WeatherUserPrompt";
+
     public static string GetPromptByName(string prompt)
     {
         var resourceName = $"MinimalApi.Services.Profile.Prompts.{prompt}.txt";

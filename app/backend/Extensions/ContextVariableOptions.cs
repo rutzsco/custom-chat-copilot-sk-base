@@ -20,5 +20,9 @@ public class ContextVariableOptions
     public static string UserId = "UserId";
     public static string SessionId = "SessionId";
     public static string SelectedDocument = "SelectedDocument";
-    
+
+    public static string WeatherLocation = "WeatherLocation";
+    public static string WeatherLatLong = "WeatherLatLong";
+
+
 }

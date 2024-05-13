@@ -72,6 +72,12 @@ namespace MinimalApi.Extensions
             var selected = ProfileDefinition.All.FirstOrDefault(x => x.Name == profile.Name);
             return selected.Approach.ToUpper() == "CHAT";
         }
+        public static bool IsWeatherChatProfile(this Dictionary<string, string> options)
+        {
+            var profile = options.GetChatProfile();
+            var selected = ProfileDefinition.All.FirstOrDefault(x => x.Name == profile.Name);
+            return selected.Approach.ToUpper() == "WEATHERCHAT";
+        }
 
         public static ProfileDefinition GetChatProfile(this Dictionary<string, string> options)
         {
