@@ -115,7 +115,7 @@ namespace MinimalApi.Extensions
         public static ApproachResponse BuildStreamingResoponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds, List<KeyValuePair<string, string>> requestSettings)
         {
             var dataSources = new SupportingContentRecord [] { };
-            if (context[ContextVariableOptions.Knowledge] != "NO_SOURCES")
+            if (context[ContextVariableOptions.Knowledge] == "NO_SOURCES")
             {
                 var knowledgeSourceSummary = (KnowledgeSourceSummary)context[ContextVariableOptions.KnowledgeSummary];
                 dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(), x.GetContent())).ToArray();
@@ -129,6 +129,31 @@ namespace MinimalApi.Extensions
             var userMessage = (string)context["UserMessage"];
 
             var thoughts = GetThoughtsRAGV2(context, answer, requestSettings);
+            var contextData = new ResponseContext(profile.Name, dataSources, thoughts.ToArray(), request.ChatTurnId, request.ChatId, diagnostics);
+
+            return new ApproachResponse(
+                Answer: NormalizeResponseText(answer),
+                CitationBaseUrl: profile.Id,
+                contextData);
+        }
+
+        public static ApproachResponse BuildStreamingResoponseV2(this KernelArguments context, ProfileDefinition profile, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds, List<KeyValuePair<string, string>> requestSettings)
+        {
+            var dataSources = new SupportingContentRecord[] { };
+            if (context[ContextVariableOptions.Knowledge] == "NO_SOURCES")
+            {
+                var knowledgeSourceSummary = (KnowledgeSourceSummary)context[ContextVariableOptions.KnowledgeSummary];
+                dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(), x.GetContent())).ToArray();
+            }
+
+            var completionTokens = GetTokenCount(answer);
+            var totalTokens = completionTokens + requestTokenCount;
+            var chatDiagnostics = new CompletionsDiagnostics(completionTokens, requestTokenCount, totalTokens, 0);
+            var diagnostics = new Diagnostics(chatDiagnostics, modelDeploymentName, workflowDurationMilliseconds);
+            var systemMessagePrompt = (string)context["SystemMessagePrompt"];
+            var userMessage = (string)context["UserMessage"];
+
+            var thoughts = GetThoughtsRAGV3(context, answer, requestSettings);
             var contextData = new ResponseContext(profile.Name, dataSources, thoughts.ToArray(), request.ChatTurnId, request.ChatId, diagnostics);
 
             return new ApproachResponse(
@@ -208,7 +233,19 @@ namespace MinimalApi.Extensions
 
             return thoughts;
         }
+        private static IEnumerable<ThoughtRecord> GetThoughtsRAGV3(KernelArguments context, string answer, List<KeyValuePair<string, string>> requestSettings)
+        {
+            var systemMessagePrompt = (string)context["SystemMessagePrompt"];
+            var userMessage = (string)context["UserMessage"];
 
+            var thoughts = new List<ThoughtRecord>
+            {
+                new("Prompt", BuildPromptContext(requestSettings)),
+                new("Answer", answer)
+            };
+
+            return thoughts;
+        }
         private static IEnumerable<ThoughtRecord> GetThoughts(KernelArguments context)
         {
 

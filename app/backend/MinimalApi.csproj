@@ -28,6 +28,7 @@
     <None Remove="Services\Profile\Prompts\ChatSimpleUserPrompt.txt" />
     <None Remove="Services\Profile\Prompts\RAGChatSystemPrompt.txt" />
     <None Remove="Services\Profile\Prompts\RAGChatUserPrompt.txt" />
+    <None Remove="Services\Profile\Prompts\RAGChatWithFollowUpSystemPrompt.txt" />
     <None Remove="Services\Profile\Prompts\RAGSearchQuerySystemPrompt.txt" />
     <None Remove="Services\Profile\Prompts\RAGSearchUserPrompt.txt" />
     <None Remove="Services\Profile\Prompts\WeatherChatSystemPrompt.txt" />
@@ -38,6 +39,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Services\Profile\profiles.json" />
+    <EmbeddedResource Include="Services\Profile\Prompts\RAGChatWithFollowUpSystemPrompt.txt" />
     <EmbeddedResource Include="Services\Profile\Prompts\WeatherChatSystemPrompt.txt" />
     <EmbeddedResource Include="Services\Profile\Prompts\WeatherLocationSystemPrompt.txt" />
     <EmbeddedResource Include="Services\Profile\Prompts\WeatherUserPrompt.txt" />

@@ -51,7 +51,7 @@ public class WeatherSkill
         arguments[ContextVariableOptions.WeatherLatLong] = searchAnswer.Content;
     }
 
-    [KernelFunction("GetLocation"), Description("Determine the location latitude and longitude based on user request")]
+    [KernelFunction("GetLocation"), Description("Determine the location based on user request")]
     public async Task DetermineLocationAsync([Description("chat History")] ChatTurn[] chatTurns,
                                         KernelArguments arguments,
                                         Kernel kernel)

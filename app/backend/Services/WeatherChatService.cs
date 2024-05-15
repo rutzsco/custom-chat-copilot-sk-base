@@ -69,7 +69,7 @@ internal sealed class WeatherChatService : IChatService
 
 
         var requestTokenCount = chatHistory.GetTokenCount();
-        var result = context.BuildStreamingResoponse(profile, request, requestTokenCount, sb.ToString(), _configuration, _openAIClientFacade.GetKernelDeploymentName(request.OptionFlags.IsChatGpt4Enabled()), sw.ElapsedMilliseconds, requestProperties);
+        var result = context.BuildStreamingResoponseV2(profile, request, requestTokenCount, sb.ToString(), _configuration, _openAIClientFacade.GetKernelDeploymentName(request.OptionFlags.IsChatGpt4Enabled()), sw.ElapsedMilliseconds, requestProperties);
         yield return new ChatChunkResponse(string.Empty, result);
     }
 

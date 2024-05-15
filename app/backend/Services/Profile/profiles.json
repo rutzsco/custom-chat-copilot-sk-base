@@ -20,16 +20,16 @@
       "StorageContianer": "content"
     }
   },
-  {
-    "Name": "General",
-    "Id": "General",
-    "Approach": "Chat",
-    "SecurityModel": "None",
-    "SampleQuestions": [
-      "Write a function in C# that will invoke a rest API",
-      "Explain why popcorn pops to a kid who loves watching it in the microwave."
-    ]
-  },
+  //{
+  //  "Name": "General",
+  //  "Id": "General",
+  //  "Approach": "Chat",
+  //  "SecurityModel": "None",
+  //  "SampleQuestions": [
+  //    "Write a function in C# that will invoke a rest API",
+  //    "Explain why popcorn pops to a kid who loves watching it in the microwave."
+  //  ]
+  //},
   {
     "Name": "Document Chat",
     "Id": "DocumentChat",
