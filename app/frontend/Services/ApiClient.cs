@@ -45,7 +45,13 @@ public sealed class ApiClient(HttpClient httpClient)
                 content.Add(fileContent, file.Name, file.Name);
             }
 
+
+            //var tokenResponse = await httpClient.GetAsync("api/token/csrf");
+            //tokenResponse.EnsureSuccessStatusCode();
+            //var token = await tokenResponse.Content.ReadAsStringAsync();
+
             // set cookie
+            Console.WriteLine($"Cookie: {cookie}");
             content.Headers.Add("X-CSRF-TOKEN-FORM", cookie);
             content.Headers.Add("X-CSRF-TOKEN-HEADER", cookie);
 

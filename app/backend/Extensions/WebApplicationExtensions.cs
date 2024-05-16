@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System;
-
+using Microsoft.AspNetCore.Antiforgery;
 using MinimalApi.Services.ChatHistory;
 using MinimalApi.Services.Profile;
 using MinimalApi.Services.Security;
@@ -37,8 +37,17 @@ internal static class WebApplicationExtensions
         // User document
         api.MapPost("documents", OnPostDocumentAsync);
         api.MapGet("user/documents", OnGetUserDocumentsAsync);
+
+        api.MapGet("token/csrf", OnGetAntiforgeryTokenAsync);
+
         return app;
     }
+    private static async Task<IResult> OnGetAntiforgeryTokenAsync(HttpContext context, IAntiforgery antiforgery)
+    {
+        var tokens = antiforgery.GetAndStoreTokens(context);
+        return TypedResults.Ok(tokens?.RequestToken ?? string.Empty);
+    }
+        
     private static async Task<IResult> OnGetSourceFileAsync(HttpContext context, string fileName, BlobServiceClient blobServiceClient, IConfiguration configuration)
     {
         try
