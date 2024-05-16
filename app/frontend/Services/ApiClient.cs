@@ -46,14 +46,14 @@ public sealed class ApiClient(HttpClient httpClient)
             }
 
 
-            //var tokenResponse = await httpClient.GetAsync("api/token/csrf");
-            //tokenResponse.EnsureSuccessStatusCode();
-            //var token = await tokenResponse.Content.ReadAsStringAsync();
+            var tokenResponse = await httpClient.GetAsync("api/token/csrf");
+            tokenResponse.EnsureSuccessStatusCode();
+            var token = await tokenResponse.Content.ReadAsStringAsync();
+            token = token.Trim('"');
 
-            // set cookie
-            Console.WriteLine($"Cookie: {cookie}");
-            content.Headers.Add("X-CSRF-TOKEN-FORM", cookie);
-            content.Headers.Add("X-CSRF-TOKEN-HEADER", cookie);
+            // set token
+            content.Headers.Add("X-CSRF-TOKEN-FORM", token);
+            content.Headers.Add("X-CSRF-TOKEN-HEADER", token);
 
             var response = await httpClient.PostAsync("api/documents", content);
 
