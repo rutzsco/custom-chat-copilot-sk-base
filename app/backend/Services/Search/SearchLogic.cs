@@ -17,14 +17,17 @@ public class SearchLogic<T> where T : IKnowledgeSource
     private readonly OpenAIClient _openAIClient;
     private readonly string _embeddingModelName;
     private readonly string _embeddingFieldName;
-    private readonly List<string> _selectFields;    
-    public SearchLogic(OpenAIClient openAIClient, SearchClientFactory factory, string indexName, string embeddingModelName, string embeddingFieldName, List<string> selectFields)
+    private readonly List<string> _selectFields;
+    private readonly int _documentFilesCount;
+
+    public SearchLogic(OpenAIClient openAIClient, SearchClientFactory factory, string indexName, string embeddingModelName, string embeddingFieldName, List<string> selectFields, int documentFilesCount)
     {
         _searchClient = factory.GetOrCreateClient(indexName);
         _openAIClient = openAIClient;
         _embeddingModelName = embeddingModelName;
         _embeddingFieldName = embeddingFieldName;
         _selectFields = selectFields;
+        _documentFilesCount = documentFilesCount;
     }
 
     public async Task<KnowledgeSourceSummary> SearchAsync(string query, KernelArguments arguments)
@@ -36,7 +39,7 @@ public class SearchLogic<T> where T : IKnowledgeSource
         // Configure the search options
         var searchOptions = new SearchOptions
         {
-            Size = AppConfiguration.SearchIndexDocumentCount,
+            Size = _documentFilesCount,
             VectorSearch = new()
             {
                 Queries = { new VectorizedQuery(queryEmbeddings.ToArray()) { KNearestNeighborsCount = DefaultSettings.KNearestNeighborsCount, Fields = { _embeddingFieldName } } }

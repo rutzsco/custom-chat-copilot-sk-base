@@ -4,6 +4,7 @@ using System.ComponentModel;
 using MinimalApi.Services.Profile;
 using MinimalApi.Services.Search;
 using MinimalApi.Services.Search.IndexDefinitions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MinimalApi.Services.Skills;
 
@@ -27,7 +28,14 @@ public sealed class RetrieveRelatedDocumentSkill
         arguments[ContextVariableOptions.Intent] = searchQuery;
         var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
 
-        var searchLogic = new SearchLogic<AIStudioIndexDefinition>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], AIStudioIndexDefinition.EmbeddingsFieldName, AIStudioIndexDefinition.SelectFieldNames);
+        var searchLogic = new SearchLogic<AIStudioIndexDefinition>(_openAIClient,
+            _searchClientFactory,
+            profile.RAGSettings.DocumentRetrievalIndexName,
+            _config["AOAIEmbeddingsDeployment"],
+            AIStudioIndexDefinition.EmbeddingsFieldName,
+            AIStudioIndexDefinition.SelectFieldNames,
+            ResolveDocumentCount(profile.RAGSettings.DocumentRetrievalDocumentCount));
+
         var result = await searchLogic.SearchAsync(searchQuery, arguments);
 
         if (!result.Sources.Any())
@@ -48,7 +56,7 @@ public sealed class RetrieveRelatedDocumentSkill
         arguments[ContextVariableOptions.Intent] = searchQuery;
         var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
 
-        var searchLogic = new SearchLogic<AISearchIndexerIndexDefinintion>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], AISearchIndexerIndexDefinintion.EmbeddingsFieldName, AISearchIndexerIndexDefinintion.SelectFieldNames);
+        var searchLogic = new SearchLogic<AISearchIndexerIndexDefinintion>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], AISearchIndexerIndexDefinintion.EmbeddingsFieldName, AISearchIndexerIndexDefinintion.SelectFieldNames, ResolveDocumentCount(profile.RAGSettings.DocumentRetrievalDocumentCount));
         var result = await searchLogic.SearchAsync(searchQuery, arguments);
 
         if (!result.Sources.Any())
@@ -69,7 +77,7 @@ public sealed class RetrieveRelatedDocumentSkill
         arguments[ContextVariableOptions.Intent] = searchQuery;
         var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
 
-        var searchLogic = new SearchLogic<KwiecienCustomIndexDefinitionV2>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], KwiecienCustomIndexDefinitionV2.EmbeddingsFieldName, KwiecienCustomIndexDefinitionV2.SelectFieldNames);
+        var searchLogic = new SearchLogic<KwiecienCustomIndexDefinitionV2>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], KwiecienCustomIndexDefinitionV2.EmbeddingsFieldName, KwiecienCustomIndexDefinitionV2.SelectFieldNames, ResolveDocumentCount(profile.RAGSettings.DocumentRetrievalDocumentCount));
         var result = await searchLogic.SearchAsync(searchQuery, arguments);
 
         if (!result.Sources.Any())
@@ -90,7 +98,7 @@ public sealed class RetrieveRelatedDocumentSkill
         arguments[ContextVariableOptions.Intent] = searchQuery;
         var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
 
-        var searchLogic = new SearchLogic<KwiecienCustomIndexDefinitionV2>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], KwiecienCustomIndexDefinitionV2.EmbeddingsFieldName, KwiecienCustomIndexDefinitionV2.SelectFieldNames);
+        var searchLogic = new SearchLogic<KwiecienCustomIndexDefinitionV2>(_openAIClient, _searchClientFactory, profile.RAGSettings.DocumentRetrievalIndexName, _config["AOAIEmbeddingsDeployment"], KwiecienCustomIndexDefinitionV2.EmbeddingsFieldName, KwiecienCustomIndexDefinitionV2.SelectFieldNames, ResolveDocumentCount(profile.RAGSettings.DocumentRetrievalDocumentCount));
         var result = await searchLogic.SearchAsync(searchQuery, arguments);
 
         if (!result.Sources.Any())
@@ -102,5 +110,14 @@ public sealed class RetrieveRelatedDocumentSkill
         arguments[ContextVariableOptions.Knowledge] = result.FormattedSourceText;
         arguments[ContextVariableOptions.KnowledgeSummary] = result;
         return result.FormattedSourceText;
+    }
+
+    private int ResolveDocumentCount(int documentRetrievalDocumentCount)
+    {
+        if (documentRetrievalDocumentCount > 0)
+        {
+            return documentRetrievalDocumentCount;
+        }
+        return AppConfiguration.SearchIndexDocumentCount;
     }
 }

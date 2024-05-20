@@ -76,6 +76,9 @@ public class RAGSettingsSummary
     public string DocumentRetrievalPluginName { get; set; }
     public string DocumentRetrievalPluginQueryFunctionName { get; set; }
     public string DocumentRetrievalIndexName { get; set; }
+
+    public int DocumentRetrievalDocumentCount { get; set; }
+
     public string ChatSystemMessageFile { get; set; }
     public string StorageContianer { get; set; }
 }
