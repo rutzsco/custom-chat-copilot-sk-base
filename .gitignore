@@ -404,3 +404,4 @@ app/frontend/wwwroot/appsettings.json
 app/backend/appsettings.Development-v1.json
 infrastructure/main.rutzsco.k.parameters.json
 .azure
+app/backend/Services/Profile/profiles-local.json

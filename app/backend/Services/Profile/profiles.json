@@ -1,25 +1,25 @@
 [
-  //{
-  //  "Name": "Auto Service Advisor",
-  //  "Id": "AutoServiceAdvisor",
-  //  "Approach": "RAG",
-  //  "SecurityModel": "Group",
-  //  "SecurityModelGroupMembership": [ "LocalDevUser" ],
-  //  "SampleQuestions": [
-  //    "How do I change the oil?",
-  //    "What are the different maintenance intervals?",
-  //    "What is the air filter part number?"
-  //  ],
-  //  "RAGSettings": {
-  //    "GenerateSearchQueryPluginName": "GenerateSearchQuery",
-  //    "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
-  //    "DocumentRetrievalPluginName": "DocumentRetrieval",
-  //    "DocumentRetrievalPluginQueryFunctionName": "Query",
-  //    "DocumentRetrievalIndexName": "manuals",
-  //    "ChatSystemMessageFile": "RAGChatSystemPrompt",
-  //    "StorageContianer": "content"
-  //  }
-  //},
+  {
+    "Name": "Auto Service Advisor",
+    "Id": "AutoServiceAdvisor",
+    "Approach": "RAG",
+    "SecurityModel": "Group",
+    "SecurityModelGroupMembership": [ "LocalDevUser" ],
+    "SampleQuestions": [
+      "How do I change the oil?",
+      "What are the different maintenance intervals?",
+      "What is the air filter part number?"
+    ],
+    "RAGSettings": {
+      "GenerateSearchQueryPluginName": "GenerateSearchQuery",
+      "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
+      "DocumentRetrievalPluginName": "DocumentRetrieval",
+      "DocumentRetrievalPluginQueryFunctionName": "QueryV2",
+      "DocumentRetrievalIndexName": "manuals",
+      "ChatSystemMessageFile": "RAGChatSystemPrompt",
+      "StorageContianer": "content"
+    }
+  },
   {
     "Name": "General",
     "Id": "General",

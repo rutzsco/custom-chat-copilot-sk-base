@@ -45,6 +45,6 @@ public class AISearchIndexerIndexDefinintion : IKnowledgeSource
         }
     }
 
-    public static string EmbeddingsFieldName = "vector";
+    public static string EmbeddingsFieldName = "text_vector";
     public static List<string> SelectFieldNames = new List<string> { "title", "chunk_id", "chunk" };
 }
