@@ -40,8 +40,15 @@ internal static class WebApplicationExtensions
 
         api.MapGet("token/csrf", OnGetAntiforgeryTokenAsync);
 
+        api.MapGet("status", OnGetStatus);
         return app;
     }
+
+    private static IResult OnGetStatus()
+    {
+        return Results.Ok("OK");
+    }
+
     private static async Task<IResult> OnGetAntiforgeryTokenAsync(HttpContext context, IAntiforgery antiforgery)
     {
         var tokens = antiforgery.GetAndStoreTokens(context);
