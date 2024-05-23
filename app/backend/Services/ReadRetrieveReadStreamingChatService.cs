@@ -32,8 +32,8 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
         var sw = Stopwatch.StartNew();
 
         // Kernel setup
-        var kernel = _openAIClientFacade.GetKernel(false);
-        
+        var kernel = _openAIClientFacade.GetKernel(request.OptionFlags.IsChatGpt4Enabled());
+
         var generateSearchQueryFunction = kernel.Plugins.GetFunction(profile.RAGSettings.GenerateSearchQueryPluginName, profile.RAGSettings.GenerateSearchQueryPluginQueryFunctionName);
         var documentLookupFunction = kernel.Plugins.GetFunction(profile.RAGSettings.DocumentRetrievalPluginName, profile.RAGSettings.DocumentRetrievalPluginQueryFunctionName);
         var context = new KernelArguments().AddUserParameters(request.History, profile, user, request.OptionFlags.GetSelectedDocument());
