@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.SemanticKernel.Services;
 using MinimalApi;
+using MinimalApi.Services.Profile;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
@@ -18,7 +19,7 @@ builder.Services.AddCrossOriginResourceSharing();
 builder.Services.AddAzureServices(builder.Configuration);
 builder.Services.AddAntiforgery(options => { options.HeaderName = "X-CSRF-TOKEN-HEADER"; options.FormFieldName = "X-CSRF-TOKEN-FORM"; });
 AppConfiguration.Load(builder.Configuration);
-
+ProfileDefinition.Load(builder.Configuration);
 
 static string? GetEnvVar(string key) => Environment.GetEnvironmentVariable(key);
 if (builder.Environment.IsDevelopment())

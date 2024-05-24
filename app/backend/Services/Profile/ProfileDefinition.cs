@@ -1,26 +1,25 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
 using Newtonsoft.Json;
 
 namespace MinimalApi.Services.Profile;
 
 public class ProfileDefinition
 {
-    static ProfileDefinition()
-    {
-        Load();
-    }
-
     public static List<ProfileDefinition> All;
 
-    private static void Load()
+    public static void Load(IConfiguration configuration)
     {
-        All = LoadProflies("profiles");
+        var fileName = configuration["ProfileFileName"];
+        if (fileName == null)
+        {
+            fileName = "profiles";
+        }
+        All = LoadProflies(fileName);
     }
 
-    public static List<ProfileDefinition> LoadProflies(string name)
+    private static List<ProfileDefinition> LoadProflies(string name)
     {
         var resourceName = $"MinimalApi.Services.Profile.{name}.json";
         var assembly = Assembly.GetExecutingAssembly();
