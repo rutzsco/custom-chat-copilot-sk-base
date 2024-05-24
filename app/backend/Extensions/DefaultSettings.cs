@@ -25,8 +25,6 @@ public static class DefaultSettings
     };
 
     public static string DocumentRetrievalPluginName = "DocumentRetrieval";
-    public static string DocumentRetrievalPluginQueryFunctionName = "Query";
-    public static string DocumentRetrievalPluginQueryFunctionNameV2 = "QueryV2";
 
     public static string CosmosDBDatabaseName = "ChatHistory";
     public static string CosmosDBCollectionName = "ChatTurn";

@@ -14,8 +14,8 @@
       "GenerateSearchQueryPluginName": "GenerateSearchQuery",
       "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
       "DocumentRetrievalPluginName": "DocumentRetrieval",
-      "DocumentRetrievalPluginQueryFunctionName": "QueryV2",
-      "DocumentRetrievalIndexName": "manuals",
+      "DocumentRetrievalPluginQueryFunctionName": "AISearchV1",
+      "DocumentRetrievalIndexName": "content-auto",
       "ChatSystemMessageFile": "RAGChatSystemPrompt",
       "StorageContianer": "content"
     }
@@ -41,10 +41,10 @@
       "GenerateSearchQueryPluginName": "GenerateSearchQuery",
       "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
       "DocumentRetrievalPluginName": "DocumentRetrieval",
-      "DocumentRetrievalPluginQueryFunctionName": "QueryV4",
+      "DocumentRetrievalPluginQueryFunctionName": "KwiecienV2",
       "DocumentRetrievalIndexName": "rag-index-20240508144216",
       "ChatSystemMessageFile": "RAGChatSystemPrompt",
-      "StorageContianer": "content"
+      "StorageContianer": "user-uploads"
     }
   }
 ]

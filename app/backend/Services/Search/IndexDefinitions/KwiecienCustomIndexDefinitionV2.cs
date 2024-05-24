@@ -30,4 +30,5 @@ public class KwiecienCustomIndexDefinitionV2 : IKnowledgeSource
 
     public static string EmbeddingsFieldName = "embeddings";
     public static List<string> SelectFieldNames = new List<string> { "content", "sourcefile", "sourcepage", "pagenumber" };
+    public static string Name = "KwiecienV2";
 }

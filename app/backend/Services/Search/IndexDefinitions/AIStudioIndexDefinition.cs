@@ -26,4 +26,6 @@ public class AIStudioIndexDefinition : IKnowledgeSource
 
     public static string EmbeddingsFieldName = "contentVector";
     public static List<string> SelectFieldNames = new List<string> { "content", "filepath" };
+
+    public static string Name = "AIStudioV1";
 }
