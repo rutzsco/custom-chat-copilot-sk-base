@@ -57,8 +57,12 @@ internal static class ServiceCollectionExtensions
 
             // Build Plugins
             var searchClientFactory = sp.GetRequiredService<SearchClientFactory>();
-            var openAIClient = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint3), new AzureKeyCredential(azureOpenAiServiceKey3));
-            var retrieveRelatedDocumentPlugin = new RetrieveRelatedDocumentSkill(config, searchClientFactory, openAIClient);
+            var openAIClient3 = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint3), new AzureKeyCredential(azureOpenAiServiceKey3));
+            var retrieveRelatedDocumentPlugin3 = new RetrieveRelatedDocumentSkill(config, searchClientFactory, openAIClient3);
+            
+            var openAIClient4 = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint3), new AzureKeyCredential(azureOpenAiServiceKey3));
+            var retrieveRelatedDocumentPlugin4 = new RetrieveRelatedDocumentSkill(config, searchClientFactory, openAIClient4);
+            
             var generateSearchQueryPlugin = new GenerateSearchQuerySkill();
             var chatPlugin = new ChatSkill();
 
@@ -71,10 +75,11 @@ internal static class ServiceCollectionExtensions
                .AddAzureOpenAIChatCompletion(deployedModelName4, azureOpenAiServiceEndpoint4, azureOpenAiServiceKey4)
                .Build();
 
-            kernel3.ImportPluginFromObject(retrieveRelatedDocumentPlugin, DefaultSettings.DocumentRetrievalPluginName);
+            kernel3.ImportPluginFromObject(retrieveRelatedDocumentPlugin3, DefaultSettings.DocumentRetrievalPluginName);
             kernel3.ImportPluginFromObject(generateSearchQueryPlugin, DefaultSettings.GenerateSearchQueryPluginName);
             kernel3.ImportPluginFromObject(chatPlugin, DefaultSettings.ChatPluginName);
-            kernel4.ImportPluginFromObject(retrieveRelatedDocumentPlugin, DefaultSettings.DocumentRetrievalPluginName);
+
+            kernel4.ImportPluginFromObject(retrieveRelatedDocumentPlugin4, DefaultSettings.DocumentRetrievalPluginName);
             kernel4.ImportPluginFromObject(generateSearchQueryPlugin, DefaultSettings.GenerateSearchQueryPluginName);
             kernel4.ImportPluginFromObject(chatPlugin, DefaultSettings.ChatPluginName);
 
