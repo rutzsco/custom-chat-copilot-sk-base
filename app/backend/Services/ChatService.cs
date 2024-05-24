@@ -30,7 +30,7 @@ internal sealed class ChatService : IChatService
 
         var sw = Stopwatch.StartNew();
 
-        var kernel = _openAIClientFacade.GetKernel(false);
+        var kernel = _openAIClientFacade.GetKernel(request.OptionFlags.IsChatGpt4Enabled());
 
         var generateSearchQueryFunction = kernel.Plugins.GetFunction(DefaultSettings.GenerateSearchQueryPluginName, DefaultSettings.GenerateSearchQueryPluginQueryFunctionName);
 
