@@ -79,7 +79,7 @@ internal static class WebApplicationExtensions
 
                 var blobContainerClient = blobServiceClient.GetBlobContainerClient(profile.RAGSettings.StorageContianer);
                 var blobClient = blobContainerClient.GetBlobClient(blobName);
-
+                Console.WriteLine($"Blob Uri:{blobClient.Uri}");
                 if (await blobClient.ExistsAsync())
                 {
                     var stream = new MemoryStream();
