@@ -14,10 +14,10 @@
       "GenerateSearchQueryPluginName": "GenerateSearchQuery",
       "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
       "DocumentRetrievalPluginName": "DocumentRetrieval",
-      "DocumentRetrievalPluginQueryFunctionName": "AISearchV1",
-      "DocumentRetrievalIndexName": "content-auto",
+      "DocumentRetrievalPluginQueryFunctionName": "KwiecienV2",
+      "DocumentRetrievalIndexName": "manuals-auto-ci-20240528182950",
       "ChatSystemMessageFile": "RAGChatSystemPrompt",
-      "StorageContianer": "content"
+      "StorageContianer": "manuals-auto"
     }
   },
   {
