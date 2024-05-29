@@ -119,8 +119,6 @@ namespace MinimalApi.Extensions
             var totalTokens = completionTokens + requestTokenCount;
             var chatDiagnostics = new CompletionsDiagnostics(completionTokens, requestTokenCount, totalTokens, 0);
             var diagnostics = new Diagnostics(chatDiagnostics, modelDeploymentName, workflowDurationMilliseconds);
-            var systemMessagePrompt = (string)context["SystemMessagePrompt"];
-            var userMessage = (string)context["UserMessage"];
 
             var thoughts = GetThoughtsRAGV2(context, answer, requestSettings);
             var contextData = new ResponseContext(profile.Name, dataSources, thoughts.ToArray(), request.ChatTurnId, request.ChatId, diagnostics);
@@ -130,6 +128,7 @@ namespace MinimalApi.Extensions
                 CitationBaseUrl: profile.Id,
                 contextData);
         }
+
         public static ApproachResponse BuildChatSimpleResoponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
         {
             var completionTokens = GetTokenCount(answer);
@@ -189,13 +188,10 @@ namespace MinimalApi.Extensions
 
         private static IEnumerable<ThoughtRecord> GetThoughtsRAGV2(KernelArguments context, string answer, List<KeyValuePair<string, string>> requestSettings)
         {
-            var intent = (string)context["intent"];
-            var systemMessagePrompt = (string)context["SystemMessagePrompt"];
-            var userMessage = (string)context["UserMessage"];
-
+            var searchRequestDiagnostics = context[ContextVariableOptions.SearchDiagnostics] as List<KeyValuePair<string, string>>;
             var thoughts = new List<ThoughtRecord>
             {
-                new("Generated search query", intent.ToString()),
+                new("Generated search query", BuildPromptContext(searchRequestDiagnostics)),
                 new("Prompt", BuildPromptContext(requestSettings)),
                 new("Answer", answer)
             };
@@ -232,6 +228,27 @@ namespace MinimalApi.Extensions
                 sb.AppendLine($"{setting.Key.Replace("PROMPTKEY:", "")}: {setting.Value}");
             }
             return sb.ToString();
+        }
+
+        public static List<KeyValuePair<string, string>> GenerateRequestProperties(this Microsoft.SemanticKernel.ChatCompletion.ChatHistory chatHistory, PromptExecutionSettings settings)
+        {
+            var results = new List<KeyValuePair<string, string>>();
+            foreach (var item in chatHistory)
+            {
+                if (item is ChatMessageContent chatMessageContent)
+                {
+                    var content = chatMessageContent.Content;
+                    var role = chatMessageContent.Role;
+                    results.Add(new KeyValuePair<string, string>($"PROMPTMESSAGE:{role}", content));
+                }
+            }
+
+            foreach (var item in settings.ExtensionData)
+            {
+                results.Add(new KeyValuePair<string, string>($"PROMPTKEY:{item.Key}", item.Value.ToString()));
+            }
+
+            return results;
         }
     }
 }
