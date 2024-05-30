@@ -106,10 +106,10 @@ namespace MinimalApi.Extensions
         }
 
 
-        public static ApproachResponse BuildStreamingResoponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds, List<KeyValuePair<string, string>> requestSettings)
+        public static ApproachResponse BuildStreamingResoponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds, List<KeyValuePair<string, string>> requestSettings = null)
         {
             var dataSources = new SupportingContentRecord [] { };
-            if (context[ContextVariableOptions.Knowledge] != "NO_SOURCES")
+            if (context.ContainsName(ContextVariableOptions.Knowledge) && context[ContextVariableOptions.Knowledge] != "NO_SOURCES")
             {
                 var knowledgeSourceSummary = (KnowledgeSourceSummary)context[ContextVariableOptions.KnowledgeSummary];
                 dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(), x.GetContent())).ToArray();
@@ -135,11 +135,9 @@ namespace MinimalApi.Extensions
             var totalTokens = completionTokens + requestTokenCount;
             var chatDiagnostics = new CompletionsDiagnostics(completionTokens, requestTokenCount, totalTokens, 0);
             var diagnostics = new Diagnostics(chatDiagnostics, modelDeploymentName, workflowDurationMilliseconds);
-            var systemMessagePrompt = (string)context["SystemMessagePrompt"];
-            var userMessage = (string)context["UserMessage"];
 
             var thoughts = GetThoughts(context);
-            var contextData = new ResponseContext(profile.Name,null, null, request.ChatTurnId, request.ChatId, diagnostics);
+            var contextData = new ResponseContext(profile.Name,null, thoughts.ToArray(), request.ChatTurnId, request.ChatId, diagnostics);
 
             return new ApproachResponse(
                 Answer: NormalizeResponseText(answer),
@@ -188,6 +186,9 @@ namespace MinimalApi.Extensions
 
         private static IEnumerable<ThoughtRecord> GetThoughtsRAGV2(KernelArguments context, string answer, List<KeyValuePair<string, string>> requestSettings)
         {
+            if(requestSettings == null)
+                return new List<ThoughtRecord>();
+           
             var searchRequestDiagnostics = context[ContextVariableOptions.SearchDiagnostics] as List<KeyValuePair<string, string>>;
             var thoughts = new List<ThoughtRecord>
             {
@@ -201,10 +202,7 @@ namespace MinimalApi.Extensions
 
         private static IEnumerable<ThoughtRecord> GetThoughts(KernelArguments context)
         {
-
-            var systemMessagePrompt = (string)context["SystemMessagePrompt"];
             var userMessage = (string)context["UserMessage"];
-
             var thoughts = new List<ThoughtRecord>
             {
                 new("Prompt", userMessage)
