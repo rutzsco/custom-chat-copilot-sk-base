@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Collections;
 using Azure.AI.OpenAI;
 using Azure.Core;
 using ClientApp.Pages;
 using Microsoft.SemanticKernel.ChatCompletion;
 using MinimalApi.Extensions;
+using MinimalApi.Services.ChatHistory;
 using MinimalApi.Services.Profile;
 using MinimalApi.Services.Profile.Prompts;
 using Shared.Models;
@@ -16,10 +18,12 @@ internal sealed class ChatService : IChatService
     private readonly ILogger<ReadRetrieveReadStreamingChatService> _logger;
     private readonly IConfiguration _configuration;
     private readonly OpenAIClientFacade _openAIClientFacade;
+    private readonly AzureBlobStorageService _blobStorageService;
 
-    public ChatService(OpenAIClientFacade openAIClientFacade, ILogger<ReadRetrieveReadStreamingChatService> logger, IConfiguration configuration)
+    public ChatService(OpenAIClientFacade openAIClientFacade, AzureBlobStorageService blobStorageService, ILogger<ReadRetrieveReadStreamingChatService> logger, IConfiguration configuration)
     {
         _openAIClientFacade = openAIClientFacade;
+        _blobStorageService = blobStorageService;
         _logger = logger;
         _configuration = configuration;
     }
@@ -39,7 +43,6 @@ internal sealed class ChatService : IChatService
         // Search Query
         await kernel.InvokeAsync(generateSearchQueryFunction, context);
 
-
         // Chat Step
         var chatGpt = kernel.Services.GetService<IChatCompletionService>();
         var systemMessagePrompt = PromptService.GetPromptByName(PromptService.ChatSimpleSystemPrompt);
@@ -48,9 +51,25 @@ internal sealed class ChatService : IChatService
         var chatHistory = new Microsoft.SemanticKernel.ChatCompletion.ChatHistory(systemMessagePrompt).AddChatHistory(request.History);
         var userMessage = await PromptService.RenderPromptAsync(kernel, PromptService.GetPromptByName(PromptService.ChatSimpleUserPrompt), context);
         context["UserMessage"] = userMessage;
-        chatHistory.AddUserMessage(userMessage);
-       
 
+        if (request.OptionFlags.ImageContentExists())
+        {
+            var imageString = request.OptionFlags.GetImageContent();
+            DataUriParser parser = new DataUriParser(imageString);
+  
+            var imageContent = new ReadOnlyMemory<byte>(parser.Data);
+            var blobResult = await _blobStorageService.UploadFileAsync(new MemoryStream(imageContent.ToArray()), parser.MediaType);
+            chatHistory.AddUserMessage(
+            [
+               new TextContent(userMessage),
+               new ImageContent(new Uri(blobResult))
+            ]);
+        }
+        else
+        {
+            chatHistory.AddUserMessage(userMessage);
+        }
+          
         var sb = new StringBuilder();
         await foreach (StreamingChatMessageContent chatUpdate in chatGpt.GetStreamingChatMessageContentsAsync(chatHistory, DefaultSettings.AIChatRequestSettings))
         {

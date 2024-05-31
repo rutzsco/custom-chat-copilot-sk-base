@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
 using System.Data;
 using ClientApp.Models;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
@@ -37,6 +38,7 @@ public sealed partial class Chat
     private bool _gPT4ON = false;
     private Guid _chatId = Guid.NewGuid();
 
+    private string _imageUrl = "";
 
     [Inject] public required HttpClient HttpClient { get; set; }
 
@@ -66,6 +68,16 @@ public sealed partial class Chat
             var userDocuments = await ApiClient.GetUserDocumentsAsync();
             _userDocuments = userDocuments.ToList();
         }
+    }
+
+    private async Task UploadFilesAsync(IBrowserFile file)
+    {
+        _files.Add(file);
+
+        var buffer = new byte[file.Size];
+        await file.OpenReadStream().ReadAsync(buffer);
+        var imageContent = Convert.ToBase64String(buffer);
+        _imageUrl = $"data:{file.ContentType};base64,{imageContent}";
     }
 
     private void OnProfileClick(string selection)
@@ -115,6 +127,10 @@ public sealed partial class Chat
                 }
             }
 
+            if (!string.IsNullOrEmpty(_imageUrl))
+            {
+                options["IMAGECONTENT"] = _imageUrl;
+            }
             var request = new ChatRequest(_chatId, Guid.NewGuid(), [.. history], options, Settings.Approach, Settings.Overrides);
             var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming");
             httpRequest.Headers.Add("Accept", "application/json");
@@ -185,6 +201,7 @@ public sealed partial class Chat
         _questionAndAnswerMap.Clear();
         _selectedDocument = "";
         _chatId = Guid.NewGuid();
+        _imageUrl = string.Empty;
     }
     private void ToggleFileUpload()
     {
@@ -194,28 +211,5 @@ public sealed partial class Chat
         }
         else
            _showFileUpload = true;
-    }
-    private async Task SubmitFilesForUploadAsync()
-    {
-        var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
-
-        Console.WriteLine("SubmitFilesForUploadAsync");
-        if (_fileUpload is { Files.Count: > 0 })
-        {
-
-            Console.WriteLine("SubmitFilesForUploadAsync");
-            var result = await ApiClient.UploadDocumentsAsync(_fileUpload.Files, MaxIndividualFileSize, cookie);
-            if (result.IsSuccessful)
-            {
-
-                Console.WriteLine("SubmitFilesForUploadAsync - Successful");
-                await _fileUpload.ResetAsync();
-
-            }
-            else
-            {
-                Console.WriteLine("SubmitFilesForUploadAsync - FAILED");
-            }
-        }
     }
 }
