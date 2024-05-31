@@ -69,7 +69,7 @@
                  <MudItem xs="12" lg="12">
   
     
-                    @* <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined"> *@
+                    <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
                     @if (_profiles.Count() > 1)
                     {
                         <MudMenu Class=""  Label="@_selectedProfile"  Color="Color.Primary" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" FullWidth="true">
@@ -108,7 +108,7 @@
                             </ButtonTemplate>
                         </MudFileUpload>
                     }
-                   @*  </MudButtonGroup> *@
+                   </MudButtonGroup>
 
 
                     @if (!string.IsNullOrEmpty(_imageUrl))
