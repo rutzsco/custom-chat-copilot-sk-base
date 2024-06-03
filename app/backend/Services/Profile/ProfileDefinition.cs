@@ -64,6 +64,8 @@ public class ProfileDefinition
 
     public RAGSettingsSummary? RAGSettings { get; set; }
 
+    public string ChatSystemMessageFile { get; set; }
+
     public List<string> SampleQuestions { get; set; }
 }
 

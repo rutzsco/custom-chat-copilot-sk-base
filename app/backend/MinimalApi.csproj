@@ -24,6 +24,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Services\Profile\Prompts\AutoBodyCopilotSystemPrompt.txt" />
+    <None Remove="Services\Profile\Prompts\AutoBodyCopilotSystemPromptV2.txt" />
     <None Remove="Services\Profile\Prompts\ChatSimpleSystemPrompt.txt" />
     <None Remove="Services\Profile\Prompts\ChatSimpleUserPrompt.txt" />
     <None Remove="Services\Profile\Prompts\RAGChatSystemPrompt.txt" />
@@ -34,6 +36,8 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Services\Profile\profiles.json" />
+    <EmbeddedResource Include="Services\Profile\Prompts\AutoBodyCopilotSystemPromptV2.txt" />
+    <EmbeddedResource Include="Services\Profile\Prompts\AutoBodyCopilotSystemPrompt.txt" />
     <EmbeddedResource Include="Services\Profile\Prompts\ChatSimpleSystemPrompt.txt" />
     <EmbeddedResource Include="Services\Profile\Prompts\RAGChatSystemPrompt.txt" />
     <EmbeddedResource Include="Services\Profile\Prompts\ChatSimpleUserPrompt.txt" />

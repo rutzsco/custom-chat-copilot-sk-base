@@ -45,7 +45,7 @@ internal sealed class ChatService : IChatService
 
         // Chat Step
         var chatGpt = kernel.Services.GetService<IChatCompletionService>();
-        var systemMessagePrompt = PromptService.GetPromptByName(PromptService.ChatSimpleSystemPrompt);
+        var systemMessagePrompt = PromptService.GetPromptByName(profile.ChatSystemMessageFile);
         context["SystemMessagePrompt"] = systemMessagePrompt;
 
         var chatHistory = new Microsoft.SemanticKernel.ChatCompletion.ChatHistory(systemMessagePrompt).AddChatHistory(request.History);

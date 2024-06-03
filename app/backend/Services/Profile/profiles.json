@@ -31,6 +31,17 @@
     ]
   },
   {
+    "Name": "Auto Body Damage Advisor",
+    "Id": "AutoBodyDamageAdvisor",
+    "Approach": "Chat",
+    "SecurityModel": "None",
+    "ChatSystemMessageFile": "AutoBodyCopilotSystemPromptV2",
+    "SampleQuestions": [
+      "What is the brand and model of this vehicle?",
+      "Classify this vehicle into 'Motorbike', 'SUV', 'Sedan', 'Truck', 'Convertible'"
+    ]
+  },
+  {
     "Name": "Document Chat",
     "Id": "DocumentChat",
     "Approach": "UserDocumentChat",
