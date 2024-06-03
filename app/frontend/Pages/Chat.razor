@@ -70,7 +70,7 @@
   
     
                     <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
-                    @if (_profiles.Count() > 1)
+                    @if (_showProfiles)
                     {
                         <MudMenu Class=""  Label="@_selectedProfile"  Color="Color.Primary" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" FullWidth="true">
                                 <ActivatorContent>
@@ -84,7 +84,8 @@
                             </ChildContent>
                         </MudMenu>
                     }
-                    @if (AppConfiguration.ShowFileUploadSelection)
+                    
+                    @if (_showDocumentUpload)
                     {
                         <MudMenu>
                             <ActivatorContent>
@@ -101,13 +102,17 @@
                                 }
                             </ChildContent>
                         </MudMenu>
+                     }
 
+                    @if (_showDocumentUpload)
+                    {
                         <MudFileUpload T="IBrowserFile" FilesChanged="UploadFilesAsync" Style="margin-top: 0px">
                             <ButtonTemplate>
                                 <MudIconButton Style="height: 36px" HtmlTag="label" Color="Color.Info" Icon="@Icons.Material.Filled.PhotoCamera" for="@context.Id"></MudIconButton>
                             </ButtonTemplate>
                         </MudFileUpload>
                     }
+                   
                    </MudButtonGroup>
 
 
