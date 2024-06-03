@@ -1,9 +1,27 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.IO;
+
 namespace MinimalApi.Services;
 
 public sealed class AzureBlobStorageService(BlobServiceClient blobServiceClient, IConfiguration configuration)
 {
+    internal async Task<string> UploadFileAsync(Stream content, string contentType)
+    {
+        var azureStorageContainer = configuration[AppConfigurationSetting.AzureStorageUserUploadContainer];
+        var container = blobServiceClient.GetBlobContainerClient(azureStorageContainer);
+        if (!await container.ExistsAsync())
+        {
+            // Create the container
+            await container.CreateAsync();
+            Console.WriteLine("Container created.");
+        }
+
+        var blobClient = container.GetBlobClient(Guid.NewGuid().ToString());
+        await blobClient.UploadAsync(content, new BlobHttpHeaders{ContentType = contentType });
+        return blobClient.Uri.AbsoluteUri;
+    }
+
     internal async Task<UploadDocumentsResponse> UploadFilesAsync(UserInformation userInfo, IEnumerable<IFormFile> files, CancellationToken cancellationToken)
     {
         try

@@ -84,7 +84,15 @@ namespace MinimalApi.Extensions
             var value = options.GetValueOrDefault("SELECTEDDOCUMENT", null);
             return value;
         }
-
+        public static string GetImageContent(this Dictionary<string, string> options)
+        {
+            var value = options.GetValueOrDefault("IMAGECONTENT", null);
+            return value;
+        }
+        public static bool ImageContentExists(this Dictionary<string, string> options)
+        {
+           return options.ContainsKey("IMAGECONTENT");
+        }
         public static ApproachResponse BuildResoponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
         {
             var result = (SKResult)context["ChatResult"];

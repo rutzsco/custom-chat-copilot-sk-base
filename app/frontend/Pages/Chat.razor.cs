@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System;
 using System.Data;
 using ClientApp.Models;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
@@ -37,6 +38,7 @@ public sealed partial class Chat
     private bool _gPT4ON = false;
     private Guid _chatId = Guid.NewGuid();
 
+    private string _imageUrl = "";
 
     [Inject] public required HttpClient HttpClient { get; set; }
 
@@ -50,6 +52,11 @@ public sealed partial class Chat
 
     [CascadingParameter(Name = nameof(IsReversed))]
     public required bool IsReversed { get; set; }
+
+
+    public bool _showProfiles { get; set; }
+    public bool _showDocumentUpload { get; set; }
+    public bool _showPictureUpload { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -66,6 +73,18 @@ public sealed partial class Chat
             var userDocuments = await ApiClient.GetUserDocumentsAsync();
             _userDocuments = userDocuments.ToList();
         }
+        EvaluateOptions();
+    }
+
+    private async Task UploadFilesAsync(IBrowserFile file)
+    {
+        _files.Add(file);
+
+        var buffer = new byte[file.Size];
+        await file.OpenReadStream().ReadAsync(buffer);
+        var imageContent = Convert.ToBase64String(buffer);
+        _imageUrl = $"data:{file.ContentType};base64,{imageContent}";
+        EvaluateOptions();
     }
 
     private void OnProfileClick(string selection)
@@ -79,6 +98,7 @@ public sealed partial class Chat
     {
         _selectedDocument = selection;
         OnClearChatDocuumentSelection();
+        EvaluateOptions();
     }
 
     private Task OnAskQuestionAsync(string question)
@@ -115,6 +135,10 @@ public sealed partial class Chat
                 }
             }
 
+            if (!string.IsNullOrEmpty(_imageUrl))
+            {
+                options["IMAGECONTENT"] = _imageUrl;
+            }
             var request = new ChatRequest(_chatId, Guid.NewGuid(), [.. history], options, Settings.Approach, Settings.Overrides);
             var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming");
             httpRequest.Headers.Add("Accept", "application/json");
@@ -176,6 +200,7 @@ public sealed partial class Chat
         _currentQuestion = default;
         _questionAndAnswerMap.Clear();
         _chatId = Guid.NewGuid();
+        EvaluateOptions();
     }
 
     private void OnClearChat()
@@ -185,37 +210,24 @@ public sealed partial class Chat
         _questionAndAnswerMap.Clear();
         _selectedDocument = "";
         _chatId = Guid.NewGuid();
+        _imageUrl = string.Empty;
+        EvaluateOptions();
     }
-    private void ToggleFileUpload()
+
+    private void EvaluateOptions()
     {
-        if(_showFileUpload)
+        _showProfiles = true;
+        _showDocumentUpload = true;
+        _showPictureUpload = true;
+        if (_profiles.Count() < 1 || !string.IsNullOrEmpty(_selectedDocument) || !string.IsNullOrEmpty(_imageUrl))
         {
-            _showFileUpload = false;
+            _showProfiles = false;
         }
-        else
-           _showFileUpload = true;
-    }
-    private async Task SubmitFilesForUploadAsync()
-    {
-        var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
 
-        Console.WriteLine("SubmitFilesForUploadAsync");
-        if (_fileUpload is { Files.Count: > 0 })
-        {
+        if (!AppConfiguration.ShowFileUploadSelection || !string.IsNullOrEmpty(_imageUrl))
+            _showDocumentUpload = false;
 
-            Console.WriteLine("SubmitFilesForUploadAsync");
-            var result = await ApiClient.UploadDocumentsAsync(_fileUpload.Files, MaxIndividualFileSize, cookie);
-            if (result.IsSuccessful)
-            {
-
-                Console.WriteLine("SubmitFilesForUploadAsync - Successful");
-                await _fileUpload.ResetAsync();
-
-            }
-            else
-            {
-                Console.WriteLine("SubmitFilesForUploadAsync - FAILED");
-            }
-        }
+        if (string.IsNullOrEmpty(_selectedDocument))
+            _showPictureUpload = false;
     }
 }
