@@ -58,18 +58,14 @@ internal sealed class ChatService : IChatService
             DataUriParser parser = new DataUriParser(imageString);
             if (parser.MediaType == "image/jpeg" || parser.MediaType == "image/png")
             {
-                var imageContent = new ReadOnlyMemory<byte>(parser.Data);
-                var blobResult = await _blobStorageService.UploadFileAsync(new MemoryStream(imageContent.ToArray()), parser.MediaType);
                 chatHistory.AddUserMessage(
                 [
                    new TextContent(userMessage),
-                   new ImageContent(new Uri(blobResult))
+                   new ImageContent(parser.Data) { MimeType = parser.MediaType }
                 ]);
             }
             else if(parser.MediaType == "text/csv")
             {
-                //context["CSVDATA"] = parser.Data;
-
                 string csvData = System.Text.Encoding.UTF8.GetString(parser.Data);
                 chatHistory.AddUserMessage(
                 [
@@ -77,7 +73,6 @@ internal sealed class ChatService : IChatService
                    new TextContent(userMessage)
                 ]);
             }
-
         }
         else
         {
