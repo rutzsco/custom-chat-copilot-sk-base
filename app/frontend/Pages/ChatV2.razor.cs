@@ -227,7 +227,9 @@ public sealed partial class ChatV2
         if (!AppConfiguration.ShowFileUploadSelection || !string.IsNullOrEmpty(_imageUrl))
             _showDocumentUpload = false;
 
-        if (string.IsNullOrEmpty(_selectedDocument))
+        if (_selectedProfileSummary.Approach != ProfileApproach.Chat || !string.IsNullOrEmpty(_selectedDocument))
+        {
             _showPictureUpload = false;
+        }
     }
 }
