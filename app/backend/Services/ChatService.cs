@@ -56,14 +56,28 @@ internal sealed class ChatService : IChatService
         {
             var imageString = request.OptionFlags.GetImageContent();
             DataUriParser parser = new DataUriParser(imageString);
-  
-            var imageContent = new ReadOnlyMemory<byte>(parser.Data);
-            var blobResult = await _blobStorageService.UploadFileAsync(new MemoryStream(imageContent.ToArray()), parser.MediaType);
-            chatHistory.AddUserMessage(
-            [
-               new TextContent(userMessage),
-               new ImageContent(new Uri(blobResult))
-            ]);
+            if (parser.MediaType == "image/jpeg" || parser.MediaType == "image/png")
+            {
+                var imageContent = new ReadOnlyMemory<byte>(parser.Data);
+                var blobResult = await _blobStorageService.UploadFileAsync(new MemoryStream(imageContent.ToArray()), parser.MediaType);
+                chatHistory.AddUserMessage(
+                [
+                   new TextContent(userMessage),
+                   new ImageContent(new Uri(blobResult))
+                ]);
+            }
+            else if(parser.MediaType == "text/csv")
+            {
+                //context["CSVDATA"] = parser.Data;
+
+                string csvData = System.Text.Encoding.UTF8.GetString(parser.Data);
+                chatHistory.AddUserMessage(
+                [
+                   new TextContent(csvData),
+                   new TextContent(userMessage)
+                ]);
+            }
+
         }
         else
         {
