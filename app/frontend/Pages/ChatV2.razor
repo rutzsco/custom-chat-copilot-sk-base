@@ -1,0 +1,189 @@
+﻿@page "/chat-v2"
+@inject IJSRuntime JS
+<!-- This page is intended for conversational Q&A. -->
+
+<PageTitle>Chat</PageTitle>
+<!-- Top Section (Fixed Height) -->
+<div class="header"></div>
+
+<!-- Middle Section (Fills Remaining Space) -->
+<div class="content" id="answerSection">
+    <MudGrid Justify="Justify.Center">
+        <MudItem id="answers" xs="12" Class="overflow-x-auto">
+            @if (_questionAndAnswerMap is { Count: 0 })
+            {
+                <div class="d-flex align-content-center flex-wrap flex-grow-1 full-height">
+                    <Examples Profile=@_selectedProfileSummary Message="@AppConfiguration.HelloText" OnExampleClicked="@OnAskQuestionAsync" />
+                </div>
+            }
+            else
+            {
+                <MudStack Reverse="@IsReversed" Spacing="12">
+                    @foreach (var ((question, askedOn), answer) in _questionAndAnswerMap)
+                    {
+                        <MudStack Justify="Justify.Center" AlignItems="AlignItems.Start" Spacing="4">
+                            <MudBadge Origin="Origin.TopLeft" Overlap="true" Color="Color.Secondary" Icon="@Icons.Material.Filled.QuestionMark" Class="d-flex align-self-end">
+                                <MudPaper Class="pa-6 d-flex flex-column" Elevation="3">
+                                    <MudText Typo="Typo.body1" Align="Align.End">@question</MudText>
+                                    <MudText Typo="Typo.caption" Align="Align.End" Color="Color.Secondary">
+                                        @($"Asked at {askedOn:h:mm:ss tt} on {askedOn:M/dd/yy}")
+                                    </MudText>
+                                </MudPaper>
+                            </MudBadge>
+                            <div class="ten-twelves">
+                                @if (answer is null)
+                                {
+                                    <MudBadge Origin="Origin.TopLeft" Overlap="true" Color="Color.Secondary" Icon="@Icons.Material.Filled.Lightbulb" Class="full-width">
+                                        <MudPaper Class="pa-6" Elevation="3">
+                                            <Loading />
+                                        </MudPaper>
+                                    </MudBadge>
+                                }
+                                else if (answer is { Error.Length: > 0 })
+                                {
+                                    <MudBadge Origin="Origin.TopLeft" Overlap="true" Color="Color.Error" Icon="@Icons.Material.Filled.Error">
+                                        <AnswerError Error="@answer" Question="@question" OnRetryClicked="@OnAskQuestionAsync" />
+                                    </MudBadge>
+                                }
+                                else
+                                {
+                                    <MudBadge Origin="Origin.TopLeft" Overlap="true" Color="Color.Secondary" Icon="@Icons.Material.Filled.AutoAwesome">
+                                        <Answer Retort="@answer" FollowupQuestionClicked="@OnAskQuestionAsync" />
+                                    </MudBadge>
+                                }
+                            </div>
+                        </MudStack>
+                    }
+                </MudStack>
+            }
+        </MudItem>
+    </MudGrid>
+</div>
+
+<!-- Bottom Section (Fixed Height) -->
+<div class="footer">
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="12" Class="rounded">
+            <MudGrid>
+                <MudItem xs="12" lg="12">
+
+
+                    <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
+                        @if (_showProfiles)
+                        {
+                            <MudMenu Class="" Label="@_selectedProfile" Color="Color.Primary" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" FullWidth="true">
+                                <ActivatorContent>
+                                    <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Category" EndIcon="@Icons.Material.Filled.KeyboardArrowDown">@_selectedProfile</MudButton>
+                                </ActivatorContent>
+                                <ChildContent>
+                                    @foreach (var profile in _profiles)
+                                    {
+                                        <MudMenuItem OnClick="@(e => OnProfileClick(@profile.Name))">@profile.Name</MudMenuItem>
+                                    }
+                                </ChildContent>
+                            </MudMenu>
+                        }
+
+                        @if (_showDocumentUpload)
+                        {
+                            <MudMenu>
+                                <ActivatorContent>
+                                    <MudButton Style="height: 36px" StartIcon="@Icons.Material.Filled.AttachFile" EndIcon="@Icons.Material.Filled.KeyboardArrowDown">@_selectedDocument</MudButton>
+                                </ActivatorContent>
+                                <ChildContent>
+                                    <MudMenuItem Color="Color.Primary" Href="/documents">Upload File</MudMenuItem>
+                                    @foreach (var document in _userDocuments)
+                                    {
+                                        if (document.Status == DocumentProcessingStatus.Succeeded)
+                                        {
+                                            <MudMenuItem OnClick="@(e => OnDocumentClick(@document.Name))" Color="Color.Primary">@document.Name</MudMenuItem>
+                                        }
+                                    }
+                                </ChildContent>
+                            </MudMenu>
+                        }
+
+                        @if (_showDocumentUpload)
+                        {
+                            <MudFileUpload T="IBrowserFile" FilesChanged="UploadFilesAsync" Style="margin-top: 0px">
+                                <ButtonTemplate>
+                                    <MudIconButton Style="height: 36px" HtmlTag="label" Color="Color.Info" Icon="@Icons.Material.Filled.PhotoCamera" for="@context.Id"></MudIconButton>
+                                </ButtonTemplate>
+                            </MudFileUpload>
+                        }
+
+                    </MudButtonGroup>
+
+
+                    @if (!string.IsNullOrEmpty(_imageUrl))
+                    {
+                        <MudImage Src="@_imageUrl" Alt="Image" Elevation="25" Width="200" Height="150" Class="rounded-lg" />
+                    }
+
+                </MudItem>
+                <MudItem xs="12" lg="10">
+                    <TextInput @bind-Value="_userQuestion" Label="Prompt"
+                               Icon="@Icons.Material.Filled.QuestionAnswer"
+                               Placeholder="Enter OpenAI + Azure Search prompt"
+                               HelperText="Use Shift + Enter for new lines."
+                               Disabled=@_isReceivingResponse
+                               OnEnterKeyPressed="OnAskClickedAsync" />
+                </MudItem>
+                <MudItem xs="0" lg="2" Class="d-flex align-self-center">
+                    <MudGrid Justify="Justify.Center">
+
+                        @if (AppConfiguration.ShowPremiumAOAIToggleSelection)
+                        {
+                            <MudItem xs="12">
+                                <MudToggleIconButton @bind-Toggled="@_gPT4ON" Icon="@Icons.Material.Filled.ToggleOff" Color="@Color.Default" Title="Off" ToggledIcon="@Icons.Material.Filled.ToggleOn" ToggledColor="@Color.Success" ToggledTitle="On" />
+                                <span>GPT-4</span>
+                            </MudItem>
+                        }
+                        <MudItem xs="9" Class="pa-2">
+                            <MudFab Color="Color.Secondary" Size="Size.Large"
+                                    StartIcon=@Icons.Material.Filled.Send Class="full-width"
+                                    Label="Chat" aria-label="Ask question button."
+                                    OnClick="@OnAskClickedAsync"
+                                    Disabled=@(_isReceivingResponse || string.IsNullOrWhiteSpace(_userQuestion)) />
+                        </MudItem>
+                        <MudItem xs="3" Class="pa-2">
+                            <MudTooltip Arrow="true" Text="Reset chat" Placement="Placement.Top">
+                                <MudFab Color="Color.Error" Size="Size.Medium" StartIcon=@Icons.Material.Filled.DeleteForever aria-label="Clear chat." OnClick="@OnClearChat" Disabled=@(_isReceivingResponse) />
+                            </MudTooltip>
+                        </MudItem>
+
+                    </MudGrid>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+    </MudGrid>
+</div>
+
+<style>
+
+    .header {
+        background: #fff;
+        text-align: center;
+        position: fixed;
+        width: 100%;
+        top: 70px;
+        height: 5px;
+    }
+
+    .footer {
+        padding: 10px 0;
+        position: fixed;
+        width: calc(100% - 300px);
+        bottom: 5px;
+        height: 250px;
+    }
+
+    .content {
+        overflow-y: auto;
+        padding: 15px;
+        background: #fff;
+        margin-top: 0px;
+        margin-bottom: 175px;
+        height: calc(100% - 250px); 
+    }
+</style>

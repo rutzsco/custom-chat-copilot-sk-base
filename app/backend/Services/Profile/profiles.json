@@ -3,7 +3,7 @@
     "Name": "Auto Service Advisor",
     "Id": "AutoServiceAdvisor",
     "Approach": "RAG",
-    "SecurityModel": "Group",
+    "SecurityModel": "None",
     "SecurityModelGroupMembership": [ "LocalDevUser" ],
     "SampleQuestions": [
       "How do I change the oil?",
@@ -25,7 +25,7 @@
     "Id": "General",
     "Approach": "Chat",
     "SecurityModel": "None",
-    "ChatSystemMessageFile": "AutoBodyCopilotSystemPrompt",
+    "ChatSystemMessageFile": "ChatSimpleSystemPrompt",
     "SampleQuestions": [
       "Write a function in C# that will invoke a rest API",
       "Explain why popcorn pops to a kid who loves watching it in the microwave."
@@ -36,7 +36,7 @@
     "Id": "AutoBodyDamageAdvisor",
     "Approach": "Chat",
     "SecurityModel": "None",
-    "ChatSystemMessageFile": "ChatSimpleSystemPrompt",
+    "ChatSystemMessageFile": "AutoBodyCopilotSystemPrompt",
     "SampleQuestions": [
       "What is the brand and model of this vehicle?",
       "Classify this vehicle into 'Motorbike', 'SUV', 'Sedan', 'Truck', 'Convertible'"
