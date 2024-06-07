@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/chat-legacy"
 @inject IJSRuntime JS
 <!-- This page is intended for conversational Q&A. -->
 
@@ -104,7 +104,7 @@
                         </MudMenu>
                      }
 
-                        @if (_showPictureUpload)
+                    @if (_showPictureUpload)
                     {
                         <MudFileUpload T="IBrowserFile" FilesChanged="UploadFilesAsync" Style="margin-top: 0px">
                             <ButtonTemplate>
