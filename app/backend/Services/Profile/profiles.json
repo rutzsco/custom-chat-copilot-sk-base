@@ -56,7 +56,7 @@
       "DocumentRetrievalPluginQueryFunctionName": "KwiecienV2",
       "DocumentRetrievalIndexName": "rag-index-20240508144216",
       "ChatSystemMessageFile": "RAGChatSystemPrompt",
-      "StorageContianer": "user-uploads"
+      "StorageContianer": "content"
     }
   }
 ]

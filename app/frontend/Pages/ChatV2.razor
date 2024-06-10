@@ -119,7 +119,7 @@
                         {
                             <MudImage Src="@_imageUrl" Alt="Image" Elevation="25" Width="100" Height="75" Class="rounded-lg ma-4" />
                         }
-                        <MudButton OnClick="OnAskClickedAsync" StartIcon="@Icons.Material.Outlined.Send" Color="Color.Secondary">Send</MudButton>
+                        <MudButton OnClick="OnAskClickedAsync" Disabled=@(_isReceivingResponse || string.IsNullOrWhiteSpace(_userQuestion)) StartIcon="@Icons.Material.Outlined.Send" Color="Color.Secondary">Send</MudButton>
                         <MudButton StartIcon=@Icons.Material.Filled.Cancel aria-label="Clear chat." Color="Color.Secondary" ButtonType="ButtonType.Reset" OnClick="@OnClearChat" Disabled=@(_isReceivingResponse) />
                     </MudPaper>
                 </MudItem>
