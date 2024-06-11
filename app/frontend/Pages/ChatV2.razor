@@ -114,7 +114,7 @@
                 </MudItem>
                 <MudItem xs="12" lg="11">
                     <MudPaper Elevation="25" Class="d-flex flex-row px-2" Style="">
-                        <MudTextField T="string" Icon="@Icons.Material.Filled.QuestionAnswer" MaxLines=5 Disabled=@_isReceivingResponse AutoGrow="true" Placeholder="Enter your message..." DisableUnderLine="true" Class="mt-n4 mx-4 py-4" @bind-Value="_userQuestion" For="@(()=> _userQuestion)" />
+                        <MudTextField T="string" Immediate=true Icon="@Icons.Material.Filled.QuestionAnswer" MaxLines=5 Disabled=@_isReceivingResponse AutoGrow="true" Placeholder="Enter your message..." DisableUnderLine="true" Class="mt-n4 mx-4 py-4" @bind-Value="_userQuestion" />
                         @if (!string.IsNullOrEmpty(_imageUrl))
                         {
                             <MudImage Src="@_imageUrl" Alt="Image" Elevation="25" Width="100" Height="75" Class="rounded-lg ma-4" />
