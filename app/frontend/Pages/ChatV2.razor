@@ -86,7 +86,7 @@
                         {
                             <MudMenu>
                                 <ActivatorContent>
-                                    <MudButton Style="height: 36px" StartIcon="@Icons.Material.Filled.AttachFile" EndIcon="@Icons.Material.Filled.KeyboardArrowDown">@_selectedDocument</MudButton>
+                                    <MudButton Style="height: 36px" StartIcon="@Icons.Material.Filled.UploadFile" EndIcon="@Icons.Material.Filled.KeyboardArrowDown">@_selectedDocument</MudButton>
                                 </ActivatorContent>
                                 <ChildContent>
                                     <MudMenuItem Color="Color.Primary" Href="/documents">Upload File</MudMenuItem>
@@ -105,20 +105,25 @@
                         {
                             <MudFileUpload T="IBrowserFile" FilesChanged="UploadFilesAsync" Style="margin-top: 0px">
                                 <ButtonTemplate>
-                                    <MudIconButton Style="height: 36px" HtmlTag="label" Color="Color.Info" Icon="@Icons.Material.Filled.PhotoCamera" for="@context.Id"></MudIconButton>
+                                    <MudIconButton Style="height: 36px" HtmlTag="label" Color="Color.Primary" Icon="@Icons.Material.Filled.AttachFile" for="@context.Id"></MudIconButton>
                                 </ButtonTemplate>
                             </MudFileUpload>
                         }
 
                     </MudButtonGroup>
+                    @if (!string.IsNullOrEmpty(_imageUrl) && _imageUrl.Contains("pdf"))
+                    {
+                        <MudChip Icon="@Icons.Material.Filled.PictureAsPdf" IconColor="Color.Primary">@_imageFileName</MudChip>
+                    }
                 </MudItem>
                 <MudItem xs="12" lg="11">
                     <MudPaper Elevation="25" Class="d-flex flex-row px-2" Style="">
                         <MudTextField T="string" Immediate=true Icon="@Icons.Material.Filled.QuestionAnswer" MaxLines=5 Disabled=@_isReceivingResponse AutoGrow="true" Placeholder="Enter your message..." DisableUnderLine="true" Class="mt-n4 mx-4 py-4" @bind-Value="_userQuestion" />
-                        @if (!string.IsNullOrEmpty(_imageUrl))
+                        @if (!string.IsNullOrEmpty(_imageUrl) && _imageUrl.Contains("png"))
                         {
                             <MudImage Src="@_imageUrl" Alt="Image" Elevation="25" Width="100" Height="75" Class="rounded-lg ma-4" />
                         }
+
                         <MudButton OnClick="OnAskClickedAsync" Disabled=@(_isReceivingResponse || string.IsNullOrWhiteSpace(_userQuestion)) StartIcon="@Icons.Material.Outlined.Send" Color="Color.Secondary">Send</MudButton>
                         <MudButton StartIcon=@Icons.Material.Filled.Cancel aria-label="Clear chat." Color="Color.Secondary" ButtonType="ButtonType.Reset" OnClick="@OnClearChat" Disabled=@(_isReceivingResponse) />
                     </MudPaper>

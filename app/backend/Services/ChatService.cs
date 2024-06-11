@@ -73,6 +73,15 @@ internal sealed class ChatService : IChatService
                    new TextContent(userMessage)
                 ]);
             }
+            else if (parser.MediaType == "application/pdf")
+            {
+                string pdfData = PDFTextExtractor.ExtractTextFromPdf(parser.Data);
+                chatHistory.AddUserMessage(
+                [
+                   new TextContent(pdfData),
+                   new TextContent(userMessage)
+                ]);
+            }
         }
         else
         {
