@@ -64,7 +64,7 @@ internal sealed class ChatService : IChatService
                    new ImageContent(parser.Data) { MimeType = parser.MediaType }
                 ]);
             }
-            else if(parser.MediaType == "text/csv")
+            else if(parser.MediaType == "text/csv" || parser.MediaType == "text/plain")
             {
                 string csvData = System.Text.Encoding.UTF8.GetString(parser.Data);
                 chatHistory.AddUserMessage(
