@@ -144,7 +144,7 @@ namespace MinimalApi.Extensions
             var chatDiagnostics = new CompletionsDiagnostics(completionTokens, requestTokenCount, totalTokens, 0);
             var diagnostics = new Diagnostics(chatDiagnostics, modelDeploymentName, workflowDurationMilliseconds);
 
-            var thoughts = GetThoughts(context);
+            var thoughts = GetThoughts(context, answer);
             var contextData = new ResponseContext(profile.Name,null, thoughts.ToArray(), request.ChatTurnId, request.ChatId, diagnostics);
 
             return new ApproachResponse(
@@ -208,12 +208,13 @@ namespace MinimalApi.Extensions
             return thoughts;
         }
 
-        private static IEnumerable<ThoughtRecord> GetThoughts(KernelArguments context)
+        private static IEnumerable<ThoughtRecord> GetThoughts(KernelArguments context, string answer)
         {
             var userMessage = (string)context["UserMessage"];
             var thoughts = new List<ThoughtRecord>
             {
-                new("Prompt", userMessage)
+                new("Prompt", userMessage),
+                new("Answer", answer)
             };
 
             return thoughts;
