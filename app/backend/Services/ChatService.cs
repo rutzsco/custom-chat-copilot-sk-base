@@ -64,21 +64,21 @@ internal sealed class ChatService : IChatService
                    new ImageContent(parser.Data) { MimeType = parser.MediaType }
                 ]);
             }
-            else if(parser.MediaType == "text/csv" || parser.MediaType == "text/plain")
-            {
-                string csvData = System.Text.Encoding.UTF8.GetString(parser.Data);
-                chatHistory.AddUserMessage(
-                [
-                   new TextContent(csvData),
-                   new TextContent(userMessage)
-                ]);
-            }
             else if (parser.MediaType == "application/pdf")
             {
                 string pdfData = PDFTextExtractor.ExtractTextFromPdf(parser.Data);
                 chatHistory.AddUserMessage(
                 [
                    new TextContent(pdfData),
+                   new TextContent(userMessage)
+                ]);
+            }
+            else
+            {
+                string csvData = System.Text.Encoding.UTF8.GetString(parser.Data);
+                chatHistory.AddUserMessage(
+                [
+                   new TextContent(csvData),
                    new TextContent(userMessage)
                 ]);
             }
