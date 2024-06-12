@@ -11,7 +11,7 @@ public sealed partial class Answer
     .UseSoftlineBreakAsHardlineBreak()
     .Build();
 
-    internal static HtmlParsedAnswer ParseAnswerToHtml(string answer, string citationBaseUrl)
+    internal static HtmlParsedAnswer ParseAnswerToHtml(string answer, string citationBaseUrl, bool containsSources = true)
     {
         var citations = new List<CitationDetails>();
         var followupQuestions = new HashSet<string>();
@@ -23,39 +23,42 @@ public sealed partial class Answer
         });
 
         parsedAnswer = parsedAnswer.Trim();
-
-        var parts = SplitRegex().Split(parsedAnswer);
-
-        var fragments = parts.Select((part, index) =>
+        string raw = parsedAnswer;
+        if (containsSources)
         {
-            if (index % 2 is 0)
+            var parts = SplitRegex().Split(parsedAnswer);
+            var fragments = parts.Select((part, index) =>
             {
-                return part;
-            }
-            else
-            {
-                var citationNumber = citations.Count + 1;
-                var existingCitation = citations.FirstOrDefault(c => c.Name == part);
-                if (existingCitation is not null)
+                if (index % 2 is 0)
                 {
-                    citationNumber = existingCitation.Number;
+                    return part;
                 }
                 else
                 {
-                    var citation = new CitationDetails(part, citationBaseUrl, citationNumber);
-                    citations.Add(citation);
-                }
+                    var citationNumber = citations.Count + 1;
+                    var existingCitation = citations.FirstOrDefault(c => c.Name == part);
+                    if (existingCitation is not null)
+                    {
+                        citationNumber = existingCitation.Number;
+                    }
+                    else
+                    {
+                        var citation = new CitationDetails(part, citationBaseUrl, citationNumber);
+                        citations.Add(citation);
+                    }
 
-                return $"""
+                    return $"""
                     <sup class="mud-chip mud-chip-text mud-chip-color-info rounded pa-1">{citationNumber}</sup>
                     """;
-            }
-        });
+                }
+            });
 
-        var raw = string.Join(string.Empty, fragments);
+            raw = string.Join(string.Empty, fragments);
+        }
+
         var html = Markdown.ToHtml(raw, _pipeline);
         var followUpQuestions = followupQuestions.Select(f => f.Replace("<<", "").Replace(">>", "")).ToHashSet();
-        return new HtmlParsedAnswer(html,citations, followUpQuestions);
+        return new HtmlParsedAnswer(html, citations, followUpQuestions);
     }
 
     [GeneratedRegex(@"<<([^>>]+)>>", RegexOptions.Multiline | RegexOptions.Compiled)]

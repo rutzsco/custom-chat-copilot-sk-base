@@ -69,8 +69,7 @@ public sealed partial class Answer
 
     protected override void OnParametersSet()
     {
-        _parsedAnswer = ParseAnswerToHtml(
-            Retort.Answer, Retort.CitationBaseUrl);
+        _parsedAnswer = ParseAnswerToHtml(Retort.Answer, Retort.CitationBaseUrl, Retort.HasDataPoints());
 
         base.OnParametersSet();
     }
