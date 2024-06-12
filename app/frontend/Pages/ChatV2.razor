@@ -111,7 +111,7 @@
                         }
 
                     </MudButtonGroup>
-                    @if (!string.IsNullOrEmpty(_imageUrl) && _imageUrl.Contains("pdf"))
+                    @if (!string.IsNullOrEmpty(_imageUrl) && (_imageUrl.Contains("pdf") || _imageUrl.Contains("csv")))
                     {
                         <MudChip Icon="@Icons.Material.Filled.PictureAsPdf" IconColor="Color.Primary">@_imageFileName</MudChip>
                     }
