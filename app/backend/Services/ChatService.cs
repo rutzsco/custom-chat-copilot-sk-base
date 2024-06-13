@@ -87,9 +87,9 @@ internal sealed class ChatService : IChatService
         {
             if (chatUpdate.Content != null)
             {
-                await Task.Delay(1);
                 sb.Append(chatUpdate.Content);
                 yield return new ChatChunkResponse(chatUpdate.Content);
+                await Task.Yield();
             }
         }
         sw.Stop();
