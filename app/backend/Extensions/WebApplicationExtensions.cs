@@ -19,7 +19,6 @@ internal static class WebApplicationExtensions
         // Process chat turn
         api.MapPost("chat/streaming", OnPostChatStreamingAsync);
         api.MapPost("chat", OnPostChatAsync);
-        api.MapPost("chat/image", OnPostChatImageAsync);
 
         // Process chat turn history
         api.MapGet("chat/history", OnGetHistoryAsync);
@@ -156,26 +155,6 @@ internal static class WebApplicationExtensions
         }
 
         return Results.BadRequest();
-    }
-
-    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatImageAsync(HttpContext context, ChatRequest request, ImageChatService chatService, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
-    {
-        // Get user information
-        var userInfo = context.GetUserInfo();
-        var profile = request.OptionFlags.GetChatProfile();
-        if (!userInfo.HasAccess(profile))
-        {
-            throw new UnauthorizedAccessException("User does not have access to this profile");
-        }
-
-        await foreach (var chunk in chatService.ReplyAsync(userInfo, profile, request).WithCancellation(cancellationToken))
-        {
-            yield return chunk;
-            if (chunk.FinalResult != null)
-            {
-                await chatHistoryService.RecordChatMessageAsync(userInfo, request, chunk.FinalResult);
-            }
-        }
     }
 
     private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, ChatHistoryService chatHistoryService, DocumentService documentService, [EnumeratorCancellation] CancellationToken cancellationToken)
