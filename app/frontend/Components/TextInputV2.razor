@@ -4,9 +4,9 @@
                   Immediate=true 
                   MaxLines=5 Disabled=@Disabled 
                   AutoGrow="true"
-                  Placeholder="Enter your message..." 
+                  Placeholder="Enter your message..."
                   DisableUnderLine="true" 
-                  Class="mt-n4 mx-4 py-4"
+                  Class="mt-n4 mx-4 py-4" 
                   OnKeyUp="@OnKeyUpAsync"
                   @bind-Value="@Value" />
 
@@ -16,5 +16,5 @@
     }
 
     <MudButton OnClick="OnAskClickedAsync" Disabled=@Disabled StartIcon="@Icons.Material.Outlined.Send" Color="Color.Secondary">Send</MudButton>
-    <MudButton StartIcon=@Icons.Material.Filled.Cancel Color="Color.Secondary" ButtonType="ButtonType.Reset" OnClick="@OnClearChatAsync" Disabled=@Disabled />
+    <MudIconButton Icon=@Icons.Material.Filled.Cancel Color="Color.Secondary" ButtonType="ButtonType.Reset" OnClick="@OnClearChatAsync" Disabled=@Disabled />
 </MudPaper>
