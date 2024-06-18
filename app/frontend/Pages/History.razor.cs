@@ -28,11 +28,6 @@ public sealed partial class History : IDisposable
     }
     private async Task OnChangeFeedbackFilerAsync()
     {
-        if (_showFeeback == true)
-            _showFeeback = false;
-        else
-            _showFeeback = true;
-
         await GetFeedbackAsync();
     }
 
