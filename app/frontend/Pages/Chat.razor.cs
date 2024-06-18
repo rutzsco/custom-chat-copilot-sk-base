@@ -39,7 +39,7 @@ public sealed partial class Chat
     private Guid _chatId = Guid.NewGuid();
 
     private string _imageUrl = "";
-
+    private string _imageFileName = "";
     [Inject] public required HttpClient HttpClient { get; set; }
 
     [Inject] public required ApiClient ApiClient { get; set; }
@@ -81,9 +81,10 @@ public sealed partial class Chat
         _files.Add(file);
 
         var buffer = new byte[file.Size];
-        await file.OpenReadStream().ReadAsync(buffer);
+        await file.OpenReadStream(2048000).ReadAsync(buffer);
         var imageContent = Convert.ToBase64String(buffer);
         _imageUrl = $"data:{file.ContentType};base64,{imageContent}";
+        _imageFileName = file.Name;
         EvaluateOptions();
     }
 

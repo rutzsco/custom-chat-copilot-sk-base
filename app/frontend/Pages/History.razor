@@ -4,7 +4,7 @@
 
 <MudGrid Justify="Justify.Center">
      <MudItem xs="12">
-        <MudCheckBox T="bool" @bind-Value="@_showFeeback" Label="Show Feedback" CheckedChanged="OnChangeFeedbackFilerAsync"></MudCheckBox>
+        <MudCheckBox T="bool" @bind-Value="@_showFeeback" @bind-Value:after="OnChangeFeedbackFilerAsync" Label="Show Feedback"></MudCheckBox>
      </MudItem>
     <MudItem xs="12">
         <MudTable Items="@_feedback" Dense="true" Hover="true" Bordered="true" FixedHeader="true" Elevation="4">
