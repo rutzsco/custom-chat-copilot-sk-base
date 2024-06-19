@@ -42,6 +42,12 @@ public class DocumentUpload
     [JsonProperty("status")]
     public DocumentProcessingStatus Status { get; set; }
 
+    [JsonProperty("status_message")]
+    public string StatusMessage { get; set; }
+
+    [JsonProperty("processing_progress")]
+    public double ProcessingProgress { get; set; }
+
     [JsonProperty("retrivalIndexName")]
     public string RetrivalIndexName { get; set; }
 

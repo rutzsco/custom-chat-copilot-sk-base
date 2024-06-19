@@ -130,6 +130,17 @@
                 </MudTh>
                 <MudTh>Content Type</MudTh>
                 <MudTh>
+                    <MudTableSortLabel SortBy="new Func<DocumentSummary, object>(d => d.StatusMessage)">
+                        Processing State
+                    </MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<DocumentSummary, object>(d => d.ProcessingProgress)">
+                        Processing Progress
+                    </MudTableSortLabel>
+                </MudTh>
+ 
+                <MudTh>
                     <MudTableSortLabel SortBy="new Func<DocumentSummary, object>(d => d.Size)">
                         Size
                     </MudTableSortLabel>
@@ -165,6 +176,12 @@
                 </MudTd>
                 <MudTd DataLabel="Content Type">
                     <code>@context.ContentType</code>
+                </MudTd>
+                <MudTd DataLabel="Processing State">
+                    <strong>@context.StatusMessage</strong>
+                </MudTd>
+                <MudTd DataLabel="Progress">
+                    <strong>@context.ProcessingProgress.ToPercentage()</strong>
                 </MudTd>
                 <MudTd DataLabel="Size">
                     <MudChip Size="Size.Small">

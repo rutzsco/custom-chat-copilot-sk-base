@@ -18,4 +18,9 @@ public static class LongExtensions
 
         return $"{size:0.##} {s_sizes[order]}";
     }
+
+    public static string ToPercentage(this double value)
+    {
+        return $"{value * 100:0.00}%";
+    }
 }
