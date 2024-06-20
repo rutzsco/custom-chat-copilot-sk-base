@@ -24,11 +24,24 @@ public static class AppConfiguration
 
 public static class AppConfigurationSetting
 {
+    public static string UseManagedIdentityResourceAccess { get; } = "UseManagedIdentityResourceAccess";
+    
+    // CosmosDB
+    public static string CosmosDBEndpoint { get; } = "CosmosDBEndpoint";
+    public static string CosmosDBConnectionString { get; } = "CosmosDBConnectionString";
+
+    // Azure Search
+    public static string AzureSearchServiceEndpoint { get; } = "AzureSearchServiceEndpoint";
+    public static string AzureSearchServiceKey { get; } = "AzureSearchServiceKey";
+    // Azure Storage
+    public static string AzureStorageAccountEndpoint { get; } = "AzureStorageAccountEndpoint";
     public static string AzureStorageAccountConnectionString { get; } = "AzureStorageAccountConnectionString";
     public static string AzureStorageUserUploadContainer { get; } = "AzureStorageUserUploadContainer";
+    public static string AzureStorageContainer { get; } = "AzureStorageContainer";
+    
 
+    // Ingestion Pipeline
     public static string IngestionPipelineAPI { get; } = "IngestionPipelineAPI";
-
     public static string IngestionPipelineAPIKey { get; } = "IngestionPipelineAPIKey";
     
 }

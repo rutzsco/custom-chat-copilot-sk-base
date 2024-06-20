@@ -2,6 +2,7 @@
 
 using System.Collections.Concurrent;
 using Azure;
+using Azure.Core;
 using Azure.Search.Documents;
 
 namespace MinimalApi.Services.Search;
@@ -10,10 +11,13 @@ public class SearchClientFactory
 {
     private readonly IConfiguration _configuration;
     private readonly ConcurrentDictionary<string,SearchClient> _clients = new ConcurrentDictionary<string, SearchClient>();
-
-    public SearchClientFactory(IConfiguration configuration)
+    private readonly TokenCredential _credential;
+    private readonly AzureKeyCredential _keyCredential;
+    public SearchClientFactory(IConfiguration configuration, TokenCredential credential, AzureKeyCredential keyCredential = null)
     {
         _configuration = configuration;
+        _credential = credential;
+        _keyCredential = keyCredential;
     }
 
     public SearchClient GetOrCreateClient(string indexName)
@@ -32,7 +36,10 @@ public class SearchClientFactory
 
     private SearchClient CreateClientForIndex(string indexName)
     {
-        var sc = new SearchClient(new Uri(_configuration["AzureSearchServiceEndpoint"]), indexName, new AzureKeyCredential(_configuration["AzureSearchServiceKey"]));
-        return sc;
+        if (_keyCredential != null)
+        {
+            return new SearchClient(new Uri(_configuration[AppConfigurationSetting.AzureSearchServiceEndpoint]), indexName, _keyCredential);
+        }
+        return new SearchClient(new Uri(_configuration[AppConfigurationSetting.AzureSearchServiceEndpoint]), indexName, _credential);
     }
 }

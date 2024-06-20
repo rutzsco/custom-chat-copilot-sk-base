@@ -1,14 +1,13 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Configuration;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.SemanticKernel.Services;
 using MinimalApi;
 using MinimalApi.Services.Profile;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
-
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -16,7 +15,15 @@ builder.Services.AddOutputCache();
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddCrossOriginResourceSharing();
-builder.Services.AddAzureServices(builder.Configuration);
+
+// Add Azure services to the container.
+var isMIBasedAuthentication = builder.Configuration[AppConfigurationSetting.UseManagedIdentityResourceAccess];
+if (!string.IsNullOrEmpty(isMIBasedAuthentication) && isMIBasedAuthentication.ToLower() == "true")
+    builder.Services.AddAzureWithMICredentialsServices(builder.Configuration);
+else
+    builder.Services.AddAzureServices(builder.Configuration);
+
+
 builder.Services.AddAntiforgery(options => { options.HeaderName = "X-CSRF-TOKEN-HEADER"; options.FormFieldName = "X-CSRF-TOKEN-FORM"; });
 AppConfiguration.Load(builder.Configuration);
 ProfileDefinition.Load(builder.Configuration);
