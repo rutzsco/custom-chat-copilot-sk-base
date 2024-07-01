@@ -27,6 +27,9 @@ blockquote:not(:empty) {
         padding-right: .5rem;
     }
 
+ul {
+    list-style: inside;
+}
 ul, ol {
     padding: 1.5rem;
 }
