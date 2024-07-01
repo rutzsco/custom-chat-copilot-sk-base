@@ -160,7 +160,6 @@ namespace MinimalApi.Extensions
                 .Replace("\\n\\r", "\n")
                 .Replace("\\n", "\n");
 
-            text = Regex.Unescape(text);
             return text;
         }
         public static int GetTokenCount(this ChatHistory chatHistory)
