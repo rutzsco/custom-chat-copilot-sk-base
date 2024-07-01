@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using static System.Net.WebRequestMethods;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using static MudBlazor.CategoryTypes;
 
 namespace ClientApp.Pages;
 
@@ -194,7 +195,9 @@ public sealed partial class Chat
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await JS.InvokeVoidAsync("scrollToBottom", "answerSection");
+        await JS.InvokeVoidAsync("highlight");
     }
+
     private void OnClearChatDocuumentSelection()
     {
         _userQuestion = _lastReferenceQuestion = "";

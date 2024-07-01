@@ -118,7 +118,7 @@ ul, ol {
     direction: rtl;
 }
 
-.hljs-copy-button {
+/*.hljs-copy-button {
     top: 2em !important;
 }
 
@@ -134,7 +134,7 @@ ul, ol {
         .hljs-copy-button[data-copied="true"]:hover {
             filter: none;
             background-color: initial;
-        }
+        }*/
 
 .mud-nav-item {
     font-size: 1.2rem;
