@@ -4,11 +4,8 @@ namespace ClientApp.Components;
 
 public sealed partial class Answer
 {
-    private static readonly MarkdownPipeline _pipeline = new MarkdownPipelineBuilder()
+    private static readonly MarkdownPipeline s_pipeline = new MarkdownPipelineBuilder()
     .ConfigureNewLine("\n")
-    .UseAdvancedExtensions()
-    .UseEmojiAndSmiley()
-    .UseSoftlineBreakAsHardlineBreak()
     .Build();
 
     internal static HtmlParsedAnswer ParseAnswerToHtml(string answer, string citationBaseUrl, bool containsSources = true)
@@ -56,7 +53,7 @@ public sealed partial class Answer
             raw = string.Join(string.Empty, fragments);
         }
 
-        var html = Markdown.ToHtml(raw, _pipeline);
+        var html = Markdown.ToHtml(raw, s_pipeline);
         var followUpQuestions = followupQuestions.Select(f => f.Replace("<<", "").Replace(">>", "")).ToHashSet();
         return new HtmlParsedAnswer(html, citations, followUpQuestions);
     }
