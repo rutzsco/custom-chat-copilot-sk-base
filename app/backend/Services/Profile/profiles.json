@@ -21,6 +21,27 @@
     }
   },
   {
+    "Name": "Boat Service Advisor",
+    "Id": "BoatServiceAdvisor",
+    "Approach": "RAG",
+    "SecurityModel": "None",
+    "SecurityModelGroupMembership": [ "LocalDevUser" ],
+    "SampleQuestions": [
+      "How do I change the oil?",
+      "How do I winterize?",
+      "How calibrate the gas gauge?"
+    ],
+    "RAGSettings": {
+      "GenerateSearchQueryPluginName": "GenerateSearchQuery",
+      "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
+      "DocumentRetrievalPluginName": "DocumentRetrieval",
+      "DocumentRetrievalPluginQueryFunctionName": "KwiecienV2",
+      "DocumentRetrievalIndexName": "manuals-boat-ci-20240708121734",
+      "ChatSystemMessageFile": "RAGChatSystemPrompt",
+      "StorageContianer": "manuals-boat"
+    }
+  },
+  {
     "Name": "General",
     "Id": "General",
     "Approach": "Chat",
@@ -53,7 +74,7 @@
       "GenerateSearchQueryPluginName": "GenerateSearchQuery",
       "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
       "DocumentRetrievalPluginName": "DocumentRetrieval",
-      "DocumentRetrievalPluginQueryFunctionName": "KwiecienV2",
+      "DocumentRetrievalPluginQueryFunctionName": "AISearchV1",
       "DocumentRetrievalIndexName": "rag-index-20240508144216",
       "ChatSystemMessageFile": "RAGChatSystemPrompt",
       "StorageContianer": "content"
