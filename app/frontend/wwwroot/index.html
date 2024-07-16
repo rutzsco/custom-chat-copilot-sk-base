@@ -68,9 +68,10 @@
             var element = document.getElementById(elementId);
             element.scrollTop = element.scrollHeight;
         }
+
         MathJax = {
             tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)'], ['\[', '\]']]
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
             }
         };
         window.renderMathJax = () => {
