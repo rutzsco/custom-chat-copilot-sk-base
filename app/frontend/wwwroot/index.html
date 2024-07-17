@@ -70,9 +70,7 @@
         }
 
         MathJax = {
-            tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']]
-            }
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)'], ['\[', '\]']] }
         };
         window.renderMathJax = () => {
             if (window.MathJax) {
