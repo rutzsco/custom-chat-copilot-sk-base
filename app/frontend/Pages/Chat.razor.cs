@@ -196,7 +196,10 @@ public sealed partial class Chat
     {
         await JS.InvokeVoidAsync("scrollToBottom", "answerSection");
         await JS.InvokeVoidAsync("highlight");
-        await JS.InvokeVoidAsync("renderMathJax");
+        if (!_isReceivingResponse)
+        {
+            await JS.InvokeVoidAsync("renderMathJax");
+        }
     }
 
     private void OnClearChatDocuumentSelection()
