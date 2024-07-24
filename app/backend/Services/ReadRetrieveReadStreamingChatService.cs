@@ -40,6 +40,11 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
 
         // RAG Steps
         await kernel.InvokeAsync(generateSearchQueryFunction, context);
+        if (context.TryGetValue(ContextVariableOptions.ResponsibleAIPolicyViolation, out var policyViolationObj) && policyViolationObj is bool policyViolation && policyViolation)
+        {
+            yield return new ChatChunkResponse("The response was filtered due to the prompt triggering Azure OpenAI's content management policy.", new ApproachResponse("The response was filtered due to the prompt triggering Azure OpenAI's content management policy.",string.Empty, null));
+            yield break;
+        }
         await kernel.InvokeAsync(documentLookupFunction, context);
 
         // Chat Step
