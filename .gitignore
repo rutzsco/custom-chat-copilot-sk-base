@@ -406,3 +406,4 @@ infrastructure/main.rutzsco.k.parameters.json
 .azure
 app/backend/Services/Profile/profiles-local.json
 app/backend/Services/Profile/profiles.local.json
+infra/rutzsco.d.parameters.json

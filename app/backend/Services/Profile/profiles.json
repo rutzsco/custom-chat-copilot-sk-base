@@ -79,5 +79,20 @@
       "ChatSystemMessageFile": "RAGChatSystemPrompt",
       "StorageContianer": "content"
     }
+  },
+  {
+    "Name": "Weather Advisor",
+    "Id": "WeatherAdvisor",
+    "Approach": "EndpointAssistant",
+    "SecurityModel": "None",
+    "SecurityModelGroupMembership": [ "LocalDevUser" ],
+    "SampleQuestions": [
+      "Q1?",
+      "Q1?"
+    ],
+    "AssistantEndpointSettings": {
+      "APIEndpointSetting": "WeatherAssistantAPIEndpoint",
+      "APIEndpointKeySetting": "WeatherAssistantAPIEndpointKey"
+    }
   }
 ]

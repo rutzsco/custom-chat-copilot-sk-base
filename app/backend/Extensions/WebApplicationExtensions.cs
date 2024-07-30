@@ -3,6 +3,7 @@
 using System;
 using ClientApp.Pages;
 using Microsoft.AspNetCore.Antiforgery;
+using MinimalApi.Services;
 using MinimalApi.Services.ChatHistory;
 using MinimalApi.Services.Profile;
 using MinimalApi.Services.Security;
@@ -157,7 +158,7 @@ internal static class WebApplicationExtensions
         return Results.BadRequest();
     }
 
-    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, ChatHistoryService chatHistoryService, DocumentService documentService, [EnumeratorCancellation] CancellationToken cancellationToken)
+    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, ChatHistoryService chatHistoryService, EndpointChatService endpointChatService, DocumentService documentService, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var userInfo = context.GetUserInfo();
         var profile = request.OptionFlags.GetChatProfile();
@@ -174,7 +175,7 @@ internal static class WebApplicationExtensions
             profile.RAGSettings.DocumentRetrievalIndexName = document.RetrivalIndexName;
         }
 
-        var chat = ResolveChatService(request, chatService, ragChatService);
+        var chat = ResolveChatService(request, chatService, ragChatService, endpointChatService);
         await foreach (var chunk in chat.ReplyAsync(userInfo, profile, request).WithCancellation(cancellationToken))
         {
             yield return chunk;
@@ -184,11 +185,14 @@ internal static class WebApplicationExtensions
             }
         }
     }
-    private static IChatService ResolveChatService(ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService)
+    private static IChatService ResolveChatService(ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, EndpointChatService endpointChatService)
     {  
         if (request.OptionFlags.IsChatProfile())
             return chatService;
-        
+
+        if (request.OptionFlags.IsEndpointAssistantProfile())
+            return endpointChatService;
+
         return ragChatService;
     }
 

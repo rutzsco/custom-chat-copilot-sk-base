@@ -34,9 +34,12 @@ public sealed class GenerateSearchQuerySkill
             var requestProperties = chatHistory.GenerateRequestProperties(DefaultSettings.AIChatRequestSettings);
             arguments[ContextVariableOptions.SearchDiagnostics] = requestProperties;
         }
-        catch(Microsoft.SemanticKernel.HttpOperationException ex)
+        catch (Microsoft.SemanticKernel.HttpOperationException ex)
         {
-            arguments[ContextVariableOptions.ResponsibleAIPolicyViolation] = true;
+            if (((Azure.RequestFailedException)ex.InnerException).ErrorCode == "content_filter")
+            {
+                arguments[ContextVariableOptions.ResponsibleAIPolicyViolation] = true;
+            }
         }
     }
 }

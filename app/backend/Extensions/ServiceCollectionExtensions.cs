@@ -108,6 +108,7 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<ChatService>();
         services.AddSingleton<ReadRetrieveReadChatService>();
         services.AddSingleton<ReadRetrieveReadStreamingChatService>();
+        services.AddSingleton<EndpointChatService>();
 
         services.AddSingleton<AzureBlobStorageService>();
         services.AddSingleton<DocumentService>();

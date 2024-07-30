@@ -40,7 +40,7 @@ public class ProfileDefinition
         }
     }
 
-    public ProfileDefinition(string name, string id, string approach, string securityModel, List<string> securityModelGroupMembership, List<string> sampleQuestions, RAGSettingsSummary? ragSettingsSummary)
+    public ProfileDefinition(string name, string id, string approach, string securityModel, List<string> securityModelGroupMembership, List<string> sampleQuestions, RAGSettingsSummary? ragSettingsSummary, AssistantEndpointSettingsSummary? assistantEndpointSettingsSummary)
     {
         Name = name;
         Id = id;
@@ -48,6 +48,7 @@ public class ProfileDefinition
         SecurityModel = securityModel;
         SampleQuestions = sampleQuestions;
         RAGSettings = ragSettingsSummary;
+        AssistantEndpointSettings = assistantEndpointSettingsSummary;
 
         if (securityModelGroupMembership == null)
             SecurityModelGroupMembership = new List<string>();
@@ -63,6 +64,7 @@ public class ProfileDefinition
     public List<string> SecurityModelGroupMembership { get; set; }
 
     public RAGSettingsSummary? RAGSettings { get; set; }
+    public AssistantEndpointSettingsSummary? AssistantEndpointSettings { get; set; }
 
     public string ChatSystemMessageFile { get; set; }
 
@@ -82,4 +84,10 @@ public class RAGSettingsSummary
 
     public string ChatSystemMessageFile { get; set; }
     public string StorageContianer { get; set; }
+}
+
+public class AssistantEndpointSettingsSummary
+{
+    public string APIEndpointSetting { get; set; }
+    public string APIEndpointKeySetting { get; set; }
 }
