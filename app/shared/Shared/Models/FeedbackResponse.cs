@@ -2,6 +2,9 @@
 
 namespace Shared.Models;
 
+
+public record class ChatSessionModel(string ChatId, List<ChatHistoryResponse> ChatMessages);
+
 public record class ChatHistoryResponse(
     string ChatId,
     string Prompt,

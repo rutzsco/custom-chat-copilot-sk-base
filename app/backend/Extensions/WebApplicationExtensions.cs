@@ -23,6 +23,7 @@ internal static class WebApplicationExtensions
 
         // Process chat turn history
         api.MapGet("chat/history", OnGetHistoryAsync);
+        api.MapGet("chat/history-v2", OnGetHistoryV2Async);
 
         // Process chat turn rating 
         api.MapPost("chat/rating", OnPostChatRatingAsync);
@@ -201,6 +202,21 @@ internal static class WebApplicationExtensions
         var userInfo = context.GetUserInfo();
         var response = await chatHistoryService.GetMostRecentChatItemsAsync(userInfo);
         return response.AsFeedbackResponse();
+    }
+
+    private static async Task<IEnumerable<ChatSessionModel>> OnGetHistoryV2Async(HttpContext context, ChatHistoryService chatHistoryService)
+    {
+        var userInfo = context.GetUserInfo();
+        var response = await chatHistoryService.GetMostRecentChatItemsAsync(userInfo);
+        var apiResponseModel = response.AsFeedbackResponse();
+
+
+        List<ChatSessionModel> sessions = apiResponseModel
+            .GroupBy(msg => msg.ChatId)
+            .Select(g => new ChatSessionModel(g.Key, g.ToList()))
+            .ToList();
+
+        return sessions;
     }
 
     private static async Task<IEnumerable<ChatHistoryResponse>> OnGetFeedbackAsync(HttpContext context, ChatHistoryService chatHistoryService)
