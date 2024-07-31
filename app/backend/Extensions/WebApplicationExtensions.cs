@@ -211,7 +211,7 @@ internal static class WebApplicationExtensions
         var response = await chatHistoryService.GetMostRecentChatItemsAsync(userInfo);
         var apiResponseModel = response.AsFeedbackResponse();
 
-
+        var first = apiResponseModel.First();
         List<ChatSessionModel> sessions = apiResponseModel
             .GroupBy(msg => msg.ChatId)
             .Select(g => new ChatSessionModel(g.Key, g.ToList()))
@@ -219,6 +219,7 @@ internal static class WebApplicationExtensions
 
         return sessions;
     }
+
 
     private static async Task<IEnumerable<ChatHistoryResponse>> OnGetChatHistorySessionAsync(string chatId, HttpContext context, ChatHistoryService chatHistoryService)
     {

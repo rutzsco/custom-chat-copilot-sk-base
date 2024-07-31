@@ -257,13 +257,15 @@ public sealed partial class Chat
 
     private async Task LoadArchivedChatAsync(CancellationToken cancellationToken, string chatId)
     {
-        var chatMessages = await ApiClient.GetChatHistorySessionAsync(cancellationToken, chatId).ToListAsync(); ;
+        var chatMessages = await ApiClient.GetChatHistorySessionAsync(cancellationToken, chatId).ToListAsync();
+        var profile = chatMessages.First().Profile;
+        _selectedProfile = profile;
+        _selectedProfileSummary = _profiles.FirstOrDefault(x => x.Name == profile);
         foreach (var chatMessage in chatMessages)
         {
-            var ar = new ApproachResponse(chatMessage.Answer, null, null);
+            var ar = new ApproachResponse(chatMessage.Answer, chatMessage.ProfileId, new ResponseContext(chatMessage.Profile,chatMessage.DataPoints, Array.Empty<ThoughtRecord>(), Guid.Empty, Guid.Empty, null));
             _questionAndAnswerMap[new UserQuestion(chatMessage.Prompt, chatMessage.Timestamp.UtcDateTime)] = ar;
         }
-
         Navigation.NavigateTo(string.Empty, forceLoad: false);
     }
 }
