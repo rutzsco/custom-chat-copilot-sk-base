@@ -152,12 +152,30 @@ public sealed class ApiClient(HttpClient httpClient)
         }
     }
 
+    public async IAsyncEnumerable<ChatHistoryResponse> GetChatHistorySessionAsync([EnumeratorCancellation] CancellationToken cancellationToken, string chatId)
+    {
+        var response = await httpClient.GetAsync($"api/chat/history/{chatId}", cancellationToken);
+        if (response.IsSuccessStatusCode)
+        {
+            var options = SerializerOptions.Default;
+            using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            await foreach (var document in JsonSerializer.DeserializeAsyncEnumerable<ChatHistoryResponse>(stream, options, cancellationToken))
+            {
+                if (document is null)
+                {
+                    continue;
+                }
+
+                yield return document;
+            }
+        }
+    }
+
     public async Task ChatRatingAsync(ChatRatingRequest request)
     {
         await PostBasicAsync(request, "api/chat/rating");
     }
 
-    //public Task<AnswerResult<ChatRequest>> ChatConversationAsync(ChatRequest request) => PostRequestAsync(request, "api/chat");
 
     private async Task<AnswerResult<TRequest>> PostRequestAsync<TRequest>(TRequest request, string apiRoute) where TRequest : ApproachRequest
     {

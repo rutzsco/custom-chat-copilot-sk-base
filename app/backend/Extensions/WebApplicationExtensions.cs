@@ -24,6 +24,7 @@ internal static class WebApplicationExtensions
         // Process chat turn history
         api.MapGet("chat/history", OnGetHistoryAsync);
         api.MapGet("chat/history-v2", OnGetHistoryV2Async);
+        api.MapGet("chat/history/{chatId}", OnGetChatHistorySessionAsync);
 
         // Process chat turn rating 
         api.MapPost("chat/rating", OnPostChatRatingAsync);
@@ -217,6 +218,14 @@ internal static class WebApplicationExtensions
             .ToList();
 
         return sessions;
+    }
+
+    private static async Task<IEnumerable<ChatHistoryResponse>> OnGetChatHistorySessionAsync(string chatId, HttpContext context, ChatHistoryService chatHistoryService)
+    {
+        var userInfo = context.GetUserInfo();
+        var response = await chatHistoryService.GetChatHistoryMessagesAsync(userInfo, chatId);
+        var apiResponseModel = response.AsFeedbackResponse();
+        return apiResponseModel;
     }
 
     private static async Task<IEnumerable<ChatHistoryResponse>> OnGetFeedbackAsync(HttpContext context, ChatHistoryService chatHistoryService)

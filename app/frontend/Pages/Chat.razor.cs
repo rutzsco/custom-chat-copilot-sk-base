@@ -41,12 +41,17 @@ public sealed partial class Chat
 
     private string _imageUrl = "";
     private string _imageFileName = "";
+
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
     [Inject] public required HttpClient HttpClient { get; set; }
 
     [Inject] public required ApiClient ApiClient { get; set; }
 
     [Inject]
     public required IJSRuntime JSRuntime { get; set; }
+
+    [Inject]
+    public required NavigationManager Navigation { get; set; }
 
     [CascadingParameter(Name = nameof(Settings))]
     public required RequestSettingsOverrides Settings { get; set; }
@@ -59,6 +64,10 @@ public sealed partial class Chat
     public bool _showDocumentUpload { get; set; }
     public bool _showPictureUpload { get; set; }
 
+
+    [SupplyParameterFromQuery(Name = "cid")]
+    public string? ArchivedChatId { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         var user = await ApiClient.GetUserAsync();
@@ -67,20 +76,33 @@ public sealed partial class Chat
         _selectedProfile = _profiles.First().Name;
         _selectedProfileSummary = _profiles.First();
 
-        StateHasChanged();
+        //StateHasChanged();
 
         if (AppConfiguration.ShowFileUploadSelection)
         {
             var userDocuments = await ApiClient.GetUserDocumentsAsync();
             _userDocuments = userDocuments.ToList();
         }
+
+        if (!string.IsNullOrEmpty(ArchivedChatId))
+        {
+            
+            var chatMessages = await ApiClient.GetChatHistorySessionAsync(_cancellationTokenSource.Token, ArchivedChatId).ToListAsync(); ;
+            foreach (var chatMessage in chatMessages)
+            {
+                var ar = new ApproachResponse(chatMessage.Answer, null, null);
+                _questionAndAnswerMap[new UserQuestion(chatMessage.Prompt, chatMessage.Timestamp.UtcDateTime)] = ar;
+            }
+            LoadArchivedChatAsync();
+            Navigation.NavigateTo("", forceLoad: false);
+        }
         EvaluateOptions();
+
     }
 
     private async Task UploadFilesAsync(IBrowserFile file)
-    {
+    {       
         _files.Add(file);
-
         var buffer = new byte[file.Size];
         await file.OpenReadStream(2048000).ReadAsync(buffer);
         var imageContent = Convert.ToBase64String(buffer);
@@ -239,5 +261,9 @@ public sealed partial class Chat
         {
             _showPictureUpload = false;
         }
+    }
+
+    private void LoadArchivedChatAsync()
+    {
     }
 }
