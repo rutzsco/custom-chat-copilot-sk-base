@@ -86,18 +86,9 @@ public sealed partial class Chat
 
         if (!string.IsNullOrEmpty(ArchivedChatId))
         {
-            
-            var chatMessages = await ApiClient.GetChatHistorySessionAsync(_cancellationTokenSource.Token, ArchivedChatId).ToListAsync(); ;
-            foreach (var chatMessage in chatMessages)
-            {
-                var ar = new ApproachResponse(chatMessage.Answer, null, null);
-                _questionAndAnswerMap[new UserQuestion(chatMessage.Prompt, chatMessage.Timestamp.UtcDateTime)] = ar;
-            }
-            LoadArchivedChatAsync();
-            Navigation.NavigateTo("", forceLoad: false);
+            await LoadArchivedChatAsync(_cancellationTokenSource.Token,ArchivedChatId);
         }
         EvaluateOptions();
-
     }
 
     private async Task UploadFilesAsync(IBrowserFile file)
@@ -216,6 +207,7 @@ public sealed partial class Chat
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        Console.WriteLine($"OnAfterRenderAsync: _isReceivingResponse - {_isReceivingResponse}");
         await JS.InvokeVoidAsync("scrollToBottom", "answerSection");
         await JS.InvokeVoidAsync("highlight");
         if (!_isReceivingResponse)
@@ -263,7 +255,15 @@ public sealed partial class Chat
         }
     }
 
-    private void LoadArchivedChatAsync()
+    private async Task LoadArchivedChatAsync(CancellationToken cancellationToken, string chatId)
     {
+        var chatMessages = await ApiClient.GetChatHistorySessionAsync(cancellationToken, chatId).ToListAsync(); ;
+        foreach (var chatMessage in chatMessages)
+        {
+            var ar = new ApproachResponse(chatMessage.Answer, null, null);
+            _questionAndAnswerMap[new UserQuestion(chatMessage.Prompt, chatMessage.Timestamp.UtcDateTime)] = ar;
+        }
+
+        Navigation.NavigateTo(string.Empty, forceLoad: false);
     }
 }
