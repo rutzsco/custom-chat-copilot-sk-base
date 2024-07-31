@@ -11,10 +11,19 @@ using Newtonsoft.Json;
 
 namespace MinimalApi.Services.ChatHistory;
 
-/// <summary>
-/// Information about a single chat message.
-/// </summary>
-public class ChatMessageRecord
+
+    public class ChatSessionRecord
+    { 
+        public string ChatId { get; set; }
+
+        public List<ChatMessageRecord> Messages { get; set; }
+    }
+
+
+    /// <summary>
+    /// Information about a single chat message.
+    /// </summary>
+    public class ChatMessageRecord
 {
     public ChatMessageRecord(string userId,
                              string chatId,

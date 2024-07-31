@@ -37,6 +37,9 @@
     <Content Update="Components\TextInputV2.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
+    <Content Update="Pages\HistoryV2.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
     <Content Update="Pages\History.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>

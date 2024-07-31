@@ -72,4 +72,21 @@ public class ChatHistoryService
 
         return results;
     }
+
+    public async Task<List<ChatMessageRecord>> GetChatHistoryMessagesAsync(UserInformation user, string chatId)
+    {
+        var query = _cosmosContainer.GetItemQueryIterator<ChatMessageRecord>(
+            new QueryDefinition("SELECT * FROM c WHERE c.userId = @username AND c.chatId = @chatid ORDER BY c.timestamp DESC")
+            .WithParameter("@username", user.UserId)
+            .WithParameter("@chatid", chatId));
+
+        var results = new List<ChatMessageRecord>();
+        while (query.HasMoreResults)
+        {
+            var response = await query.ReadNextAsync();
+            results.AddRange(response.ToList());
+        }
+
+        return results;
+    }
 }

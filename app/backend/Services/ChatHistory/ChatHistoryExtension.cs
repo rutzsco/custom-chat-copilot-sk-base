@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using MinimalApi.Services.Profile;
+
 namespace MinimalApi.Services.ChatHistory;
 
 public static class ChatHistoryExtension
@@ -19,6 +21,9 @@ public static class ChatHistoryExtension
                         -1,
                         string.Empty,
                         item.Context.Diagnostics.ModelDeploymentName,
+                        item.Context.Profile,
+                        ProfileDefinition.All.Single(x => x.Name == item.Context.Profile).Id,
+                        item.Context.DataPoints,
                         item.Context.Diagnostics.WorkflowDurationMilliseconds,
                         item.Timestamp);
                 }
@@ -31,6 +36,9 @@ public static class ChatHistoryExtension
                         item.Rating.Rating,
                         item.Rating.Feedback,
                         item.Context.Diagnostics.ModelDeploymentName,
+                        item.Context.Profile,
+                        ProfileDefinition.All.Single(x => x.Name == item.Context.Profile).Id,
+                        item.Context.DataPoints,
                         item.Context.Diagnostics.WorkflowDurationMilliseconds,
                         item.Timestamp);
                 }
@@ -47,6 +55,9 @@ public static class ChatHistoryExtension
                     0,
                     string.Empty,
                     "Unavialable",
+                    "Unavialable",
+                    "Unavialable",
+                    Array.Empty<SupportingContentRecord>(),
                     0,
                     item.Timestamp);
                 }
@@ -59,6 +70,9 @@ public static class ChatHistoryExtension
                         item.Rating.Rating,
                         item.Rating.Feedback,
                         "Unavialable",
+                        "Unavialable",
+                        "Unavialable",
+                        Array.Empty<SupportingContentRecord>(),
                         0,
                         item.Timestamp);
                 }
