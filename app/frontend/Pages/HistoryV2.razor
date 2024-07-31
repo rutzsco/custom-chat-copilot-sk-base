@@ -26,7 +26,7 @@
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Description" Style="text-align:center"><strong>@context.Description</strong></MudTd>
-                <MudTd DataLabel="Description" Style="text-align:center"><MudChip T="string" Variant="Variant.Text" Size="Size.Small">@context.Profile</MudChip></MudTd>
+                <MudTd DataLabel="Profile" Style="text-align:center"><MudChip T="string" Variant="Variant.Text" Size="Size.Small">@context.Profile</MudChip></MudTd>
                 <MudTd DataLabel="Timestamp" Style="text-align:center"><strong>@context.Timestamp</strong></MudTd>
                 <MudTd DataLabel="Timestamp" Style="text-align:center"><MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="@(() => ViewChat(context.ChatId))">View</MudButton></MudTd>              
             </RowTemplate>

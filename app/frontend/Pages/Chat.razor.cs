@@ -261,7 +261,9 @@ public sealed partial class Chat
         var profile = chatMessages.First().Profile;
         _selectedProfile = profile;
         _selectedProfileSummary = _profiles.FirstOrDefault(x => x.Name == profile);
-        foreach (var chatMessage in chatMessages)
+        _chatId = Guid.Parse(chatId);
+
+        foreach (var chatMessage in chatMessages.OrderByDescending(x => x.Timestamp))
         {
             var ar = new ApproachResponse(chatMessage.Answer, chatMessage.ProfileId, new ResponseContext(chatMessage.Profile,chatMessage.DataPoints, Array.Empty<ThoughtRecord>(), Guid.Empty, Guid.Empty, null));
             _questionAndAnswerMap[new UserQuestion(chatMessage.Prompt, chatMessage.Timestamp.UtcDateTime)] = ar;
