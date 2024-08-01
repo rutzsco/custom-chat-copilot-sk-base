@@ -6,77 +6,39 @@ namespace MinimalApi.Services.ChatHistory;
 
 public static class ChatHistoryExtension
 {
-    public static IEnumerable<ChatHistoryResponse> AsFeedbackResponse(this List<ChatMessageRecord> records)
+    public static List<ChatHistoryResponse> AsFeedbackResponse(this List<ChatMessageRecord> records)
     {
+        var chatHistoryResponses = new List<ChatHistoryResponse>();
+
         foreach (var item in records)
         {
-            if (item.Context != null && item.Context.Diagnostics != null)
-            {
-                if (item.Rating == null)
-                {
-                    yield return new ChatHistoryResponse(
-                        item.ChatId,
-                        item.Prompt,
-                        item.Content,
-                        -1,
-                        string.Empty,
-                        item.Context.Diagnostics.ModelDeploymentName,
-                        item.Context.Profile,
-                        ProfileDefinition.All.Single(x => x.Name == item.Context.Profile).Id,
-                        item.Context.DataPoints,
-                        item.Context.Diagnostics.WorkflowDurationMilliseconds,
-                        item.Timestamp);
-                }
-                else
-                {
-                    yield return new ChatHistoryResponse(
-                        item.ChatId,
-                        item.Prompt,
-                        item.Content,
-                        item.Rating.Rating,
-                        item.Rating.Feedback,
-                        item.Context.Diagnostics.ModelDeploymentName,
-                        item.Context.Profile,
-                        ProfileDefinition.All.Single(x => x.Name == item.Context.Profile).Id,
-                        item.Context.DataPoints,
-                        item.Context.Diagnostics.WorkflowDurationMilliseconds,
-                        item.Timestamp);
-                }
+            var profileName = item.Context?.Profile ?? "Unavailable";
+            var profileId = ProfileDefinition.All.SingleOrDefault(x => x.Name == profileName)?.Id ?? "Unavailable";
 
-            }
-            else
-            {
-                if (item.Rating == null)
-                {
-                    yield return new ChatHistoryResponse(
-                    item.ChatId,
-                    item.Prompt,
-                    item.Content,
-                    0,
-                    string.Empty,
-                    "Unavialable",
-                    "Unavialable",
-                    "Unavialable",
-                    Array.Empty<SupportingContentRecord>(),
-                    0,
-                    item.Timestamp);
-                }
-                else
-                {
-                    yield return new ChatHistoryResponse(
-                        item.ChatId,
-                        item.Prompt,
-                        item.Content,
-                        item.Rating.Rating,
-                        item.Rating.Feedback,
-                        "Unavialable",
-                        "Unavialable",
-                        "Unavialable",
-                        Array.Empty<SupportingContentRecord>(),
-                        0,
-                        item.Timestamp);
-                }
-            }
+            var rating = item.Rating?.Rating ?? 0;
+            var feedback = item.Rating?.Feedback ?? string.Empty;
+
+            var modelDeploymentName = item.Context?.Diagnostics?.ModelDeploymentName ?? "Unavailable";
+            var workflowDurationMilliseconds = item.Context?.Diagnostics?.WorkflowDurationMilliseconds ?? 0;
+
+            var dataPoints = item.Context?.DataPoints ?? Array.Empty<SupportingContentRecord>();
+
+            var chatHistoryResponse = new ChatHistoryResponse(
+                item.ChatId,
+                item.Prompt,
+                item.Content,
+                rating,
+                feedback,
+                modelDeploymentName,
+                profileName,
+                profileId,
+                dataPoints,
+                workflowDurationMilliseconds,
+                item.Timestamp);
+
+            chatHistoryResponses.Add(chatHistoryResponse);
         }
+
+        return chatHistoryResponses;
     }
 }
