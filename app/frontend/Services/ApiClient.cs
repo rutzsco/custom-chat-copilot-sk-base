@@ -6,13 +6,6 @@ namespace ClientApp.Services;
 
 public sealed class ApiClient(HttpClient httpClient)
 {
-    public async Task<bool> ShowLogoutButtonAsync()
-    {
-        var response = await httpClient.GetAsync("api/enableLogout");
-        response.EnsureSuccessStatusCode();
-
-        return await response.Content.ReadFromJsonAsync<bool>();
-    }
     public async Task<UserInformation> GetUserAsync()
     {
         var response = await httpClient.GetAsync("api/user");
@@ -174,40 +167,6 @@ public sealed class ApiClient(HttpClient httpClient)
     public async Task ChatRatingAsync(ChatRatingRequest request)
     {
         await PostBasicAsync(request, "api/chat/rating");
-    }
-
-
-    private async Task<AnswerResult<TRequest>> PostRequestAsync<TRequest>(TRequest request, string apiRoute) where TRequest : ApproachRequest
-    {
-        var result = new AnswerResult<TRequest>(
-            IsSuccessful: false,
-            Response: null,
-            Approach: request.Approach,
-            Request: request);
-
-        var json = JsonSerializer.Serialize(request, SerializerOptions.Default);
-        using var body = new StringContent(json, Encoding.UTF8, "application/json");
-
-        var response = await httpClient.PostAsync(apiRoute, body);
-        if (response.IsSuccessStatusCode)
-        {
-            var answer = await response.Content.ReadFromJsonAsync<ApproachResponse>();
-            return result with
-            {
-                IsSuccessful = answer is not null,
-                Response = answer
-            };
-        }
-        else
-        {
-            var answer = new ApproachResponse($"HTTP {(int)response.StatusCode} : {response.ReasonPhrase ?? "☹️ Unknown error..."}","Unable to retrieve valid response from the server.", null);
-
-            return result with
-            {
-                IsSuccessful = false,
-                Response = answer
-            };
-        }
     }
 
     private async Task PostBasicAsync<TRequest>(TRequest request, string apiRoute) where TRequest : ApproachRequest
