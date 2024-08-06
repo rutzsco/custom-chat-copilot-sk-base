@@ -84,19 +84,25 @@
 
                         @if (_showDocumentUpload)
                         {
-                            <MudMenu>
+                            <MudMenu Style="width: 350px">
                                 <ActivatorContent>
                                     <MudButton Style="height: 36px" StartIcon="@Icons.Material.Filled.UploadFile" EndIcon="@Icons.Material.Filled.KeyboardArrowDown">@_selectedDocument</MudButton>
                                 </ActivatorContent>
                                 <ChildContent>
                                     <MudMenuItem Color="Color.Primary" Href="/documents">Upload File</MudMenuItem>
-                                    @foreach (var document in _userDocuments)
+@*                                     @foreach (var document in _userDocuments)
                                     {
                                         if (document.Status == DocumentProcessingStatus.Succeeded)
                                         {
                                             <MudMenuItem OnClick="@(e => OnDocumentClick(@document.Name))" Color="Color.Primary">@document.Name</MudMenuItem>
                                         }
-                                    }
+                                    } *@
+                                    <MudSelect Style="padding: 10px; width: 300px" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetMultiSelectionText))" MultiSelection="true" @bind-Value="value" @bind-SelectedValues="SelectedDocuments" T="string" Label="Documents" AnchorOrigin="Origin.BottomCenter">
+                                        @foreach (var document in _userDocuments)
+                                        {
+                                            <MudSelectItem T="string" Value="@document.Name">@document.Name</MudSelectItem>
+                                        } 
+                                    </MudSelect>
                                 </ChildContent>
                             </MudMenu>
                         }

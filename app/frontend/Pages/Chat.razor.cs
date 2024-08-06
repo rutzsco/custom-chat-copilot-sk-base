@@ -64,9 +64,19 @@ public sealed partial class Chat
     public bool _showDocumentUpload { get; set; }
     public bool _showPictureUpload { get; set; }
 
-
     [SupplyParameterFromQuery(Name = "cid")]
     public string? ArchivedChatId { get; set; }
+
+    private string GetMultiSelectionText(List<string> selectedValues)
+    {
+        var text = $"{selectedValues.Count} documents{(selectedValues.Count > 1 ? "s have" : " has")} been selected";
+        _selectedDocument = text;
+        OnClearChatDocuumentSelection();
+        return text;
+    }
+
+    private string value { get; set; } = "Nothing selected";
+    private IEnumerable<string> SelectedDocuments { get; set; } = new HashSet<string>() { };
 
     protected override async Task OnInitializedAsync()
     {
@@ -141,10 +151,11 @@ public sealed partial class Chat
             var options = new Dictionary<string, string>();
             options["GPT4ENABLED"] = _gPT4ON.ToString();
             options["PROFILE"] = _selectedProfile;
-            if(_userUploadProfileSummary != null && !string.IsNullOrEmpty(_selectedDocument))
-            {
-                options["SELECTEDDOCUMENT"] = _selectedDocument;
-                if (!string.IsNullOrEmpty(_selectedDocument))
+            var selectedDocuments = string.Join(",", SelectedDocuments);
+            if (_userUploadProfileSummary != null && SelectedDocuments.Any())
+            {               
+                options["SELECTEDDOCUMENT"] = selectedDocuments;
+                if (SelectedDocuments.Any())
                 {
                     options["PROFILE"] = _userUploadProfileSummary.Name;
                 }
@@ -154,7 +165,8 @@ public sealed partial class Chat
             {
                 options["IMAGECONTENT"] = _imageUrl;
             }
-            var request = new ChatRequest(_chatId, Guid.NewGuid(), [.. history], options, Settings.Approach, Settings.Overrides);
+
+            var request = new ChatRequest(_chatId, Guid.NewGuid(), [.. history], SelectedDocuments, options, Settings.Approach, Settings.Overrides);
             var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming");
             httpRequest.Headers.Add("Accept", "application/json");
             httpRequest.SetBrowserResponseStreamingEnabled(true);

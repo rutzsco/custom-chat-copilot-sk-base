@@ -86,6 +86,20 @@ public class RAGSettingsSummary
     public string StorageContianer { get; set; }
 }
 
+public class DocumentCollectionRAGSettings
+{
+    public string GenerateSearchQueryPluginName { get; set; }
+    public string GenerateSearchQueryPluginQueryFunctionName { get; set; }
+    public string DocumentRetrievalPluginName { get; set; }
+    public string DocumentRetrievalPluginQueryFunctionName { get; set; }
+    public string DocumentRetrievalIndexName { get; set; }
+
+    public int DocumentRetrievalDocumentCount { get; set; }
+
+    public string ChatSystemMessageFile { get; set; }
+    public string StorageContianer { get; set; }
+}
+
 public class AssistantEndpointSettingsSummary
 {
     public string APIEndpointSetting { get; set; }
