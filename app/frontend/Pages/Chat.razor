@@ -84,7 +84,7 @@
 
                         @if (_showDocumentUpload)
                         {
-                            <MudMenu Style="width: 350px">
+                            <MudMenu Style="width: 600px">
                                 <ActivatorContent>
                                     <MudButton Style="height: 36px" StartIcon="@Icons.Material.Filled.UploadFile" EndIcon="@Icons.Material.Filled.KeyboardArrowDown">@_selectedDocument</MudButton>
                                 </ActivatorContent>
@@ -97,12 +97,18 @@
                                             <MudMenuItem OnClick="@(e => OnDocumentClick(@document.Name))" Color="Color.Primary">@document.Name</MudMenuItem>
                                         }
                                     } *@
-                                    <MudSelect Style="padding: 10px; width: 300px" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetMultiSelectionText))" MultiSelection="true" @bind-Value="value" @bind-SelectedValues="SelectedDocuments" T="string" Label="Documents" AnchorOrigin="Origin.BottomCenter">
+@*                                     <MudSelect Style="padding: 10px; width: 300px" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetMultiSelectionText))" MultiSelection="true" @bind-Value="value" @bind-SelectedValues="SelectedDocuments" T="string" Label="Documents" AnchorOrigin="Origin.BottomCenter">
                                         @foreach (var document in _userDocuments)
                                         {
                                             <MudSelectItem T="string" Value="@document.Name">@document.Name</MudSelectItem>
                                         } 
-                                    </MudSelect>
+                                    </MudSelect> *@
+
+                                    <MudTable Style="padding: 10px;" T="DocumentSummary" Items="@_userDocuments" MultiSelection="true" @bind-SelectedItems="SelectedDocuments">
+                                        <RowTemplate>
+                                            <MudTd DataLabel="Nr">@context.Name</MudTd>
+                                        </RowTemplate>
+                                    </MudTable>
                                 </ChildContent>
                             </MudMenu>
                         }

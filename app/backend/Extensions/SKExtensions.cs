@@ -22,15 +22,15 @@ namespace MinimalApi.Extensions
             return new SKResult(answer, usage, sw.ElapsedMilliseconds);
         }
 
-        public static KernelArguments AddUserParameters(this KernelArguments arguments, ChatTurn[] history, ProfileDefinition profile, UserInformation user, string selectedDocument = null)
+        public static KernelArguments AddUserParameters(this KernelArguments arguments, ChatTurn[] history, ProfileDefinition profile, UserInformation user, IEnumerable<string>? selectedDocuments = null)
         {
             arguments[ContextVariableOptions.Profile] = profile;
             arguments[ContextVariableOptions.UserId] = user.UserId;
             arguments[ContextVariableOptions.SessionId] = user.SessionId;
 
-            if(selectedDocument != null)
+            if(selectedDocuments != null)
             {
-                arguments[ContextVariableOptions.SelectedDocument] = selectedDocument;
+                arguments[ContextVariableOptions.SelectedDocuments] = selectedDocuments;
             }
 
             if (history.LastOrDefault()?.User is { } userQuestion)
@@ -85,11 +85,7 @@ namespace MinimalApi.Extensions
             var value = options.GetValueOrDefault("PROFILE", defaultProfile.Name);
             return ProfileDefinition.All.FirstOrDefault(x => x.Name == value) ?? defaultProfile;
         }
-        public static string GetSelectedDocument(this Dictionary<string, string> options)
-        {
-            var value = options.GetValueOrDefault("SELECTEDDOCUMENT", null);
-            return value;
-        }
+
         public static string GetImageContent(this Dictionary<string, string> options)
         {
             var value = options.GetValueOrDefault("IMAGECONTENT", null);

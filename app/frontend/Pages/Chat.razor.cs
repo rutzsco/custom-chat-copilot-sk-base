@@ -76,7 +76,7 @@ public sealed partial class Chat
     }
 
     private string value { get; set; } = "Nothing selected";
-    private IEnumerable<string> SelectedDocuments { get; set; } = new HashSet<string>() { };
+    private HashSet<DocumentSummary> SelectedDocuments { get; set; } = new HashSet<DocumentSummary>() { };
 
     protected override async Task OnInitializedAsync()
     {
@@ -166,7 +166,7 @@ public sealed partial class Chat
                 options["IMAGECONTENT"] = _imageUrl;
             }
 
-            var request = new ChatRequest(_chatId, Guid.NewGuid(), [.. history], SelectedDocuments, options, Settings.Approach, Settings.Overrides);
+            var request = new ChatRequest(_chatId, Guid.NewGuid(), [.. history], SelectedDocuments.Select(x => x.Name), options, Settings.Approach, Settings.Overrides);
             var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming");
             httpRequest.Headers.Add("Accept", "application/json");
             httpRequest.SetBrowserResponseStreamingEnabled(true);
