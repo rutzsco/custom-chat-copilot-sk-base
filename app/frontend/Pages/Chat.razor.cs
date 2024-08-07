@@ -67,16 +67,17 @@ public sealed partial class Chat
     [SupplyParameterFromQuery(Name = "cid")]
     public string? ArchivedChatId { get; set; }
 
-    private string GetMultiSelectionText(List<string> selectedValues)
-    {
-        var text = $"{selectedValues.Count} documents{(selectedValues.Count > 1 ? "s have" : " has")} been selected";
-        _selectedDocument = text;
-        OnClearChatDocuumentSelection();
-        return text;
-    }
+    private HashSet<DocumentSummary> _selectedDocuments = new HashSet<DocumentSummary>();
 
-    private string value { get; set; } = "Nothing selected";
-    private HashSet<DocumentSummary> SelectedDocuments { get; set; } = new HashSet<DocumentSummary>() { };
+    private HashSet<DocumentSummary> SelectedDocuments
+    {
+        get => _selectedDocuments;
+        set
+        {
+            _selectedDocuments = value;
+            OnSelectedDocumentsChanged();    
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -119,13 +120,6 @@ public sealed partial class Chat
         OnClearChat();
     }
 
-    private void OnDocumentClick(string selection)
-    {
-        _selectedDocument = selection;
-        OnClearChatDocuumentSelection();
-        EvaluateOptions();
-    }
-
     private Task OnAskQuestionAsync(string question)
     {
         _userQuestion = question;
@@ -150,15 +144,12 @@ public sealed partial class Chat
 
             var options = new Dictionary<string, string>();
             options["GPT4ENABLED"] = _gPT4ON.ToString();
+
+            // Set profile, override if user selected uploaded document
             options["PROFILE"] = _selectedProfile;
-            var selectedDocuments = string.Join(",", SelectedDocuments);
             if (_userUploadProfileSummary != null && SelectedDocuments.Any())
-            {               
-                options["SELECTEDDOCUMENT"] = selectedDocuments;
-                if (SelectedDocuments.Any())
-                {
-                    options["PROFILE"] = _userUploadProfileSummary.Name;
-                }
+            {
+                options["PROFILE"] = _userUploadProfileSummary.Name;
             }
 
             if (!string.IsNullOrEmpty(_imageUrl))
@@ -188,9 +179,7 @@ public sealed partial class Chat
                 responseBuffer.Append(chunk.Text);
                 var restponseText = responseBuffer.ToString();
 
-                var isComplete = chunk.FinalResult != null;
-
-               
+                var isComplete = chunk.FinalResult != null;            
                 if (chunk.FinalResult != null)
                 {
                     var ar = new ApproachResponse(restponseText, chunk.FinalResult.CitationBaseUrl, chunk.FinalResult.Context);
@@ -215,6 +204,27 @@ public sealed partial class Chat
         {
             _isReceivingResponse = false;
         }
+    }
+    private void OnSelectedDocumentsChanged()
+    {
+        Console.WriteLine($"SelectedDocuments: {SelectedDocuments.Count()}");
+        if (SelectedDocuments.Any())
+        {
+            if (SelectedDocuments.Count() > 1)
+            {
+                _selectedDocument = $"{SelectedDocuments.First().Name}";
+            }
+            else
+            {
+                _selectedDocument = $"{SelectedDocuments.Count()} - Documents selected";
+            }
+        }
+        else
+        {
+            _selectedDocument = string.Empty;
+        }
+
+        OnClearChatDocuumentSelection();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
