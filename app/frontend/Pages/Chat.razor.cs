@@ -253,6 +253,7 @@ public sealed partial class Chat
         _currentQuestion = default;
         _questionAndAnswerMap.Clear();
         _selectedDocument = "";
+        SelectedDocuments.Clear();
         _chatId = Guid.NewGuid();
         _imageUrl = string.Empty;
         EvaluateOptions();

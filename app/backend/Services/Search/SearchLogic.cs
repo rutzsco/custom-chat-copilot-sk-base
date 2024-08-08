@@ -50,13 +50,14 @@ public class SearchLogic<T> where T : IKnowledgeSource
         {
             searchOptions.Select.Add(field);
         }
-     
-        if (arguments.ContainsName(ContextVariableOptions.SelectedDocument))
+
+        if (arguments.ContainsName(ContextVariableOptions.SelectedDocuments))
         {
             var userId = arguments[ContextVariableOptions.UserId] as string;
             var sessionId = arguments[ContextVariableOptions.SessionId] as string;
-            var sourcefile = arguments[ContextVariableOptions.SelectedDocument] as string;
-            searchOptions.Filter = $"entra_id eq '{userId}' and session_id eq '{sessionId}' and sourcefile eq '{sourcefile}'";
+            var sourcefiles = arguments[ContextVariableOptions.SelectedDocuments] as IEnumerable<string>;
+            var sourcefilesString = string.Join(",", sourcefiles);
+            searchOptions.Filter = $"entra_id eq '{userId}' and session_id eq '{sessionId}' and search.in(sourcefile, '{sourcefilesString}')";
         }
 
         // Perform the search and build the results
