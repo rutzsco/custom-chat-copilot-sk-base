@@ -210,7 +210,7 @@ public sealed partial class Chat
         Console.WriteLine($"SelectedDocuments: {SelectedDocuments.Count()}");
         if (SelectedDocuments.Any())
         {
-            if (SelectedDocuments.Count() > 1)
+            if (SelectedDocuments.Count() == 1)
             {
                 _selectedDocument = $"{SelectedDocuments.First().Name}";
             }
