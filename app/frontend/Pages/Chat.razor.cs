@@ -64,9 +64,20 @@ public sealed partial class Chat
     public bool _showDocumentUpload { get; set; }
     public bool _showPictureUpload { get; set; }
 
-
     [SupplyParameterFromQuery(Name = "cid")]
     public string? ArchivedChatId { get; set; }
+
+    private HashSet<DocumentSummary> _selectedDocuments = new HashSet<DocumentSummary>();
+
+    private HashSet<DocumentSummary> SelectedDocuments
+    {
+        get => _selectedDocuments;
+        set
+        {
+            _selectedDocuments = value;
+            OnSelectedDocumentsChanged();    
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -109,13 +120,6 @@ public sealed partial class Chat
         OnClearChat();
     }
 
-    private void OnDocumentClick(string selection)
-    {
-        _selectedDocument = selection;
-        OnClearChatDocuumentSelection();
-        EvaluateOptions();
-    }
-
     private Task OnAskQuestionAsync(string question)
     {
         _userQuestion = question;
@@ -140,21 +144,20 @@ public sealed partial class Chat
 
             var options = new Dictionary<string, string>();
             options["GPT4ENABLED"] = _gPT4ON.ToString();
+
+            // Set profile, override if user selected uploaded document
             options["PROFILE"] = _selectedProfile;
-            if(_userUploadProfileSummary != null && !string.IsNullOrEmpty(_selectedDocument))
+            if (_userUploadProfileSummary != null && SelectedDocuments.Any())
             {
-                options["SELECTEDDOCUMENT"] = _selectedDocument;
-                if (!string.IsNullOrEmpty(_selectedDocument))
-                {
-                    options["PROFILE"] = _userUploadProfileSummary.Name;
-                }
+                options["PROFILE"] = _userUploadProfileSummary.Name;
             }
 
             if (!string.IsNullOrEmpty(_imageUrl))
             {
                 options["IMAGECONTENT"] = _imageUrl;
             }
-            var request = new ChatRequest(_chatId, Guid.NewGuid(), [.. history], options, Settings.Approach, Settings.Overrides);
+
+            var request = new ChatRequest(_chatId, Guid.NewGuid(), [.. history], SelectedDocuments.Select(x => x.Name), options, Settings.Approach, Settings.Overrides);
             var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming");
             httpRequest.Headers.Add("Accept", "application/json");
             httpRequest.SetBrowserResponseStreamingEnabled(true);
@@ -176,9 +179,7 @@ public sealed partial class Chat
                 responseBuffer.Append(chunk.Text);
                 var restponseText = responseBuffer.ToString();
 
-                var isComplete = chunk.FinalResult != null;
-
-               
+                var isComplete = chunk.FinalResult != null;            
                 if (chunk.FinalResult != null)
                 {
                     var ar = new ApproachResponse(restponseText, chunk.FinalResult.CitationBaseUrl, chunk.FinalResult.Context);
@@ -203,6 +204,27 @@ public sealed partial class Chat
         {
             _isReceivingResponse = false;
         }
+    }
+    private void OnSelectedDocumentsChanged()
+    {
+        Console.WriteLine($"SelectedDocuments: {SelectedDocuments.Count()}");
+        if (SelectedDocuments.Any())
+        {
+            if (SelectedDocuments.Count() == 1)
+            {
+                _selectedDocument = $"{SelectedDocuments.First().Name}";
+            }
+            else
+            {
+                _selectedDocument = $"{SelectedDocuments.Count()} - Documents selected";
+            }
+        }
+        else
+        {
+            _selectedDocument = string.Empty;
+        }
+
+        OnClearChatDocuumentSelection();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -231,6 +253,7 @@ public sealed partial class Chat
         _currentQuestion = default;
         _questionAndAnswerMap.Clear();
         _selectedDocument = "";
+        SelectedDocuments.Clear();
         _chatId = Guid.NewGuid();
         _imageUrl = string.Empty;
         EvaluateOptions();

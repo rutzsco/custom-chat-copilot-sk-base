@@ -12,9 +12,9 @@ public class KwiecienCustomIndexDefinitionV2 : IKnowledgeSource
 
     public required int pagenumber { get; set; }
 
-    public string FormatAsOpenAISourceText()
+    public string FormatAsOpenAISourceText(bool useSourcepage = false)
     {
-        return $"<source><name>{sourcefile}#page={pagenumber}</name><content> {content.Replace('\r', ' ').Replace('\n', ' ')}</content></source>";
+        return $"<source><name>{GetFilepath(useSourcepage)}</name><content> {content.Replace('\r', ' ').Replace('\n', ' ')}</content></source>";
     }
 
     public string GetContent()
@@ -22,8 +22,11 @@ public class KwiecienCustomIndexDefinitionV2 : IKnowledgeSource
         return content;
     }
 
-    public string GetFilepath()
+    public string GetFilepath(bool useSourcepage = false)
     {
+        if (useSourcepage)
+            return sourcepage;
+
         return $"{sourcefile}#page={pagenumber}";
     }
 

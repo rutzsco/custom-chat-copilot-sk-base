@@ -17,7 +17,8 @@
       "DocumentRetrievalPluginQueryFunctionName": "KwiecienV2",
       "DocumentRetrievalIndexName": "manuals-auto-ci-20240528182950",
       "ChatSystemMessageFile": "RAGChatSystemPrompt",
-      "StorageContianer": "manuals-auto"
+      "StorageContianer": "manuals-auto-chunks",
+      "CitationUseSourcePage": true
     }
   },
   {
@@ -74,8 +75,7 @@
       "GenerateSearchQueryPluginName": "GenerateSearchQuery",
       "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
       "DocumentRetrievalPluginName": "DocumentRetrieval",
-      "DocumentRetrievalPluginQueryFunctionName": "AISearchV1",
-      "DocumentRetrievalIndexName": "rag-index-20240508144216",
+      "DocumentRetrievalPluginQueryFunctionName": "KwiecienV2",
       "ChatSystemMessageFile": "RAGChatSystemPrompt",
       "StorageContianer": "content"
     }

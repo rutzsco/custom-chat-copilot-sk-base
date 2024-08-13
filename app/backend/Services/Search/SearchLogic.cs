@@ -50,13 +50,17 @@ public class SearchLogic<T> where T : IKnowledgeSource
         {
             searchOptions.Select.Add(field);
         }
-     
-        if (arguments.ContainsName(ContextVariableOptions.SelectedDocument))
+
+        if (arguments.ContainsName(ContextVariableOptions.SelectedDocuments))
         {
-            var userId = arguments[ContextVariableOptions.UserId] as string;
-            var sessionId = arguments[ContextVariableOptions.SessionId] as string;
-            var sourcefile = arguments[ContextVariableOptions.SelectedDocument] as string;
-            searchOptions.Filter = $"entra_id eq '{userId}' and session_id eq '{sessionId}' and sourcefile eq '{sourcefile}'";
+            var sourcefiles = arguments[ContextVariableOptions.SelectedDocuments] as IEnumerable<string>;
+            if (sourcefiles.Any())
+            {
+                var userId = arguments[ContextVariableOptions.UserId] as string;
+                var sessionId = arguments[ContextVariableOptions.SessionId] as string;
+                var sourcefilesString = string.Join(",", sourcefiles);
+                searchOptions.Filter = $"entra_id eq '{userId}' and session_id eq '{sessionId}' and search.in(sourcefile, '{sourcefilesString}')";
+            }
         }
 
         // Perform the search and build the results
@@ -68,11 +72,12 @@ public class SearchLogic<T> where T : IKnowledgeSource
         }
 
         /// Filter the results by the maximum request token size
-        var sourceSummary = FilterByMaxRequestTokenSize(list, DefaultSettings.MaxRequestTokens);
+        var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
+        var sourceSummary = FilterByMaxRequestTokenSize(list, DefaultSettings.MaxRequestTokens, profile.RAGSettings.CitationUseSourcePage);
         return sourceSummary;
     }
 
-    private KnowledgeSourceSummary FilterByMaxRequestTokenSize(IReadOnlyList<T> sources, int maxRequestTokens)
+    private KnowledgeSourceSummary FilterByMaxRequestTokenSize(IReadOnlyList<T> sources, int maxRequestTokens, bool citationUseSourcePage)
     {
         int sourceSize = 0;
         int tokenSize = 0;
@@ -81,7 +86,7 @@ public class SearchLogic<T> where T : IKnowledgeSource
         var sb = new StringBuilder();
         foreach (var document in sources)
         {
-            var text = document.FormatAsOpenAISourceText();
+            var text = document.FormatAsOpenAISourceText(citationUseSourcePage);
             sourceSize += text.Length;
             tokenSize += tikToken.Encode(text).Count;
             if (tokenSize > maxRequestTokens)

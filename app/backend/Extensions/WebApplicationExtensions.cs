@@ -171,7 +171,7 @@ internal static class WebApplicationExtensions
 
         if (profile.Approach == ProfileApproach.UserDocumentChat.ToString())
         {
-            var selectedDocument = request.OptionFlags.GetSelectedDocument();
+            var selectedDocument = request.SelectedFiles.FirstOrDefault();
             var documents = await documentService.GetDocumentUploadsAsync(userInfo);
             var document = documents.FirstOrDefault(d => d.SourceName == selectedDocument);
             profile.RAGSettings.DocumentRetrievalIndexName = document.RetrivalIndexName;

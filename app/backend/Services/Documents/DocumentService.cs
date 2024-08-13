@@ -70,8 +70,8 @@ public class DocumentService
 
         var request = new ProcessingData()
         {
-            source_container = "content",
-            extract_container = "content-extract",
+            source_container = AppConfiguration.UserDocumentUploadBlobStorageContentContainer,
+            extract_container = AppConfiguration.UserDocumentUploadBlobStorageExtractContainer,
             prefix_path = fileSummary.FileName,
             entra_id = user.UserId,
             session_id = user.SessionId,

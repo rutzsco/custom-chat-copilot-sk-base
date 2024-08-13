@@ -12,6 +12,9 @@ public static class AppConfiguration
 
     public static bool EnableDataProtectionBlobKeyStorage { get; private set; }
 
+    public static string UserDocumentUploadBlobStorageContentContainer { get; private set; }
+    public static string UserDocumentUploadBlobStorageExtractContainer { get; private set; }
+
     public static void Load(IConfiguration configuration)
     {
         SearchIndexDocumentCount = configuration.GetValue<int>("SearchIndexDocumentCount", 15);
@@ -19,6 +22,10 @@ public static class AppConfiguration
         AzureStorageAccountConnectionString = configuration.GetValue<string>("AzureStorageAccountConnectionString");
         DataProtectionKeyContainer = configuration.GetValue<string>("SearchIndexSourceFieldName", "dataprotectionkeys");
         EnableDataProtectionBlobKeyStorage = configuration.GetValue<bool>("EnableDataProtectionBlobKeyStorage", true);
+
+        UserDocumentUploadBlobStorageContentContainer = configuration.GetValue<string>("UserDocumentUploadBlobStorageContentContainer", "content");
+
+        UserDocumentUploadBlobStorageExtractContainer = configuration.GetValue<string>("UserDocumentUploadBlobStorageExtractContainer", "content-extract");
     }
 }
 
