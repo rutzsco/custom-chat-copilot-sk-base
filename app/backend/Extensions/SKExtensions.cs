@@ -99,7 +99,7 @@ namespace MinimalApi.Extensions
         {
             var result = (SKResult)context["ChatResult"];
             var knowledgeSourceSummary = (KnowledgeSourceSummary)context[ContextVariableOptions.KnowledgeSummary];
-            var dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(), x.GetContent())).ToArray();
+            var dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(profile.RAGSettings.CitationUseSourcePage), x.GetContent())).ToArray();
 
             var chatDiagnostics = new CompletionsDiagnostics(result.Usage.CompletionTokens, result.Usage.PromptTokens, result.Usage.TotalTokens, result.DurationMilliseconds);
             var diagnostics = new Diagnostics(chatDiagnostics, modelDeploymentName, workflowDurationMilliseconds);
@@ -122,7 +122,7 @@ namespace MinimalApi.Extensions
             if (context.ContainsName(ContextVariableOptions.Knowledge) && context[ContextVariableOptions.Knowledge] != "NO_SOURCES")
             {
                 var knowledgeSourceSummary = (KnowledgeSourceSummary)context[ContextVariableOptions.KnowledgeSummary];
-                dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(), x.GetContent())).ToArray();
+                dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(profile.RAGSettings.CitationUseSourcePage), x.GetContent())).ToArray();
             }
   
             var completionTokens = GetTokenCount(answer);

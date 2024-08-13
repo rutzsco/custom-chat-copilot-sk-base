@@ -12,7 +12,7 @@ public class AISearchIndexerIndexDefinintion : IKnowledgeSource
 
     public required string chunk_id { get; set; }
 
-    public string FormatAsOpenAISourceText()
+    public string FormatAsOpenAISourceText(bool useSourcepage = false)
     {
         return $"<source><name>{title}#page={GetPage()}</name><content> {chunk.Replace('\r', ' ').Replace('\n', ' ')}</content></source>";
     }
@@ -22,7 +22,7 @@ public class AISearchIndexerIndexDefinintion : IKnowledgeSource
         return chunk;
     }
 
-    public string GetFilepath()
+    public string GetFilepath(bool useSourcepage = false)
     {
         return title;
     }

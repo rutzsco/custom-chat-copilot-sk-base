@@ -8,7 +8,7 @@ public class AIStudioIndexDefinition : IKnowledgeSource
 
     public required string content { get; set; }
 
-    public string FormatAsOpenAISourceText()
+    public string FormatAsOpenAISourceText(bool useSourcepage = false)
     {
         return $"<source><name>{filepath}</name><content> {content.Replace('\r', ' ').Replace('\n', ' ')}</content></source>";
     }
@@ -18,7 +18,7 @@ public class AIStudioIndexDefinition : IKnowledgeSource
         return content;
     }
 
-    public string GetFilepath()
+    public string GetFilepath(bool useSourcepage = false)
     {
         return filepath;
     }

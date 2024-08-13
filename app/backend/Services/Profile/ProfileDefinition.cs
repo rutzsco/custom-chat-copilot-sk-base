@@ -84,6 +84,8 @@ public class RAGSettingsSummary
 
     public string ChatSystemMessageFile { get; set; }
     public string StorageContianer { get; set; }
+
+    public bool CitationUseSourcePage { get; set; }
 }
 
 public class DocumentCollectionRAGSettings
