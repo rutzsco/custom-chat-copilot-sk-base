@@ -106,7 +106,7 @@ public sealed partial class Chat
     {       
         _files.Add(file);
         var buffer = new byte[file.Size];
-        await file.OpenReadStream(2048000).ReadAsync(buffer);
+        await file.OpenReadStream(8192000).ReadAsync(buffer);
         var imageContent = Convert.ToBase64String(buffer);
         _imageUrl = $"data:{file.ContentType};base64,{imageContent}";
         _imageFileName = file.Name;
