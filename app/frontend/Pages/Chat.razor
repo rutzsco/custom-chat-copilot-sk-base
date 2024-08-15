@@ -4,10 +4,10 @@
 
 <PageTitle>Chat</PageTitle>
 <!-- Top Section (Fixed Height) -->
-<div class="header"></div>
+<div class="header" style="background-color: @Color.Primary"></div>
 
 <!-- Middle Section (Fills Remaining Space) -->
-<div class="content" id="answerSection">
+<div class="content" id="answerSection" style="background-color: @Color.Primary">
     <MudGrid Justify="Justify.Center">
         <MudItem id="answers" xs="12" Class="overflow-x-auto">
             @if (_questionAndAnswerMap is { Count: 0 })
@@ -61,7 +61,7 @@
 </div>
 
 <!-- Bottom Section (Fixed Height) -->
-<div class="footer">
+<div class="footer" >
     <MudGrid Justify="Justify.Center">
         <MudItem xs="12" Class="rounded">
             <MudGrid>
