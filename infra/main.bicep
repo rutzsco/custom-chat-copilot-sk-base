@@ -20,7 +20,7 @@ param principalId string
 param azureChatGptStandardDeploymentName string = 'chat'
 
 @description('Name of the chat GPT model. Default: gpt-35-turbo')
-@allowed([ 'gpt-35-turbo', 'gpt-4', 'gpt-35-turbo-16k', 'gpt-4-16k' ])
+@allowed([ 'gpt-35-turbo', 'gpt-4', 'gpt-35-turbo-16k', 'gpt-4-16k', 'gpt-4o' ])
 param azureOpenAIChatGptStandardModelName string = 'gpt-35-turbo'
 
 param azureOpenAIChatGptStandardModelVersion string ='0613'
@@ -32,10 +32,10 @@ param chatGptStandardDeploymentCapacity int = 10
 param azureChatGptPremiumDeploymentName string = 'chat-gpt4'
 
 @description('Name of the chat GPT model. Default: gpt-35-turbo')
-@allowed([ 'gpt-35-turbo', 'gpt-4', 'gpt-35-turbo-16k', 'gpt-4-16k' ])
-param azureOpenAIChatGptPremiumModelName string = 'gpt-4'
+@allowed([ 'gpt-35-turbo', 'gpt-4', 'gpt-35-turbo-16k', 'gpt-4-16k', 'gpt-4o' ])
+param azureOpenAIChatGptPremiumModelName string = 'gpt-4o'
 
-param azureOpenAIChatGptPremiumModelVersion string ='1106-Preview'
+param azureOpenAIChatGptPremiumModelVersion string ='2024-05-13'
 
 @description('Capacity of the chat GPT deployment. Default: 10')
 param chatGptPremiumDeploymentCapacity int = 10
@@ -175,7 +175,7 @@ var appDefinition = {
       secret: true
     }
     {
-      name: 'AzureStorageConnectionString'
+      name: 'AzureStorageAccountConnectionString'
       value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${storageAccount.outputs.storageAccountConnectionStringSecretName}'
       secretRef: 'azurestorageconnectionstring'
       secret: true
