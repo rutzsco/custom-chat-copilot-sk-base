@@ -51,6 +51,13 @@ param embeddingDeploymentCapacity int = 30
 
 param searchContentIndex string = 'manuals'
 
+@description('Name of the virtual network to use for the app. If empty, the app will be created without virtual network integration.')
+param virtualNetworkName string
+
+param containerAppSubnetAddressPrefix string
+
+param privateEndpointSubnetAddressPrefix string
+
 // Tags that should be applied to all resources.
 // 
 // Note that 'azd-service-name' tags should be applied separately to service host resources.
@@ -92,6 +99,15 @@ module managedIdentity './app/identity.bicep' = {
   }
 }
 
+module virtualNetwork './app/virtual-network.bicep' = if(virtualNetworkName != '') {
+  name: 'virtual-network'
+  params: {
+    virtualNetworkName: virtualNetworkName
+    containerAppSubnetAddressPrefix: containerAppSubnetAddressPrefix
+    privateEndpointSubnetAddressPrefix: privateEndpointSubnetAddressPrefix
+  }
+}
+
 module registry './app/registry.bicep' = {
   name: 'registry'
   params: {
@@ -99,6 +115,9 @@ module registry './app/registry.bicep' = {
     tags: tags
     name: '${abbrs.containerRegistryRegistries}${resourceToken}'
     keyVaultName: keyVault.outputs.name
+    privateEndpointSubnetId: virtualNetworkName != '' ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    publicNetworkAccess: virtualNetworkName != '' ? 'Disabled' : 'Enabled'
+    privateEndpointName: virtualNetworkName != '' ? '${abbrs.networkPrivateLinkServices}${abbrs.containerRegistryRegistries}${resourceToken}': ''
   }
 }
 
@@ -110,6 +129,8 @@ module cosmos './app/cosmosdb.bicep' = {
     location: location
     tags: tags
     keyVaultName: keyVault.outputs.name
+    privateEndpointSubnetId: virtualNetworkName != '' ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: virtualNetworkName != '' ? '${abbrs.networkPrivateLinkServices}${abbrs.documentDBDatabaseAccounts}${resourceToken}': ''
   }
 }
 
@@ -121,6 +142,8 @@ module keyVault './app/keyvault.bicep' = {
     name: '${abbrs.keyVaultVaults}${resourceToken}'
     userPrincipalId: principalId
     managedIdentityPrincipalId: managedIdentity.outputs.identityPrincipalId
+    privateEndpointSubnetId: virtualNetworkName != '' ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: virtualNetworkName != '' ? '${abbrs.networkPrivateLinkServices}${abbrs.keyVaultVaults}${resourceToken}': ''
   }
 }
 
@@ -149,6 +172,10 @@ module storageAccount './app/storage-account.bicep' = {
         name: storageAccountContainerName
       }
     ]
+    publicNetworkAccess: virtualNetworkName != '' ? 'Disabled' : 'Enabled'
+    allowBlobPublicAccess: virtualNetworkName != '' ? false : true
+    privateEndpointSubnetId: virtualNetworkName != '' ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: virtualNetworkName != '' ? '${abbrs.networkPrivateLinkServices}${abbrs.storageStorageAccounts}${resourceToken}': ''
   }
 }
 
@@ -157,6 +184,9 @@ module search './app/search-services.bicep' = {
   params: {
     keyVaultName: keyVault.outputs.name
     name: '${abbrs.searchSearchServices}${resourceToken}'
+    publicNetworkAccess: virtualNetworkName != '' ? 'Disabled' : 'Enabled'
+    privateEndpointSubnetId: virtualNetworkName != '' ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: virtualNetworkName != '' ? '${abbrs.networkPrivateLinkServices}${abbrs.searchSearchServices}${resourceToken}': ''
   }
 }
 
@@ -297,9 +327,13 @@ module azureOpenAi './app/cognitive-services.bicep' =  {
       }
     ])
     keyVaultName: keyVault.outputs.name
+    publicNetworkAccess: virtualNetworkName != '' ? 'Disabled' : 'Enabled'
+    privateEndpointSubnetId: virtualNetworkName != '' ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: virtualNetworkName != '' ? '${abbrs.networkPrivateLinkServices}${abbrs.cognitiveServicesAccounts}${resourceToken}': ''
   }
 }
 
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = registry.outputs.loginServer
 output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
 output AZURE_KEY_VAULT_ENDPOINT string = keyVault.outputs.endpoint
+output AZURE_VNET_NAME string = virtualNetworkName

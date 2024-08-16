@@ -8,9 +8,11 @@ param dataEndpointEnabled bool = false
 param networkRuleBypassOptions string = 'AzureServices'
 param publicNetworkAccess string = 'Enabled'
 param sku object = {
-  name: 'Standard'
+  name: privateEndpointSubnetId != '' ? 'Premium' : 'Standard'
 }
 param keyVaultName string
+param privateEndpointSubnetId string
+param privateEndpointName string
 
 var registrySecretName = 'acr-registry-secret'
 
@@ -35,6 +37,16 @@ module registrySecret '../shared/keyvault-secret.bicep' = {
     keyVaultName: keyVaultName
     name: registrySecretName
     secretValue: containerRegistry.listCredentials().passwords[0].value
+  }
+}
+
+module privateEndpoint '../shared/private-endpoint.bicep' = if(privateEndpointSubnetId != ''){
+  name: '${name}-private-endpoint'
+  params: {
+    name: privateEndpointName
+    groupIds: ['registry']
+    privateLinkServiceId: containerRegistry.id
+    subnetId: privateEndpointSubnetId
   }
 }
 

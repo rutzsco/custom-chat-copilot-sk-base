@@ -19,6 +19,15 @@
       },
       "principalId": {
         "value": "${AZURE_PRINCIPAL_ID}"
+      },
+      "virtualNetworkName": {
+        "value": "${AZURE_VNET_NAME}"
+      },
+      "containerAppSubnetAddressPrefix": {
+        "value": "10.0.0.0/26"
+      },
+      "privateEndpointSubnetAddressPrefix": {
+        "value": "10.0.0.64/26"
       }
     }
 }

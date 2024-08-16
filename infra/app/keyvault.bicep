@@ -5,6 +5,9 @@ param tags object = {}
 param userPrincipalId string
 param managedIdentityPrincipalId string
 
+param privateEndpointSubnetId string
+param privateEndpointName string
+
 var defaultAccessPolicies = [
   {
     objectId: userPrincipalId
@@ -29,6 +32,16 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
     accessPolicies: union(defaultAccessPolicies, [
       // define access policies here
     ])
+  }
+}
+
+module privateEndpoint '../shared/private-endpoint.bicep' = if(privateEndpointSubnetId != ''){
+  name: '${name}-private-endpoint'
+  params: {
+    name: privateEndpointName
+    groupIds: ['vault']
+    privateLinkServiceId: keyVault.id
+    subnetId: privateEndpointSubnetId
   }
 }
 

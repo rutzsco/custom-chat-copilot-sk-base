@@ -12,12 +12,15 @@ param networkRuleSet object = {
 }
 param partitionCount int = 1
 @allowed([
-  'enabled'
-  'disabled'
+  'Enabled'
+  'Disabled'
 ])
-param publicNetworkAccess string = 'enabled'
+param publicNetworkAccess string
 param replicaCount int = 1
 param keyVaultName string
+
+param privateEndpointSubnetId string
+param privateEndpointName string
 
 var searchKeySecretName = 'search-key'
 
@@ -43,6 +46,16 @@ module searchSecret '../shared/keyvault-secret.bicep' = {
     keyVaultName: keyVaultName
     name: searchKeySecretName
     secretValue: search.listAdminKeys().primaryKey
+  }
+}
+
+module privateEndpoint '../shared/private-endpoint.bicep' = if(privateEndpointSubnetId != ''){
+  name: '${name}-private-endpoint'
+  params: {
+    name: privateEndpointName
+    groupIds: ['searchService']
+    privateLinkServiceId: search.id
+    subnetId: privateEndpointSubnetId
   }
 }
 

@@ -12,7 +12,10 @@ param tags object = {}
 var connectionStringSecretName = 'azure-cosmos-connection-string'
 param keyVaultName string
 
-resource account 'Microsoft.DocumentDB/databaseAccounts@2020-06-01-preview' = {
+param privateEndpointSubnetId string
+param privateEndpointName string
+
+resource account 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
   name: toLower(accountName)
   location: location
   tags: tags
@@ -27,6 +30,8 @@ resource account 'Microsoft.DocumentDB/databaseAccounts@2020-06-01-preview' = {
     enableAnalyticalStorage: false
     createMode: 'Default'
     databaseAccountOfferType: 'Standard'
+    publicNetworkAccess: privateEndpointSubnetId != '' ? 'Disabled' : 'Enabled'
+    networkAclBypass: 'AzureServices'
     consistencyPolicy: {
       defaultConsistencyLevel: 'Session'
       maxIntervalInSeconds: 5
@@ -107,6 +112,16 @@ module cosmosConnectionStringSecret '../shared/keyvault-secret.bicep' = {
     keyVaultName: keyVaultName
     name: connectionStringSecretName
     secretValue: account.listConnectionStrings().connectionStrings[0].connectionString
+  }
+}
+
+module privateEndpoint '../shared/private-endpoint.bicep' = if(privateEndpointSubnetId != ''){
+  name: '${accountName}-private-endpoint'
+  params: {
+    name: privateEndpointName
+    groupIds: ['Sql']
+    privateLinkServiceId: account.id
+    subnetId: privateEndpointSubnetId
   }
 }
 
