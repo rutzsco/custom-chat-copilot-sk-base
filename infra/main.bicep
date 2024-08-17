@@ -99,12 +99,17 @@ module managedIdentity './app/identity.bicep' = {
   }
 }
 
-module virtualNetwork './app/virtual-network.bicep' = if(virtualNetworkName != '') {
+module virtualNetwork './app/virtual-network.bicep' = if(!empty(virtualNetworkName)) {
   name: 'virtual-network'
   params: {
     virtualNetworkName: virtualNetworkName
+    location: location
+    containerAppSubnetName: 'container-app'
     containerAppSubnetAddressPrefix: containerAppSubnetAddressPrefix
+    containerAppSubnetNsgName: '${abbrs.networkNetworkSecurityGroups}container-app-${resourceToken}'
+    privateEndpointSubnetName: 'private-endpoint'
     privateEndpointSubnetAddressPrefix: privateEndpointSubnetAddressPrefix
+    privateEndpointSubnetNsgName: '${abbrs.networkNetworkSecurityGroups}private-endpoint${resourceToken}'
   }
 }
 
@@ -115,9 +120,9 @@ module registry './app/registry.bicep' = {
     tags: tags
     name: '${abbrs.containerRegistryRegistries}${resourceToken}'
     keyVaultName: keyVault.outputs.name
-    privateEndpointSubnetId: virtualNetworkName != '' ? virtualNetwork.outputs.privateEndpointSubnetId: ''
-    publicNetworkAccess: virtualNetworkName != '' ? 'Disabled' : 'Enabled'
-    privateEndpointName: virtualNetworkName != '' ? '${abbrs.networkPrivateLinkServices}${abbrs.containerRegistryRegistries}${resourceToken}': ''
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    publicNetworkAccess: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.containerRegistryRegistries}${resourceToken}': ''
   }
 }
 
@@ -129,8 +134,8 @@ module cosmos './app/cosmosdb.bicep' = {
     location: location
     tags: tags
     keyVaultName: keyVault.outputs.name
-    privateEndpointSubnetId: virtualNetworkName != '' ? virtualNetwork.outputs.privateEndpointSubnetId: ''
-    privateEndpointName: virtualNetworkName != '' ? '${abbrs.networkPrivateLinkServices}${abbrs.documentDBDatabaseAccounts}${resourceToken}': ''
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.documentDBDatabaseAccounts}${resourceToken}': ''
   }
 }
 
@@ -142,8 +147,9 @@ module keyVault './app/keyvault.bicep' = {
     name: '${abbrs.keyVaultVaults}${resourceToken}'
     userPrincipalId: principalId
     managedIdentityPrincipalId: managedIdentity.outputs.identityPrincipalId
-    privateEndpointSubnetId: virtualNetworkName != '' ? virtualNetwork.outputs.privateEndpointSubnetId: ''
-    privateEndpointName: virtualNetworkName != '' ? '${abbrs.networkPrivateLinkServices}${abbrs.keyVaultVaults}${resourceToken}': ''
+    publicNetworkAccess: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.keyVaultVaults}${resourceToken}': ''
   }
 }
 
@@ -155,6 +161,7 @@ module appsEnv './app/apps-env.bicep' = {
     tags: tags
     applicationInsightsName: monitoring.outputs.applicationInsightsName
     logAnalyticsWorkspaceName: monitoring.outputs.logAnalyticsWorkspaceName
+    containerAppSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.containerAppSubnetId : ''
   }
 }
 
@@ -172,10 +179,10 @@ module storageAccount './app/storage-account.bicep' = {
         name: storageAccountContainerName
       }
     ]
-    publicNetworkAccess: virtualNetworkName != '' ? 'Disabled' : 'Enabled'
-    allowBlobPublicAccess: virtualNetworkName != '' ? false : true
-    privateEndpointSubnetId: virtualNetworkName != '' ? virtualNetwork.outputs.privateEndpointSubnetId: ''
-    privateEndpointName: virtualNetworkName != '' ? '${abbrs.networkPrivateLinkServices}${abbrs.storageStorageAccounts}${resourceToken}': ''
+    publicNetworkAccess: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
+    allowBlobPublicAccess: !empty(virtualNetworkName) ? false : true
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.storageStorageAccounts}${resourceToken}': ''
   }
 }
 
@@ -184,9 +191,9 @@ module search './app/search-services.bicep' = {
   params: {
     keyVaultName: keyVault.outputs.name
     name: '${abbrs.searchSearchServices}${resourceToken}'
-    publicNetworkAccess: virtualNetworkName != '' ? 'Disabled' : 'Enabled'
-    privateEndpointSubnetId: virtualNetworkName != '' ? virtualNetwork.outputs.privateEndpointSubnetId: ''
-    privateEndpointName: virtualNetworkName != '' ? '${abbrs.networkPrivateLinkServices}${abbrs.searchSearchServices}${resourceToken}': ''
+    publicNetworkAccess: !empty(virtualNetworkName) ? 'disabled' : 'enabled'
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.searchSearchServices}${resourceToken}': ''
   }
 }
 
@@ -327,9 +334,9 @@ module azureOpenAi './app/cognitive-services.bicep' =  {
       }
     ])
     keyVaultName: keyVault.outputs.name
-    publicNetworkAccess: virtualNetworkName != '' ? 'Disabled' : 'Enabled'
-    privateEndpointSubnetId: virtualNetworkName != '' ? virtualNetwork.outputs.privateEndpointSubnetId: ''
-    privateEndpointName: virtualNetworkName != '' ? '${abbrs.networkPrivateLinkServices}${abbrs.cognitiveServicesAccounts}${resourceToken}': ''
+    publicNetworkAccess: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.cognitiveServicesAccounts}${resourceToken}': ''
   }
 }
 

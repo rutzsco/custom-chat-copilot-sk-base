@@ -12,8 +12,8 @@ param networkRuleSet object = {
 }
 param partitionCount int = 1
 @allowed([
-  'Enabled'
-  'Disabled'
+  'enabled'
+  'disabled'
 ])
 param publicNetworkAccess string
 param replicaCount int = 1
@@ -24,7 +24,7 @@ param privateEndpointName string
 
 var searchKeySecretName = 'search-key'
 
-resource search 'Microsoft.Search/searchServices@2021-04-01-preview' = {
+resource search 'Microsoft.Search/searchServices@2023-11-01' = {
   name: name
   location: location
   tags: tags
@@ -49,7 +49,7 @@ module searchSecret '../shared/keyvault-secret.bicep' = {
   }
 }
 
-module privateEndpoint '../shared/private-endpoint.bicep' = if(privateEndpointSubnetId != ''){
+module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)){
   name: '${name}-private-endpoint'
   params: {
     name: privateEndpointName

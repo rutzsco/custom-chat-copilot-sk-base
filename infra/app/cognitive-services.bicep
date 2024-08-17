@@ -20,7 +20,7 @@ resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   properties: {
     publicNetworkAccess: publicNetworkAccess
     networkAcls: {
-      defaultAction: privateEndpointSubnetId != '' ? 'Deny' : 'Allow'
+      defaultAction: !empty(privateEndpointSubnetId) ? 'Deny' : 'Allow'
     }
     customSubDomainName: 'cognitiveservices'
   }
@@ -52,7 +52,7 @@ module cognitiveServicesSecret '../shared/keyvault-secret.bicep' = {
   }
 }
 
-module privateEndpoint '../shared/private-endpoint.bicep' = if(privateEndpointSubnetId != ''){
+module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)){
   name: '${name}-private-endpoint'
   params: {
     name: privateEndpointName

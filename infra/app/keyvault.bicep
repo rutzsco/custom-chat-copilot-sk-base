@@ -4,6 +4,11 @@ param tags object = {}
 
 param userPrincipalId string
 param managedIdentityPrincipalId string
+@allowed([
+  'Enabled'
+  'Disabled'
+])
+param publicNetworkAccess string
 
 param privateEndpointSubnetId string
 param privateEndpointName string
@@ -29,6 +34,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
     tenantId: subscription().tenantId
     sku: { family: 'A', name: 'standard' }
     enabledForTemplateDeployment: true
+    publicNetworkAccess: publicNetworkAccess
     accessPolicies: union(defaultAccessPolicies, [
       // define access policies here
     ])

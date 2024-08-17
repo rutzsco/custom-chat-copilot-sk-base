@@ -1,24 +1,99 @@
 param virtualNetworkName string
+param location string = resourceGroup().location
+param containerAppSubnetName string
 param containerAppSubnetAddressPrefix string
+param containerAppSubnetNsgName string
+param privateEndpointSubnetName string
 param privateEndpointSubnetAddressPrefix string
+param privateEndpointSubnetNsgName string
 
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-01-01' existing = {
   name: virtualNetworkName
 }
 
 resource containerAppSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-01-01' = {
-  name: 'container-app'
+  name: containerAppSubnetName
   parent: virtualNetwork
   properties: {
     addressPrefix: containerAppSubnetAddressPrefix
   }
 }
 
+resource containerAppSubnetNsg 'Microsoft.Network/networkSecurityGroups@2024-01-01' = {
+  name: containerAppSubnetNsgName
+  location: location
+  properties: {
+    securityRules: [
+      {
+        name: 'AllowAllInbound'
+        properties: {
+          priority: 100
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+        }
+      }
+      {
+        name: 'AllowAllOutbound'
+        properties: {
+          priority: 100
+          direction: 'Outbound'
+          access: 'Allow'
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+        }
+      }
+    ]
+  }
+}
+
 resource privateEndpointSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-01-01' = {
-  name: 'private-endpoint'
+  name: privateEndpointSubnetName
   parent: virtualNetwork
   properties: {
     addressPrefix: privateEndpointSubnetAddressPrefix
+  }
+}
+
+resource privateEndpointSubnetNsg 'Microsoft.Network/networkSecurityGroups@2024-01-01' = {
+  name: privateEndpointSubnetNsgName
+  location: location
+  properties: {
+    securityRules: [
+      {
+        name: 'AllowAllInbound'
+        properties: {
+          priority: 100
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+        }
+      }
+      {
+        name: 'AllowAllOutbound'
+        properties: {
+          priority: 100
+          direction: 'Outbound'
+          access: 'Allow'
+          protocol: '*'
+          sourcePortRange: '*'
+          destinationPortRange: '*'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: '*'
+        }
+      }
+    ]
   }
 }
 

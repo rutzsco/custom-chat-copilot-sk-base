@@ -61,7 +61,7 @@ module storageAccountConnectionStringSecret '../shared/keyvault-secret.bicep' = 
   }
 }
 
-module privateEndpoint '../shared/private-endpoint.bicep' = if(privateEndpointSubnetId != ''){
+module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)){
   name: '${name}-private-endpoint'
   params: {
     name: privateEndpointName

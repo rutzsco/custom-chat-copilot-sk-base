@@ -30,7 +30,7 @@ resource account 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
     enableAnalyticalStorage: false
     createMode: 'Default'
     databaseAccountOfferType: 'Standard'
-    publicNetworkAccess: privateEndpointSubnetId != '' ? 'Disabled' : 'Enabled'
+    publicNetworkAccess: !empty(privateEndpointSubnetId) ? 'Disabled' : 'Enabled'
     networkAclBypass: 'AzureServices'
     consistencyPolicy: {
       defaultConsistencyLevel: 'Session'
@@ -115,7 +115,7 @@ module cosmosConnectionStringSecret '../shared/keyvault-secret.bicep' = {
   }
 }
 
-module privateEndpoint '../shared/private-endpoint.bicep' = if(privateEndpointSubnetId != ''){
+module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)){
   name: '${accountName}-private-endpoint'
   params: {
     name: privateEndpointName
