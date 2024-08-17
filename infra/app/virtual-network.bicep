@@ -16,6 +16,9 @@ resource containerAppSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-01-0
   parent: virtualNetwork
   properties: {
     addressPrefix: containerAppSubnetAddressPrefix
+    networkSecurityGroup: {
+      id: containerAppSubnetNsg.id
+    }
   }
 }
 
@@ -59,6 +62,9 @@ resource privateEndpointSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-0
   parent: virtualNetwork
   properties: {
     addressPrefix: privateEndpointSubnetAddressPrefix
+    networkSecurityGroup: {
+      id: privateEndpointSubnetNsg.id
+    }
   }
 }
 

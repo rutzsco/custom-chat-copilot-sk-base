@@ -109,7 +109,7 @@ module virtualNetwork './app/virtual-network.bicep' = if(!empty(virtualNetworkNa
     containerAppSubnetNsgName: '${abbrs.networkNetworkSecurityGroups}container-app-${resourceToken}'
     privateEndpointSubnetName: 'private-endpoint'
     privateEndpointSubnetAddressPrefix: privateEndpointSubnetAddressPrefix
-    privateEndpointSubnetNsgName: '${abbrs.networkNetworkSecurityGroups}private-endpoint${resourceToken}'
+    privateEndpointSubnetNsgName: '${abbrs.networkNetworkSecurityGroups}private-endpoint-${resourceToken}'
   }
 }
 
