@@ -65,6 +65,7 @@
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="PdfPig" />
     <PackageReference Include="Swashbuckle.AspNetCore" />
+    <PackageReference Include="System.Text.Json" />
     <PackageReference Include="TiktokenSharp" />
   </ItemGroup>
 
