@@ -4,6 +4,7 @@ param tags object = {}
 
 param logAnalyticsWorkspaceName string
 param applicationInsightsName string = ''
+param containerAppSubnetId string
 
 resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2022-10-01' = {
   name: name
@@ -18,6 +19,9 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2022-10-01'
       }
     }
     daprAIConnectionString: applicationInsights.properties.ConnectionString
+    vnetConfiguration: {
+       infrastructureSubnetId: !empty(containerAppSubnetId) ? containerAppSubnetId : null
+    }
   }
 }
 

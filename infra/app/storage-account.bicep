@@ -7,7 +7,7 @@ param tags object = {}
   'Hot'
   'Premium' ])
 param accessTier string = 'Hot'
-param allowBlobPublicAccess bool = true
+param allowBlobPublicAccess bool
 param allowSharedKeyAccess bool = true
 param containers array = []
 param kind string = 'StorageV2'
@@ -17,9 +17,12 @@ param networkAcls object = {
   defaultAction: 'Allow'
 }
 @allowed([ 'Enabled', 'Disabled' ])
-param publicNetworkAccess string = 'Enabled'
+param publicNetworkAccess string
 param sku object = { name: 'Standard_LRS' }
 param keyVaultName string
+
+param privateEndpointSubnetId string
+param privateEndpointName string
 
 var storageAccountConnectionStringSecretName = 'storage-account-connection-string'
 
@@ -55,6 +58,16 @@ module storageAccountConnectionStringSecret '../shared/keyvault-secret.bicep' = 
     keyVaultName: keyVaultName
     name: storageAccountConnectionStringSecretName
     secretValue: 'DefaultEndpointsProtocol=https;AccountName=${storage.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storage.listKeys().keys[0].value}'
+  }
+}
+
+module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)){
+  name: '${name}-private-endpoint'
+  params: {
+    name: privateEndpointName
+    groupIds: ['blob']
+    privateLinkServiceId: storage.id
+    subnetId: privateEndpointSubnetId
   }
 }
 
