@@ -51,6 +51,13 @@ param embeddingDeploymentCapacity int = 30
 
 param searchContentIndex string = 'manuals'
 
+@description('Name of the virtual network to use for the app. If empty, the app will be created without virtual network integration.')
+param virtualNetworkName string
+
+param containerAppSubnetAddressPrefix string
+
+param privateEndpointSubnetAddressPrefix string
+
 // Tags that should be applied to all resources.
 // 
 // Note that 'azd-service-name' tags should be applied separately to service host resources.
@@ -92,6 +99,20 @@ module managedIdentity './app/identity.bicep' = {
   }
 }
 
+module virtualNetwork './app/virtual-network.bicep' = if(!empty(virtualNetworkName)) {
+  name: 'virtual-network'
+  params: {
+    virtualNetworkName: virtualNetworkName
+    location: location
+    containerAppSubnetName: 'container-app'
+    containerAppSubnetAddressPrefix: containerAppSubnetAddressPrefix
+    containerAppSubnetNsgName: '${abbrs.networkNetworkSecurityGroups}container-app-${resourceToken}'
+    privateEndpointSubnetName: 'private-endpoint'
+    privateEndpointSubnetAddressPrefix: privateEndpointSubnetAddressPrefix
+    privateEndpointSubnetNsgName: '${abbrs.networkNetworkSecurityGroups}private-endpoint-${resourceToken}'
+  }
+}
+
 module registry './app/registry.bicep' = {
   name: 'registry'
   params: {
@@ -99,6 +120,9 @@ module registry './app/registry.bicep' = {
     tags: tags
     name: '${abbrs.containerRegistryRegistries}${resourceToken}'
     keyVaultName: keyVault.outputs.name
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    publicNetworkAccess: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.containerRegistryRegistries}${resourceToken}': ''
   }
 }
 
@@ -110,6 +134,8 @@ module cosmos './app/cosmosdb.bicep' = {
     location: location
     tags: tags
     keyVaultName: keyVault.outputs.name
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.documentDBDatabaseAccounts}${resourceToken}': ''
   }
 }
 
@@ -121,6 +147,9 @@ module keyVault './app/keyvault.bicep' = {
     name: '${abbrs.keyVaultVaults}${resourceToken}'
     userPrincipalId: principalId
     managedIdentityPrincipalId: managedIdentity.outputs.identityPrincipalId
+    publicNetworkAccess: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.keyVaultVaults}${resourceToken}': ''
   }
 }
 
@@ -132,6 +161,7 @@ module appsEnv './app/apps-env.bicep' = {
     tags: tags
     applicationInsightsName: monitoring.outputs.applicationInsightsName
     logAnalyticsWorkspaceName: monitoring.outputs.logAnalyticsWorkspaceName
+    containerAppSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.containerAppSubnetId : ''
   }
 }
 
@@ -149,6 +179,10 @@ module storageAccount './app/storage-account.bicep' = {
         name: storageAccountContainerName
       }
     ]
+    publicNetworkAccess: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
+    allowBlobPublicAccess: !empty(virtualNetworkName) ? false : true
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.storageStorageAccounts}${resourceToken}': ''
   }
 }
 
@@ -157,6 +191,9 @@ module search './app/search-services.bicep' = {
   params: {
     keyVaultName: keyVault.outputs.name
     name: '${abbrs.searchSearchServices}${resourceToken}'
+    publicNetworkAccess: !empty(virtualNetworkName) ? 'disabled' : 'enabled'
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.searchSearchServices}${resourceToken}': ''
   }
 }
 
@@ -297,9 +334,13 @@ module azureOpenAi './app/cognitive-services.bicep' =  {
       }
     ])
     keyVaultName: keyVault.outputs.name
+    publicNetworkAccess: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.cognitiveServicesAccounts}${resourceToken}': ''
   }
 }
 
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = registry.outputs.loginServer
 output AZURE_KEY_VAULT_NAME string = keyVault.outputs.name
 output AZURE_KEY_VAULT_ENDPOINT string = keyVault.outputs.endpoint
+output AZURE_VNET_NAME string = virtualNetworkName

@@ -3,11 +3,14 @@ param location string = resourceGroup().location
 param tags object = {}
 param deployments array = []
 param kind string = 'OpenAI'
-param publicNetworkAccess string = 'Enabled'
+param publicNetworkAccess string
 param sku object = {
   name: 'S0'
 }
 param keyVaultName string
+
+param privateEndpointSubnetId string
+param privateEndpointName string
 
 resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   name: name
@@ -17,8 +20,9 @@ resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   properties: {
     publicNetworkAccess: publicNetworkAccess
     networkAcls: {
-      defaultAction: 'Allow'
+      defaultAction: !empty(privateEndpointSubnetId) ? 'Deny' : 'Allow'
     }
+    customSubDomainName: 'cognitiveservices'
   }
   sku: sku
 }
@@ -45,6 +49,16 @@ module cognitiveServicesSecret '../shared/keyvault-secret.bicep' = {
     keyVaultName: keyVaultName
     name: cognitiveServicesKeySecretName
     secretValue: account.listKeys().key1
+  }
+}
+
+module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)){
+  name: '${name}-private-endpoint'
+  params: {
+    name: privateEndpointName
+    groupIds: ['account']
+    privateLinkServiceId: account.id
+    subnetId: privateEndpointSubnetId
   }
 }
 

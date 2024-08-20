@@ -15,13 +15,16 @@ param partitionCount int = 1
   'enabled'
   'disabled'
 ])
-param publicNetworkAccess string = 'enabled'
+param publicNetworkAccess string
 param replicaCount int = 1
 param keyVaultName string
 
+param privateEndpointSubnetId string
+param privateEndpointName string
+
 var searchKeySecretName = 'search-key'
 
-resource search 'Microsoft.Search/searchServices@2021-04-01-preview' = {
+resource search 'Microsoft.Search/searchServices@2023-11-01' = {
   name: name
   location: location
   tags: tags
@@ -43,6 +46,16 @@ module searchSecret '../shared/keyvault-secret.bicep' = {
     keyVaultName: keyVaultName
     name: searchKeySecretName
     secretValue: search.listAdminKeys().primaryKey
+  }
+}
+
+module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)){
+  name: '${name}-private-endpoint'
+  params: {
+    name: privateEndpointName
+    groupIds: ['searchService']
+    privateLinkServiceId: search.id
+    subnetId: privateEndpointSubnetId
   }
 }
 
