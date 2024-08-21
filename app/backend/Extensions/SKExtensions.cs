@@ -191,13 +191,13 @@ namespace MinimalApi.Extensions
 
         private static IEnumerable<ThoughtRecord> GetThoughtsRAG(KernelArguments context, string answer)
         {
-            var intent = (string)context["intent"];
-            var systemMessagePrompt = (string)context["SystemMessagePrompt"];
-            var userMessage = (string)context["UserMessage"];
+            var intent = context["intent"] as string;
+            var systemMessagePrompt = context["SystemMessagePrompt"] as string;
+            var userMessage = context["UserMessage"] as string;
 
             var thoughts = new List<ThoughtRecord>
             {
-                new("Generated search query", intent.ToString()),
+                new("Generated search query", intent),
                 new("Prompt", $"System:\n\n{systemMessagePrompt}\n\nUser:\n\n{userMessage}"),
                 new("Answer", answer)
             };
@@ -223,7 +223,7 @@ namespace MinimalApi.Extensions
 
         private static IEnumerable<ThoughtRecord> GetThoughts(KernelArguments context, string answer)
         {
-            var userMessage = (string)context["UserMessage"];
+            var userMessage = context["UserMessage"] as string;
             var thoughts = new List<ThoughtRecord>
             {
                 new("Prompt", userMessage),
