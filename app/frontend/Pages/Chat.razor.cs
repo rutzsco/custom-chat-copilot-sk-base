@@ -2,13 +2,7 @@
 
 using System;
 using System.Data;
-using ClientApp.Models;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
-using Microsoft.Extensions.Logging;
-using Microsoft.JSInterop;
-using static System.Net.WebRequestMethods;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using static MudBlazor.CategoryTypes;
 
 namespace ClientApp.Pages;
 
@@ -43,29 +37,19 @@ public sealed partial class Chat
     private string _imageFileName = "";
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
+
     [Inject] public required HttpClient HttpClient { get; set; }
-
     [Inject] public required ApiClient ApiClient { get; set; }
+    [Inject] public required IJSRuntime JSRuntime { get; set; }
+    [Inject] public required NavigationManager Navigation { get; set; }
 
-    [Inject]
-    public required IJSRuntime JSRuntime { get; set; }
-
-    [Inject]
-    public required NavigationManager Navigation { get; set; }
-
-    [CascadingParameter(Name = nameof(Settings))]
-    public required RequestSettingsOverrides Settings { get; set; }
-
-    [CascadingParameter(Name = nameof(IsReversed))]
-    public required bool IsReversed { get; set; }
-
+    [CascadingParameter(Name = nameof(Settings))] public required RequestSettingsOverrides Settings { get; set; }
+    [CascadingParameter(Name = nameof(IsReversed))] public required bool IsReversed { get; set; }
 
     public bool _showProfiles { get; set; }
     public bool _showDocumentUpload { get; set; }
     public bool _showPictureUpload { get; set; }
-
-    [SupplyParameterFromQuery(Name = "cid")]
-    public string? ArchivedChatId { get; set; }
+    [SupplyParameterFromQuery(Name = "cid")] public string? ArchivedChatId { get; set; }
 
     private HashSet<DocumentSummary> _selectedDocuments = new HashSet<DocumentSummary>();
 
@@ -150,15 +134,11 @@ public sealed partial class Chat
             };
 
             if (_userUploadProfileSummary != null && SelectedDocuments.Any())
-            {
                 options["PROFILE"] = _userUploadProfileSummary.Name;
-            }
 
             if (!string.IsNullOrEmpty(_imageUrl))
-            {
                 options["IMAGECONTENT"] = _imageUrl;
-            }
-
+ 
             var request = new ChatRequest(_chatId, Guid.NewGuid(), history.ToArray(), SelectedDocuments.Select(x => x.Name), options, Settings.Approach, Settings.Overrides);
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming")
             {
