@@ -55,7 +55,7 @@ internal sealed class ChatService : IChatService
                 chatHistory.AddUserMessage(
                 [
                    new TextContent(userMessage),
-                   new ImageContent(parser.Data) { MimeType = parser.MediaType }
+                   new ImageContent(parser.Data, parser.MediaType) 
                 ]);
             }
             else if (parser.MediaType == "application/pdf")

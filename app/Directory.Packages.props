@@ -36,7 +36,7 @@
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
     <PackageVersion Include="Microsoft.ML" Version="2.0.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
-    <PackageVersion Include="Microsoft.SemanticKernel" Version="1.14.1" />
+    <PackageVersion Include="Microsoft.SemanticKernel" Version="1.17.1" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
     <PackageVersion Include="MudBlazor" Version="6.20.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
