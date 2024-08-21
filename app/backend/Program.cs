@@ -15,6 +15,8 @@ builder.Services.AddOutputCache();
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddCrossOriginResourceSharing();
+builder.Services.AddRazorComponents()
+    .AddInteractiveWebAssemblyComponents();
 
 // Add Azure services to the container.
 var isMIBasedAuthentication = builder.Configuration[AppConfigurationSetting.UseManagedIdentityResourceAccess];
@@ -78,7 +80,6 @@ app.UseOutputCache();
 app.UseRouting();
 app.UseStaticFiles();
 app.UseCors();
-app.UseBlazorFrameworkFiles();
 app.UseAntiforgery();
 app.MapRazorPages();
 app.MapControllers();
@@ -89,7 +90,9 @@ app.Use(next => context =>
     context.Response.Cookies.Append("XSRF-TOKEN", tokens?.RequestToken ?? string.Empty, new CookieOptions() { HttpOnly = false });
     return next(context);
 });
-app.MapFallbackToFile("index.html");
+app.MapRazorComponents<App>()
+    .AddInteractiveWebAssemblyRenderMode()
+    .AddAdditionalAssemblies(typeof(ClientApp._Imports).Assembly);
 
 app.MapApi();
 
