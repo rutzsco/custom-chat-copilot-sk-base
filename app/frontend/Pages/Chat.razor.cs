@@ -132,6 +132,7 @@ public sealed partial class Chat
         {
             return;
         }
+
         _isReceivingResponse = true;
         _lastReferenceQuestion = _userQuestion;
         _currentQuestion = new(_userQuestion, DateTime.Now);
@@ -142,11 +143,12 @@ public sealed partial class Chat
             var history = _questionAndAnswerMap.Where(x => x.Value is not null).Select(x => new ChatTurn(x.Key.Question, x.Value.Answer)).ToList();
             history.Add(new ChatTurn(_userQuestion.Trim()));
 
-            var options = new Dictionary<string, string>();
-            options["GPT4ENABLED"] = _gPT4ON.ToString();
+            var options = new Dictionary<string, string>
+            {
+                ["GPT4ENABLED"] = _gPT4ON.ToString(),
+                ["PROFILE"] = _selectedProfile
+            };
 
-            // Set profile, override if user selected uploaded document
-            options["PROFILE"] = _selectedProfile;
             if (_userUploadProfileSummary != null && SelectedDocuments.Any())
             {
                 options["PROFILE"] = _userUploadProfileSummary.Name;
@@ -157,18 +159,20 @@ public sealed partial class Chat
                 options["IMAGECONTENT"] = _imageUrl;
             }
 
-            var request = new ChatRequest(_chatId, Guid.NewGuid(), [.. history], SelectedDocuments.Select(x => x.Name), options, Settings.Approach, Settings.Overrides);
-            var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming");
-            httpRequest.Headers.Add("Accept", "application/json");
+            var request = new ChatRequest(_chatId, Guid.NewGuid(), history.ToArray(), SelectedDocuments.Select(x => x.Name), options, Settings.Approach, Settings.Overrides);
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming")
+            {
+                Headers = { { "Accept", "application/json" } },
+                Content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
+            };
             httpRequest.SetBrowserResponseStreamingEnabled(true);
-            httpRequest.Content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
 
             using HttpResponseMessage response = await HttpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
-
             response.EnsureSuccessStatusCode();
 
             using Stream responseStream = await response.Content.ReadAsStreamAsync();
             var responseBuffer = new StringBuilder();
+
             await foreach (ChatChunkResponse chunk in JsonSerializer.DeserializeAsyncEnumerable<ChatChunkResponse>(responseStream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, DefaultBufferSize = 128 }))
             {
                 if (chunk == null)
@@ -177,24 +181,19 @@ public sealed partial class Chat
                 }
 
                 responseBuffer.Append(chunk.Text);
-                var restponseText = responseBuffer.ToString();
+                var responseText = responseBuffer.ToString();
 
-                var isComplete = chunk.FinalResult != null;            
                 if (chunk.FinalResult != null)
                 {
-                    var ar = new ApproachResponse(restponseText, chunk.FinalResult.CitationBaseUrl, chunk.FinalResult.Context);
-                    _questionAndAnswerMap[_currentQuestion] = ar;
+                    _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(responseText, chunk.FinalResult.CitationBaseUrl, chunk.FinalResult.Context);
+                    _isReceivingResponse = false;
+                    _userQuestion = "";
+                    _currentQuestion = default;
                 }
                 else
                 {
-                    _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(restponseText, null, null);
-                }
-
-                _isReceivingResponse = isComplete is false;
-                if (isComplete)
-                {
-                    _userQuestion = "";
-                    _currentQuestion = default;
+                    _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(responseText, null, null);
+                    _isReceivingResponse = true;
                 }
 
                 StateHasChanged();
@@ -205,6 +204,7 @@ public sealed partial class Chat
             _isReceivingResponse = false;
         }
     }
+
     private void OnSelectedDocumentsChanged()
     {
         Console.WriteLine($"SelectedDocuments: {SelectedDocuments.Count()}");
