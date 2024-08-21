@@ -4,6 +4,7 @@ namespace MinimalApi.Extensions;
 
 public class ContextVariableOptions
 {
+    public static string ChatResult = "ChatResult";
     public static string KnowledgeSummary = "knowledge-summary";
 
     public static string ChatHistory = "chat_history";

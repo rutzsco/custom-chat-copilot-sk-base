@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using Azure.Core;
 using ClientApp.Components;
+using Microsoft.Azure.Cosmos.Serialization.HybridRow;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.VisualBasic;
 using MinimalApi.Services.Profile;
@@ -86,10 +87,12 @@ namespace MinimalApi.Extensions
             return ProfileDefinition.All.FirstOrDefault(x => x.Name == value) ?? defaultProfile;
         }
 
-        public static string GetImageContent(this Dictionary<string, string> options)
+        public static string? GetImageContent(this Dictionary<string, string> options)
         {
-            var value = options.GetValueOrDefault("IMAGECONTENT", null);
-            return value;
+            if (options.TryGetValue("IMAGECONTENT", out var value))
+                return value;
+
+            return null;
         }
         public static bool ImageContentExists(this Dictionary<string, string> options)
         {
@@ -97,14 +100,21 @@ namespace MinimalApi.Extensions
         }
         public static ApproachResponse BuildResoponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
         {
-            var result = (SKResult)context["ChatResult"];
-            var knowledgeSourceSummary = (KnowledgeSourceSummary)context[ContextVariableOptions.KnowledgeSummary];
+            var result = context[ContextVariableOptions.ChatResult] as SKResult;
+            var knowledgeSourceSummary = context[ContextVariableOptions.KnowledgeSummary] as KnowledgeSourceSummary;
+            var systemMessagePrompt = context[ContextVariableOptions.SystemMessagePrompt] as string;
+            var userMessage = context[ContextVariableOptions.UserMessage] as string;
+
+            ArgumentNullException.ThrowIfNull(result, "ChatResult is null");
+            ArgumentNullException.ThrowIfNull(knowledgeSourceSummary, "KnowledgeSummary is null");
+            ArgumentNullException.ThrowIfNull(systemMessagePrompt, "SystemMessagePrompt is null");
+            ArgumentNullException.ThrowIfNull(userMessage, "UserMessage is null");
+
             var dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(profile.RAGSettings.CitationUseSourcePage), x.GetContent())).ToArray();
 
             var chatDiagnostics = new CompletionsDiagnostics(result.Usage.CompletionTokens, result.Usage.PromptTokens, result.Usage.TotalTokens, result.DurationMilliseconds);
             var diagnostics = new Diagnostics(chatDiagnostics, modelDeploymentName, workflowDurationMilliseconds);
-            var systemMessagePrompt = (string)context["SystemMessagePrompt"];
-            var userMessage = (string)context["UserMessage"];
+
 
             var thoughts = GetThoughtsRAG(context, result.Answer);
             var contextData = new ResponseContext(profile.Name, dataSources, thoughts.ToArray(), request.ChatTurnId, request.ChatId, diagnostics);
@@ -121,7 +131,9 @@ namespace MinimalApi.Extensions
             var dataSources = new SupportingContentRecord [] { };
             if (context.ContainsName(ContextVariableOptions.Knowledge) && context[ContextVariableOptions.Knowledge] != "NO_SOURCES")
             {
-                var knowledgeSourceSummary = (KnowledgeSourceSummary)context[ContextVariableOptions.KnowledgeSummary];
+                var knowledgeSourceSummary = context[ContextVariableOptions.KnowledgeSummary] as KnowledgeSourceSummary;
+                ArgumentNullException.ThrowIfNull(knowledgeSourceSummary, "knowledgeSourceSummary is null");
+
                 dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(profile.RAGSettings.CitationUseSourcePage), x.GetContent())).ToArray();
             }
   
