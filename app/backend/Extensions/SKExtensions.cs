@@ -29,7 +29,7 @@ namespace MinimalApi.Extensions
             arguments[ContextVariableOptions.UserId] = user.UserId;
             arguments[ContextVariableOptions.SessionId] = user.SessionId;
 
-            if(selectedDocuments != null)
+            if (selectedDocuments != null)
             {
                 arguments[ContextVariableOptions.SelectedDocuments] = selectedDocuments;
             }
@@ -64,20 +64,20 @@ namespace MinimalApi.Extensions
         public static bool IsChatGpt4Enabled(this Dictionary<string, string> options)
         {
             var value = options.GetValueOrDefault("GPT4ENABLED", "false");
-            return value.ToLower()  == "true";
+            return value.ToLower() == "true";
         }
 
         public static bool IsChatProfile(this Dictionary<string, string> options)
         {
             var profile = options.GetChatProfile();
             var selected = ProfileDefinition.All.FirstOrDefault(x => x.Name == profile.Name);
-            return selected.Approach.ToUpper() == "CHAT";
+            return selected?.Approach.ToUpper() == "CHAT";
         }
         public static bool IsEndpointAssistantProfile(this Dictionary<string, string> options)
         {
             var profile = options.GetChatProfile();
             var selected = ProfileDefinition.All.FirstOrDefault(x => x.Name == profile.Name);
-            return selected.Approach.ToUpper() == "ENDPOINTASSISTANT";
+            return selected?.Approach.ToUpper() == "ENDPOINTASSISTANT";
         }
 
         public static ProfileDefinition GetChatProfile(this Dictionary<string, string> options)
@@ -96,7 +96,7 @@ namespace MinimalApi.Extensions
         }
         public static bool ImageContentExists(this Dictionary<string, string> options)
         {
-           return options.ContainsKey("IMAGECONTENT");
+            return options.ContainsKey("IMAGECONTENT");
         }
         public static ApproachResponse BuildResoponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
         {
@@ -110,7 +110,7 @@ namespace MinimalApi.Extensions
             ArgumentNullException.ThrowIfNull(systemMessagePrompt, "SystemMessagePrompt is null");
             ArgumentNullException.ThrowIfNull(userMessage, "UserMessage is null");
 
-            var dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(profile.RAGSettings.CitationUseSourcePage), x.GetContent())).ToArray();
+            var dataSources = knowledgeSourceSummary?.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(profile.RAGSettings.CitationUseSourcePage), x.GetContent())).ToArray();
 
             var chatDiagnostics = new CompletionsDiagnostics(result.Usage.CompletionTokens, result.Usage.PromptTokens, result.Usage.TotalTokens, result.DurationMilliseconds);
             var diagnostics = new Diagnostics(chatDiagnostics, modelDeploymentName, workflowDurationMilliseconds);
@@ -128,7 +128,7 @@ namespace MinimalApi.Extensions
 
         public static ApproachResponse BuildStreamingResoponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds, List<KeyValuePair<string, string>> requestSettings = null)
         {
-            var dataSources = new SupportingContentRecord [] { };
+            var dataSources = new SupportingContentRecord[] { };
             if (context.ContainsName(ContextVariableOptions.Knowledge) && context[ContextVariableOptions.Knowledge] != "NO_SOURCES")
             {
                 var knowledgeSourceSummary = context[ContextVariableOptions.KnowledgeSummary] as KnowledgeSourceSummary;
@@ -136,7 +136,7 @@ namespace MinimalApi.Extensions
 
                 dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(profile.RAGSettings.CitationUseSourcePage), x.GetContent())).ToArray();
             }
-  
+
             var completionTokens = GetTokenCount(answer);
             var totalTokens = completionTokens + requestTokenCount;
             var chatDiagnostics = new CompletionsDiagnostics(completionTokens, requestTokenCount, totalTokens, 0);
@@ -159,7 +159,7 @@ namespace MinimalApi.Extensions
             var diagnostics = new Diagnostics(chatDiagnostics, modelDeploymentName, workflowDurationMilliseconds);
 
             var thoughts = GetThoughts(context, answer);
-            var contextData = new ResponseContext(profile.Name,null, thoughts.ToArray(), request.ChatTurnId, request.ChatId, diagnostics);
+            var contextData = new ResponseContext(profile.Name, null, thoughts.ToArray(), request.ChatTurnId, request.ChatId, diagnostics);
 
             return new ApproachResponse(
                 Answer: NormalizeResponseText(answer),
@@ -196,27 +196,27 @@ namespace MinimalApi.Extensions
             var userMessage = context["UserMessage"] as string;
 
             var thoughts = new List<ThoughtRecord>
-            {
-                new("Generated search query", intent),
-                new("Prompt", $"System:\n\n{systemMessagePrompt}\n\nUser:\n\n{userMessage}"),
-                new("Answer", answer)
-            };
+                {
+                    new("Generated search query", intent),
+                    new("Prompt", $"System:\n\n{systemMessagePrompt}\n\nUser:\n\n{userMessage}"),
+                    new("Answer", answer)
+                };
 
             return thoughts;
         }
 
         private static IEnumerable<ThoughtRecord> GetThoughtsRAGV2(KernelArguments context, string answer, List<KeyValuePair<string, string>> requestSettings)
         {
-            if(requestSettings == null)
+            if (requestSettings == null)
                 return new List<ThoughtRecord>();
-           
+
             var searchRequestDiagnostics = context[ContextVariableOptions.SearchDiagnostics] as List<KeyValuePair<string, string>>;
             var thoughts = new List<ThoughtRecord>
-            {
-                new("Generated search query", BuildPromptContext(searchRequestDiagnostics)),
-                new("Prompt", BuildPromptContext(requestSettings)),
-                new("Answer", answer)
-            };
+                {
+                    new("Generated search query", BuildPromptContext(searchRequestDiagnostics)),
+                    new("Prompt", BuildPromptContext(requestSettings)),
+                    new("Answer", answer)
+                };
 
             return thoughts;
         }
@@ -225,10 +225,10 @@ namespace MinimalApi.Extensions
         {
             var userMessage = context["UserMessage"] as string;
             var thoughts = new List<ThoughtRecord>
-            {
-                new("Prompt", userMessage),
-                new("Answer", answer)
-            };
+                {
+                    new("Prompt", userMessage),
+                    new("Answer", answer)
+                };
 
             return thoughts;
         }
@@ -238,7 +238,7 @@ namespace MinimalApi.Extensions
             var sb = new StringBuilder();
             foreach (var setting in requestSettings.Where(x => x.Key.StartsWith("PROMPTMESSAGE:")))
             {
-    
+
                 sb.AppendLine($"{setting.Key.Replace("PROMPTMESSAGE:", "")}:\n\n{setting.Value}\n");
             }
 
@@ -263,7 +263,7 @@ namespace MinimalApi.Extensions
                 }
             }
 
-            foreach (var item in settings.ExtensionData)
+            foreach (var item in settings.ExtensionData ?? new Dictionary<string, object>())
             {
                 results.Add(new KeyValuePair<string, string>($"PROMPTKEY:{item.Key}", item.Value.ToString()));
             }
