@@ -127,12 +127,12 @@
                     {
                         @if (_imageFileName.Contains(".pdf"))
                         {
-                            <MudChip Icon="@Icons.Material.Filled.PictureAsPdf" IconColor="Color.Primary">@_imageFileName</MudChip>
+                            <MudChip T="string" Icon="@Icons.Material.Filled.PictureAsPdf" IconColor="Color.Primary">@_imageFileName</MudChip>
                         }
 
                         @if (_imageFileName.Contains(".csv") || _imageFileName.Contains(".txt") || _imageFileName.Contains(".xml"))
                         {
-                            <MudChip Icon="@Icons.Material.Filled.InsertDriveFile" IconColor="Color.Primary">@_imageFileName</MudChip>
+                            <MudChip T="string" Icon="@Icons.Material.Filled.InsertDriveFile" IconColor="Color.Primary">@_imageFileName</MudChip>
                         }
                     }
                 </MudItem>
