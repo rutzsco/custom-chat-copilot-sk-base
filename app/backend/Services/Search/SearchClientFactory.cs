@@ -12,8 +12,8 @@ public class SearchClientFactory
     private readonly IConfiguration _configuration;
     private readonly ConcurrentDictionary<string,SearchClient> _clients = new ConcurrentDictionary<string, SearchClient>();
     private readonly TokenCredential _credential;
-    private readonly AzureKeyCredential _keyCredential;
-    public SearchClientFactory(IConfiguration configuration, TokenCredential credential, AzureKeyCredential keyCredential = null)
+    private readonly AzureKeyCredential? _keyCredential;
+    public SearchClientFactory(IConfiguration configuration, TokenCredential credential, AzureKeyCredential? keyCredential = null)
     {
         _configuration = configuration;
         _credential = credential;

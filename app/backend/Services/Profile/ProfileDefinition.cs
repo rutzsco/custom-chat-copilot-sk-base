@@ -90,20 +90,20 @@ public class RAGSettingsSummary
 
 public class DocumentCollectionRAGSettings
 {
-    public string GenerateSearchQueryPluginName { get; set; }
-    public string GenerateSearchQueryPluginQueryFunctionName { get; set; }
-    public string DocumentRetrievalPluginName { get; set; }
-    public string DocumentRetrievalPluginQueryFunctionName { get; set; }
-    public string DocumentRetrievalIndexName { get; set; }
+    public required string GenerateSearchQueryPluginName { get; set; }
+    public required string GenerateSearchQueryPluginQueryFunctionName { get; set; }
+    public required string DocumentRetrievalPluginName { get; set; }
+    public required string DocumentRetrievalPluginQueryFunctionName { get; set; }
+    public required string DocumentRetrievalIndexName { get; set; }
 
     public int DocumentRetrievalDocumentCount { get; set; }
 
-    public string ChatSystemMessageFile { get; set; }
-    public string StorageContianer { get; set; }
+    public required string ChatSystemMessageFile { get; set; }
+    public required string StorageContianer { get; set; }
 }
 
 public class AssistantEndpointSettingsSummary
 {
-    public string APIEndpointSetting { get; set; }
-    public string APIEndpointKeySetting { get; set; }
+    public required string APIEndpointSetting { get; set; }
+    public required string APIEndpointKeySetting { get; set; }
 }
