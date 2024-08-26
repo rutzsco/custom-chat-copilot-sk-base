@@ -81,6 +81,7 @@ internal static class WebApplicationExtensions
                     throw new UnauthorizedAccessException("User does not have access to this profile");
                 }
 
+                ArgumentNullException.ThrowIfNull(profile.RAGSettings, "Profile RAGSettings is null");
                 var blobContainerClient = blobServiceClient.GetBlobContainerClient(profile.RAGSettings.StorageContianer);
                 var blobClient = blobContainerClient.GetBlobClient(blobName);
                 Console.WriteLine($"Blob Uri:{blobClient.Uri}");
@@ -171,9 +172,13 @@ internal static class WebApplicationExtensions
 
         if (profile.Approach == ProfileApproach.UserDocumentChat.ToString())
         {
+            ArgumentNullException.ThrowIfNull(profile.RAGSettings, "Profile RAGSettings is null");
+
             var selectedDocument = request.SelectedFiles.FirstOrDefault();
             var documents = await documentService.GetDocumentUploadsAsync(userInfo);
             var document = documents.FirstOrDefault(d => d.SourceName == selectedDocument);
+
+            ArgumentNullException.ThrowIfNull(document, "Document is null");
             profile.RAGSettings.DocumentRetrievalIndexName = document.RetrivalIndexName;
         }
 
