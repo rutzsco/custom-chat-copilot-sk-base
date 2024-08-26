@@ -1,12 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using Azure.AI.OpenAI;
-using Azure.Search.Documents;
-using MinimalApi.Extensions;
-using MinimalApi.Services.Profile;
 using TiktokenSharp;
 
 namespace MinimalApi.Services.Search;
@@ -32,11 +25,9 @@ public class SearchLogic<T> where T : IKnowledgeSource
 
     public async Task<KnowledgeSourceSummary> SearchAsync(string query, KernelArguments arguments)
     {
-        // Generate the embedding for the query  
+        // Generate the embedding for the query
         var queryEmbeddings = await GenerateEmbeddingsAsync(query, _openAIClient);
 
-
-        // Configure the search options
         var searchOptions = new SearchOptions
         {
             Size = _documentFilesCount,
@@ -45,6 +36,17 @@ public class SearchLogic<T> where T : IKnowledgeSource
                 Queries = { new VectorizedQuery(queryEmbeddings.ToArray()) { KNearestNeighborsCount = DefaultSettings.KNearestNeighborsCount, Fields = { _embeddingFieldName } } }
             }
         };
+
+
+        var ragSettings = arguments.GetProfileRAGSettingsDefinition();
+        if (ragSettings.UseSemanticRanker)
+        {
+            searchOptions.SemanticSearch = new SemanticSearchOptions
+            {
+                SemanticConfigurationName = ragSettings.SemanticConfigurationName
+            };
+            searchOptions.QueryType = SearchQueryType.Semantic;
+        }
 
         foreach (var field in _selectFields)
         {
@@ -71,9 +73,8 @@ public class SearchLogic<T> where T : IKnowledgeSource
             list.Add(result.Document);
         }
 
-        /// Filter the results by the maximum request token size
-        var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
-        var sourceSummary = FilterByMaxRequestTokenSize(list, DefaultSettings.MaxRequestTokens, profile.RAGSettings.CitationUseSourcePage);
+        // Filter the results by the maximum request token size
+        var sourceSummary = FilterByMaxRequestTokenSize(list, DefaultSettings.MaxRequestTokens, ragSettings.CitationUseSourcePage);
         return sourceSummary;
     }
 

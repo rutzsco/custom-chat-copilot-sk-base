@@ -24,9 +24,15 @@ public sealed class RetrieveRelatedDocumentSkill
     [KernelFunction("Retrieval"), Description("Search more information")]
     public async Task<string> RetrievalAsync([Description("search query")] string searchQuery, KernelArguments arguments)
     {
+        var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
+
+        ArgumentNullException.ThrowIfNull(profile, "Profile is not set.");
+        ArgumentNullException.ThrowIfNull(profile.RAGSettings, "Profile RAGSettings not set.");
+
+
         searchQuery = searchQuery.Replace("\"", string.Empty);
         arguments[ContextVariableOptions.Intent] = searchQuery;
-        var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
+
 
         var searchLogic = ResolveRetrievalLogic(_openAIClient, _searchClientFactory, profile.RAGSettings, _config["AOAIEmbeddingsDeployment"], profile.RAGSettings.DocumentRetrievalPluginQueryFunctionName);
         var result = await searchLogic(searchQuery, arguments);

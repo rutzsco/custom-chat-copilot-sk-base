@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Drawing.Printing;
+using System.Text.RegularExpressions;
 using Azure.Core;
 using ClientApp.Components;
 using Microsoft.Azure.Cosmos.Serialization.HybridRow;
@@ -45,6 +46,24 @@ namespace MinimalApi.Extensions
 
             arguments["chatTurns"] = history;
             return arguments;
+        }
+        public static ProfileDefinition GetProfileDefinition(this KernelArguments arguments)
+        {
+            var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
+
+            ArgumentNullException.ThrowIfNull(profile, "Profile is not set.");
+            ArgumentNullException.ThrowIfNull(profile.RAGSettings, "Profile RAGSettings is not set.");
+
+            return profile;
+        }
+        public static RAGSettingsSummary GetProfileRAGSettingsDefinition(this KernelArguments arguments)
+        {
+            var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;
+
+            ArgumentNullException.ThrowIfNull(profile, "Profile is not set.");
+            ArgumentNullException.ThrowIfNull(profile.RAGSettings, "Profile RAGSettings is not set.");
+
+            return profile.RAGSettings;
         }
 
         public static ChatHistory AddChatHistory(this ChatHistory chatHistory, ChatTurn[] history)

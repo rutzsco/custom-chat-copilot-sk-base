@@ -18,7 +18,10 @@
       "DocumentRetrievalIndexName": "manuals-auto-ci-20240528182950",
       "ChatSystemMessageFile": "RAGChatSystemPrompt",
       "StorageContianer": "manuals-auto-chunks",
-      "CitationUseSourcePage": true
+      "CitationUseSourcePage": true,
+      "DocumentRetrievalDocumentCount": 50,
+      "UseSemanticRanker": true,
+      "SemanticConfigurationName": "Default"
     }
   },
   {

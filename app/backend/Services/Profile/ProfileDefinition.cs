@@ -74,18 +74,21 @@ public class ProfileDefinition
 
 public class RAGSettingsSummary
 {
-    public string GenerateSearchQueryPluginName { get; set; }
-    public string GenerateSearchQueryPluginQueryFunctionName { get; set; }
-    public string DocumentRetrievalPluginName { get; set; }
-    public string DocumentRetrievalPluginQueryFunctionName { get; set; }
-    public string DocumentRetrievalIndexName { get; set; }
+    public required string GenerateSearchQueryPluginName { get; set; }
+    public required string GenerateSearchQueryPluginQueryFunctionName { get; set; }
+    public required string DocumentRetrievalPluginName { get; set; }
+    public required string DocumentRetrievalPluginQueryFunctionName { get; set; }
+    public required string DocumentRetrievalIndexName { get; set; }
 
-    public int DocumentRetrievalDocumentCount { get; set; }
+    public required int DocumentRetrievalDocumentCount { get; set; }
 
-    public string ChatSystemMessageFile { get; set; }
-    public string StorageContianer { get; set; }
+    public required string ChatSystemMessageFile { get; set; }
+    public required string StorageContianer { get; set; }
 
-    public bool CitationUseSourcePage { get; set; }
+    public required bool CitationUseSourcePage { get; set; }
+
+    public required bool UseSemanticRanker { get; set; }
+    public string? SemanticConfigurationName { get; set; }
 }
 
 public class DocumentCollectionRAGSettings
