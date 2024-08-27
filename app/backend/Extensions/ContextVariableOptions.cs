@@ -24,4 +24,6 @@ public class ContextVariableOptions
     public static string SelectedDocuments = "SelectedDocuments";
 
     public static string ResponsibleAIPolicyViolation = "ResponsibleAIPolicyViolation";
+
+    public static string ChatTurns = "chatTurns";
 }

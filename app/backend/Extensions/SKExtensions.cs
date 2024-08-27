@@ -1,10 +1,4 @@
-﻿using System.Drawing.Printing;
-using System.Text.RegularExpressions;
-using Azure.Core;
-using ClientApp.Components;
-using Microsoft.Azure.Cosmos.Serialization.HybridRow;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.VisualBasic;
+﻿using Microsoft.SemanticKernel.ChatCompletion;
 using MinimalApi.Services.Profile;
 using MinimalApi.Services.Search;
 using TiktokenSharp;
@@ -44,7 +38,7 @@ public static class SKExtensions
             throw new InvalidOperationException("User question is null");
         }
 
-        arguments["chatTurns"] = history;
+        arguments[ContextVariableOptions.ChatTurns] = history;
         return arguments;
     }
     public static ProfileDefinition GetProfileDefinition(this KernelArguments arguments)
@@ -150,12 +144,17 @@ public static class SKExtensions
     public static ApproachResponse BuildStreamingResoponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds, List<KeyValuePair<string, string>>? requestSettings = null)
     {
         var dataSources = new SupportingContentRecord[] { };
-        if (context.ContainsName(ContextVariableOptions.Knowledge) && context[ContextVariableOptions.Knowledge] != "NO_SOURCES")
+        if (context.ContainsName(ContextVariableOptions.Knowledge))
         {
-            var knowledgeSourceSummary = context[ContextVariableOptions.KnowledgeSummary] as KnowledgeSourceSummary;
-            ArgumentNullException.ThrowIfNull(knowledgeSourceSummary, "knowledgeSourceSummary is null");
+            var sources = context[ContextVariableOptions.Knowledge] as string;
+            if (sources != "NO_SOURCES")
+            {
+                var knowledgeSourceSummary = context[ContextVariableOptions.KnowledgeSummary] as KnowledgeSourceSummary;
+                ArgumentNullException.ThrowIfNull(knowledgeSourceSummary, "knowledgeSourceSummary is null");
+                ArgumentNullException.ThrowIfNull(profile.RAGSettings, "profile.RAGSettings is null");
 
-            dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(profile.RAGSettings.CitationUseSourcePage), x.GetContent())).ToArray();
+                dataSources = knowledgeSourceSummary.Sources.Select(x => new SupportingContentRecord(x.GetFilepath(profile.RAGSettings.CitationUseSourcePage), x.GetContent())).ToArray();
+            }
         }
 
         var completionTokens = GetTokenCount(answer);
