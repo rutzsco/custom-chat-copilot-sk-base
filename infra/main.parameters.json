@@ -23,8 +23,17 @@
       "virtualNetworkName": {
         "value": "${AZURE_VNET_NAME}"
       },
+      "virtualNetworkResourceGroupName": {
+        "value": "${AZURE_VNET_RESOURCE_GROUP_NAME}"
+      },
+      "containerAppSubnetName": {
+        "value": "${AZURE_CONTAINER_APP_SUBNET_NAME}"
+      },
       "containerAppSubnetAddressPrefix": {
         "value": "10.0.0.0/23"
+      },
+      "privateEndpointSubnetName": {
+        "value": "${AZURE_PRIVATE_ENDPOINT_SUBNET_NAME}"
       },
       "privateEndpointSubnetAddressPrefix": {
         "value": "10.0.2.0/26"

@@ -54,8 +54,14 @@ param searchContentIndex string = 'manuals'
 @description('Name of the virtual network to use for the app. If empty, the app will be created without virtual network integration.')
 param virtualNetworkName string
 
+param virtualNetworkResourceGroupName string
+
+param containerAppSubnetName string
+
 @description('Address prefix for the container app subnet')
 param containerAppSubnetAddressPrefix string
+
+param privateEndpointSubnetName string
 
 @description('Address prefix for the private endpoint subnet')
 param privateEndpointSubnetAddressPrefix string
@@ -118,13 +124,14 @@ module virtualNetwork './app/virtual-network.bicep' = if(!empty(virtualNetworkNa
   params: {
     virtualNetworkName: virtualNetworkName
     location: location
-    containerAppSubnetName: 'container-app'
+    containerAppSubnetName: containerAppSubnetName
     containerAppSubnetAddressPrefix: containerAppSubnetAddressPrefix
     containerAppSubnetNsgName: '${abbrs.networkNetworkSecurityGroups}container-app-${resourceToken}'
-    privateEndpointSubnetName: 'private-endpoint'
+    privateEndpointSubnetName: privateEndpointSubnetName
     privateEndpointSubnetAddressPrefix: privateEndpointSubnetAddressPrefix
     privateEndpointSubnetNsgName: '${abbrs.networkNetworkSecurityGroups}private-endpoint-${resourceToken}'
   }
+  scope: resourceGroup(virtualNetworkResourceGroupName)
 }
 
 module registry './app/registry.bicep' = {
