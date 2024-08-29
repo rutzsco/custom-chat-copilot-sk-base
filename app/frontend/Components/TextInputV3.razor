@@ -1,0 +1,23 @@
+﻿<MudPaper Elevation="25" Class="pl-4 pt-4 pr-4 pb-0" Style="">
+    <MudStack>
+    <MudTextField T="string"
+                  AutoFocus="true"
+                  Immediate=true 
+                  MaxLines=5 Disabled=@Disabled 
+                  AutoGrow="true"
+                  Placeholder="Enter your message..." Class="mt-n4 pl-2" OnKeyUp="@OnKeyUpAsync" @bind-Value="@Value" />
+    
+    @if (!string.IsNullOrEmpty(ImageUrl) && ImageUrl.Contains("png"))
+    {
+        <MudImage Src="@ImageUrl" Alt="Image" Elevation="25" Width="100" Height="75" Class="rounded-lg ma-4" />
+    }
+
+            <MudToolBar DisableGutters="true" Class="mt-n4 pb-0">
+               <MudIconButton Class="pa-2"  Size="Size.Small" Icon=@Icons.Material.Filled.AttachFile aria-label="Attach file or picture" OnClick="OnAskClickedAsync" Disabled=@Disabled></MudIconButton>
+               <MudToggleIconButton Class="pa-2" Icon="@Icons.Material.Filled.ToggleOff" Color="@Color.Default" Title="Off" ToggledIcon="@Icons.Material.Filled.ToggleOn" ToggledColor="@Color.Success" ToggledTitle="On" />
+               <MudSpacer />
+              <MudIconButton Class="pa-2" Size="Size.Small" Icon=@Icons.Material.Outlined.Send Color="Color.Secondary" OnClick="OnAskClickedAsync" Disabled=@Disabled></MudIconButton>
+              <MudIconButton Class="pa-2" Size="Size.Small" Icon=@Icons.Material.Filled.Cancel Color="Color.Secondary" ButtonType="ButtonType.Reset" OnClick="@OnClearChatAsync" Disabled=@Disabled />
+            </MudToolBar>
+    </MudStack>
+</MudPaper>
