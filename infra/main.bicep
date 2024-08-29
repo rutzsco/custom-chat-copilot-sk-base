@@ -54,9 +54,17 @@ param searchContentIndex string = 'manuals'
 @description('Name of the virtual network to use for the app. If empty, the app will be created without virtual network integration.')
 param virtualNetworkName string
 
+@description('Address prefix for the container app subnet')
 param containerAppSubnetAddressPrefix string
 
+@description('Address prefix for the private endpoint subnet')
 param privateEndpointSubnetAddressPrefix string
+
+@description('Name of the Azure Monitor private link scope')
+param azureMonitorPrivateLinkScopeName string
+
+@description('Resource group name of the Azure Monitor private link scope')
+param azureMonitorPrivateLinkScopeResourceGroupName string
 
 // Tags that should be applied to all resources.
 // 
@@ -77,6 +85,12 @@ module monitoring './app/monitoring.bicep' = {
     tags: tags
     logAnalyticsName: '${abbrs.operationalInsightsWorkspaces}${resourceToken}'
     applicationInsightsName: '${abbrs.insightsComponents}${resourceToken}'
+    azureMonitorPrivateLinkScopeName: !empty(virtualNetworkName) ? azureMonitorPrivateLinkScopeName : ''
+    azureMonitorPrivateLinkScopeResourceGroupName: !empty(virtualNetworkName) ? azureMonitorPrivateLinkScopeResourceGroupName : ''
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}azureMonitorPrivateLinkService-${resourceToken}': ''
+    publicNetworkAccessForIngestion: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
+    publicNetworkAccessForQuery: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
   }
 }
 
