@@ -39,6 +39,8 @@ docker build . -t custom-chat-copilot-sk-base/chat-app
 
 ```bash
 azd env set AZURE_VNET_NAME <vnet-name>
+azd env set AZURE_MONITOR_PRIVATE_LINK_SCOPE_NAME <azure-monitor-private-link-scope-name>
+azd env set AZURE_MONITOR_PRIVATE_LINK_SCOPE_RESOURCE_GROUP_NAME <azure-monitor-private-link-scope-resource-group-name>
 ```
 
 ```bash

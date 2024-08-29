@@ -28,6 +28,12 @@
       },
       "privateEndpointSubnetAddressPrefix": {
         "value": "10.0.2.0/26"
+      },
+      "azureMonitorPrivateLinkScopeName": {
+        "value": "${AZURE_MONITOR_PRIVATE_LINK_SCOPE_NAME}"
+      },
+      "azureMonitorPrivateLinkScopeResourceGroupName": {
+        "value": "${AZURE_MONITOR_PRIVATE_LINK_SCOPE_RESOURCE_GROUP_NAME}"
       }
     }
 }
