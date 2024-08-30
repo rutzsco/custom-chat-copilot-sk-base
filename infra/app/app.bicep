@@ -4,6 +4,7 @@ param tags object = {}
 
 param containerRegistryName string
 param containerAppsEnvironmentName string
+param containerAppsEnvironmentWorkloadProfileName string
 param applicationInsightsName string
 param exists bool
 @secure()
@@ -107,6 +108,7 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
         maxReplicas: 10
       }
     }
+    workloadProfileName: containerAppsEnvironmentWorkloadProfileName
   }
 }
 

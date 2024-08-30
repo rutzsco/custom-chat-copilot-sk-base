@@ -35,10 +35,15 @@ docker build . -t custom-chat-copilot-sk-base/chat-app
 
 #### Azure Developer CLI
 
-**NOTE**: You can specify the following command if you want to use an existing vNet and secure all services behind private endpoints. You will need a vNet with a /22 CIDR range in order to use this option.
+**NOTE**: You can specify the following command if you want to use an existing vNet and secure all services behind private endpoints. You will need a vNet with a /24 CIDR range in order to use this option.
 
 ```bash
 azd env set AZURE_VNET_NAME <vnet-name>
+azd env set AZURE_VNET_RESOURCE_GROUP_NAME <vnet-resource-group-name>
+azd env set AZURE_CONTAINER_APP_SUBNET_NAME <azure-container-app-subnet-name>
+azd env set AZURE_CONTAINER_APP_SUBNET_ADDRESS_PREFIX <azure-container-app-subnet-address-prefix>
+azd env set AZURE_PRIVATE_ENDPOINT_SUBNET_NAME <azure-private-endpoint-subnet-name>
+azd env set AZURE_PRIVATE_ENDPOINT_SUBNET_ADDRESS_PREFIX <azure-private-endpoint-subnet-address-prefix>
 azd env set AZURE_MONITOR_PRIVATE_LINK_SCOPE_NAME <azure-monitor-private-link-scope-name>
 azd env set AZURE_MONITOR_PRIVATE_LINK_SCOPE_RESOURCE_GROUP_NAME <azure-monitor-private-link-scope-resource-group-name>
 ```

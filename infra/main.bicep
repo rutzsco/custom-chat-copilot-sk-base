@@ -72,6 +72,12 @@ param azureMonitorPrivateLinkScopeName string
 @description('Resource group name of the Azure Monitor private link scope')
 param azureMonitorPrivateLinkScopeResourceGroupName string
 
+@description('Workload profiles for the Container Apps environment')
+param containerAppEnvironmentWorkloadProfiles array = []
+
+@description('Name of the Container Apps Environment workload profile to use for the app')
+param appContainerAppEnvironmentWorkloadProfileName string
+
 // Tags that should be applied to all resources.
 // 
 // Note that 'azd-service-name' tags should be applied separately to service host resources.
@@ -183,6 +189,7 @@ module appsEnv './app/apps-env.bicep' = {
     applicationInsightsName: monitoring.outputs.applicationInsightsName
     logAnalyticsWorkspaceName: monitoring.outputs.logAnalyticsWorkspaceName
     containerAppSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.containerAppSubnetId : ''
+    containerAppEnvironmentWorkloadProfiles: containerAppEnvironmentWorkloadProfiles
   }
 }
 
@@ -204,6 +211,10 @@ module storageAccount './app/storage-account.bicep' = {
     allowBlobPublicAccess: !empty(virtualNetworkName) ? false : true
     privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
     privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.storageStorageAccounts}${resourceToken}': ''
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: !empty(virtualNetworkName) ? 'Deny' : 'Allow'
+    }
   }
 }
 
@@ -301,6 +312,7 @@ module app './app/app.bicep' = {
     tags: tags
     applicationInsightsName: monitoring.outputs.applicationInsightsName
     containerAppsEnvironmentName: appsEnv.outputs.name
+    containerAppsEnvironmentWorkloadProfileName: appContainerAppEnvironmentWorkloadProfileName
     containerRegistryName: registry.outputs.name
     exists: backendExists
     appDefinition: appDefinition
