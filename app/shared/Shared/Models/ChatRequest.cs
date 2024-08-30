@@ -6,7 +6,8 @@ public record class ChatRequest(
     Guid ChatId,
     Guid ChatTurnId,
     ChatTurn[] History,
-    IEnumerable<string> SelectedFiles,
+    IEnumerable<string> SelectedUserCollectionFiles,
+    IEnumerable<FileSummary> FileUploads,
     Dictionary<string, string> OptionFlags,
     Approach Approach,
     RequestOverrides? Overrides = null) : ApproachRequest(Approach)

@@ -90,20 +90,6 @@
                                 </ActivatorContent>
                                 <ChildContent>
                                     <MudMenuItem Color="Color.Primary" Href="/documents">Upload File</MudMenuItem>
-@*                                     @foreach (var document in _userDocuments)
-                                    {
-                                        if (document.Status == DocumentProcessingStatus.Succeeded)
-                                        {
-                                            <MudMenuItem OnClick="@(e => OnDocumentClick(@document.Name))" Color="Color.Primary">@document.Name</MudMenuItem>
-                                        }
-                                    } *@
-@*                                     <MudSelect Style="padding: 10px; width: 300px" MultiSelectionTextFunc="@(new Func<List<string>, string>(GetMultiSelectionText))" MultiSelection="true" @bind-Value="value" @bind-SelectedValues="SelectedDocuments" T="string" Label="Documents" AnchorOrigin="Origin.BottomCenter">
-                                        @foreach (var document in _userDocuments)
-                                        {
-                                            <MudSelectItem T="string" Value="@document.Name">@document.Name</MudSelectItem>
-                                        } 
-                                    </MudSelect> *@
-
                                     <MudTable Style="padding: 10px;" T="DocumentSummary" Items="@_userDocuments" MultiSelection="true" @bind-SelectedItems="SelectedDocuments">
                                         <RowTemplate>
                                             <MudTd DataLabel="Nr">@context.Name</MudTd>
@@ -113,17 +99,10 @@
                             </MudMenu>
                         }
 
-                        @if (_showPictureUpload)
-                        {
-                            <MudFileUpload T="IBrowserFile" FilesChanged="UploadFilesAsync" Style="margin-top: 0px">
-                                <ButtonTemplate>
-                                    <MudIconButton Style="height: 36px" HtmlTag="label" Color="Color.Primary" Icon="@Icons.Material.Filled.AttachFile" for="@context.Id"></MudIconButton>
-                                </ButtonTemplate>
-                            </MudFileUpload>
-                        }
 
-                    </MudButtonGroup>
-                    @if (!string.IsNullOrEmpty(_imageFileName))
+
+                     </MudButtonGroup>
+ @*                    @if (!string.IsNullOrEmpty(_imageFileName))
                     {
                         @if (_imageFileName.Contains(".pdf"))
                         {
@@ -134,26 +113,17 @@
                         {
                             <MudChip T="string" Icon="@Icons.Material.Filled.InsertDriveFile" IconColor="Color.Primary">@_imageFileName</MudChip>
                         }
-                    }
+                    }  *@
                 </MudItem>
-                <MudItem xs="12" lg="11">
-                    <TextInputV2 @bind-Value="_userQuestion" Label="Prompt"
+                <MudItem xs="12" lg="12">
+                    <TextInputV3 Label="Prompt"
                                  Placeholder="Enter your message..."
                                  Disabled=@_isReceivingResponse
-                                 OnEnterKeyPressed="OnAskClickedAsync"
+                                 OnEnterKeyPressed="OnAskQuestionAsync"
                                  OnResetPressed="OnClearChat" 
-                                 ImageUrl="@_imageUrl"/>
-                </MudItem>
-                <MudItem xs="0" lg="1" Class="d-flex align-self-center">
-                    <MudGrid Justify="Justify.Center">
-                        @if (AppConfiguration.ShowPremiumAOAIToggleSelection)
-                        {
-                            <MudItem xs="12">
-                                <MudToggleIconButton @bind-Toggled="@_gPT4ON" Icon="@Icons.Material.Filled.ToggleOff" Color="@Color.Default" Title="Off" ToggledIcon="@Icons.Material.Filled.ToggleOn" ToggledColor="@Color.Success" ToggledTitle="On" />
-                                <span>GPT-4</span>
-                            </MudItem>
-                        }
-                    </MudGrid>
+                                 OnFileUpload="OnFileUpload"
+                                 OnModelSelection="OnModelSelection"
+                                 SupportsFileUpload=@_supportsFileUpload />
                 </MudItem>
             </MudGrid>
         </MudItem>

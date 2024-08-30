@@ -2,6 +2,7 @@
 
 using System;
 using System.Data;
+using Blazor.Serialization.Extensions;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
 
 namespace ClientApp.Pages;
@@ -9,15 +10,16 @@ namespace ClientApp.Pages;
 public sealed partial class Chat
 {
     private const long MaxIndividualFileSize = 1_024L * 1_024;
-    private IList<IBrowserFile> _files = new List<IBrowserFile>();
-    private MudForm _form = null!;
-    private MudFileUpload<IReadOnlyList<IBrowserFile>> _fileUpload = null!;
-    private bool _showFileUpload = false;
 
+    private MudForm _form = null!;
+
+    // User input and selections
     private string _userQuestion = "";
+    private List<FileSummary> _files = new ();
+    private List<DocumentSummary> _userDocuments = new();
+    private string _selectedDocument = "";
     private UserQuestion _currentQuestion;
-    private string _lastReferenceQuestion = "";
-    private bool _isReceivingResponse = false;
+
     private bool _filtersSelected = false;
 
     private string _selectedProfile = "";
@@ -25,16 +27,14 @@ public sealed partial class Chat
     private ProfileSummary? _selectedProfileSummary = null;
     private ProfileSummary? _userUploadProfileSummary = null;
 
-    private List<DocumentSummary> _userDocuments = new();
-    private string _selectedDocument = "";
-
+    private string _lastReferenceQuestion = "";
+    private bool _isReceivingResponse = false;
+    private bool _supportsFileUpload = false;
+    
     private readonly Dictionary<UserQuestion, ApproachResponse?> _questionAndAnswerMap = [];
 
     private bool _gPT4ON = false;
     private Guid _chatId = Guid.NewGuid();
-
-    private string _imageUrl = "";
-    private string _imageFileName = "";
 
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -86,27 +86,26 @@ public sealed partial class Chat
         EvaluateOptions();
     }
 
-    private async Task UploadFilesAsync(IBrowserFile file)
-    {       
-        _files.Add(file);
-        var buffer = new byte[file.Size];
-        await file.OpenReadStream(8192000).ReadAsync(buffer);
-        var imageContent = Convert.ToBase64String(buffer);
-        _imageUrl = $"data:{file.ContentType};base64,{imageContent}";
-        _imageFileName = file.Name;
-        EvaluateOptions();
-    }
 
     private void OnProfileClick(string selection)
     {
         _selectedProfile = selection;
         _selectedProfileSummary = _profiles.FirstOrDefault(x => x.Name == selection);
+        _supportsFileUpload = _selectedProfileSummary.Approach == ProfileApproach.Chat;
         OnClearChat();
     }
-
-    private Task OnAskQuestionAsync(string question)
+    private void OnFileUpload(FileSummary fileSummary)
     {
-        _userQuestion = question;
+        _files.Add(fileSummary);
+    }
+    private void OnModelSelection(bool isPremium)
+    {
+       _gPT4ON = isPremium;
+    }
+    
+    private Task OnAskQuestionAsync(string userInput)
+    {
+        _userQuestion = userInput;
         return OnAskClickedAsync();
     }
 
@@ -135,11 +134,8 @@ public sealed partial class Chat
 
             if (_userUploadProfileSummary != null && SelectedDocuments.Any())
                 options["PROFILE"] = _userUploadProfileSummary.Name;
-
-            if (!string.IsNullOrEmpty(_imageUrl))
-                options["IMAGECONTENT"] = _imageUrl;
  
-            var request = new ChatRequest(_chatId, Guid.NewGuid(), history.ToArray(), SelectedDocuments.Select(x => x.Name), options, Settings.Approach, Settings.Overrides);
+            var request = new ChatRequest(_chatId, Guid.NewGuid(), history.ToArray(), SelectedDocuments.Select(x => x.Name), _files, options, Settings.Approach, Settings.Overrides);
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming")
             {
                 Headers = { { "Accept", "application/json" } },
@@ -235,7 +231,8 @@ public sealed partial class Chat
         _selectedDocument = "";
         SelectedDocuments.Clear();
         _chatId = Guid.NewGuid();
-        _imageUrl = string.Empty;
+        _files.Clear();
+
         EvaluateOptions();
     }
 
@@ -244,12 +241,12 @@ public sealed partial class Chat
         _showProfiles = true;
         _showDocumentUpload = true;
         _showPictureUpload = true;
-        if (_profiles.Count() < 1 || !string.IsNullOrEmpty(_selectedDocument) || !string.IsNullOrEmpty(_imageUrl))
+        if (_profiles.Count() < 1 || !string.IsNullOrEmpty(_selectedDocument))
         {
             _showProfiles = false;
         }
 
-        if (!AppConfiguration.ShowFileUploadSelection || !string.IsNullOrEmpty(_imageUrl))
+        if (!AppConfiguration.ShowFileUploadSelection)
             _showDocumentUpload = false;
 
         if (_selectedProfileSummary.Approach != ProfileApproach.Chat || !string.IsNullOrEmpty(_selectedDocument))
