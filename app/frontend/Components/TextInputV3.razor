@@ -1,23 +1,40 @@
 ﻿<MudPaper Elevation="25" Class="pl-4 pt-4 pr-4 pb-0" Style="">
     <MudStack>
-    <MudTextField T="string"
-                  AutoFocus="true"
-                  Immediate=true 
-                  MaxLines=5 Disabled=@Disabled 
-                  AutoGrow="true"
-                  Placeholder="Enter your message..." Class="mt-n4 pl-2" OnKeyUp="@OnKeyUpAsync" @bind-Value="@Value" />
-    
-    @if (!string.IsNullOrEmpty(ImageUrl) && ImageUrl.Contains("png"))
-    {
-        <MudImage Src="@ImageUrl" Alt="Image" Elevation="25" Width="100" Height="75" Class="rounded-lg ma-4" />
-    }
+        @if (_files.Any())
+        {
+            <MudStack Row="true">
+                @foreach (var file in _files)
+                {
+                    <MudImage Src="@file.DataUrl" Alt="Image" Elevation="5" Width="100" Height="75" Class="rounded-lg ma-4" />
+                }
+            </MudStack>
+        }
 
-            <MudToolBar DisableGutters="true" Class="mt-n4 pb-0">
-               <MudIconButton Class="pa-2"  Size="Size.Small" Icon=@Icons.Material.Filled.AttachFile aria-label="Attach file or picture" OnClick="OnAskClickedAsync" Disabled=@Disabled></MudIconButton>
-               <MudToggleIconButton Class="pa-2" Icon="@Icons.Material.Filled.ToggleOff" Color="@Color.Default" Title="Off" ToggledIcon="@Icons.Material.Filled.ToggleOn" ToggledColor="@Color.Success" ToggledTitle="On" />
-               <MudSpacer />
-              <MudIconButton Class="pa-2" Size="Size.Small" Icon=@Icons.Material.Outlined.Send Color="Color.Secondary" OnClick="OnAskClickedAsync" Disabled=@Disabled></MudIconButton>
-              <MudIconButton Class="pa-2" Size="Size.Small" Icon=@Icons.Material.Filled.Cancel Color="Color.Secondary" ButtonType="ButtonType.Reset" OnClick="@OnClearChatAsync" Disabled=@Disabled />
-            </MudToolBar>
+        <MudTextField T="string"
+                      AutoFocus="true"
+                      Immediate=true 
+                      MaxLines=5 Disabled=@Disabled 
+                      AutoGrow="true"
+                      Placeholder="Enter your message..." Class="mt-n4 pl-2" OnKeyUp="@OnKeyUpAsync" @bind-Value="@UserQuestion" />
+    
+        <MudToolBar DisableGutters="true" Class="mt-n4 pb-0">     
+            @if (SupportsFileUpload)
+            {
+                 <MudFileUpload T="IBrowserFile" FilesChanged="UploadFilesAsync" Style="margin-top: 0px">
+                    <ButtonTemplate>
+                        <MudIconButton Class="pa-2" Size="Size.Small" HtmlTag="label" Color="Color.Primary" Icon="@Icons.Material.Filled.AttachFile" for="@context.Id"></MudIconButton>
+                    </ButtonTemplate>
+                </MudFileUpload>
+            }
+            @if (AppConfiguration.ShowPremiumAOAIToggleSelection)
+            {
+                <MudToggleIconButton Class="pa-2" Icon="@Icons.Material.Filled.ToggleOff" Color="@Color.Default" ToggledIcon="@Icons.Material.Filled.ToggleOn" ToggledColor="@Color.Success" Disabled=@Disabled ToggledChanged="OnModelSelectionAsync" />
+
+                <span>GPT-4</span>
+            }
+            <MudSpacer />
+            <MudIconButton Class="pa-2" Size="Size.Small" Icon=@Icons.Material.Outlined.Send Color="Color.Secondary" OnClick="OnAskClickedAsync" Disabled=@Disabled></MudIconButton>
+            <MudIconButton Class="pa-2" Size="Size.Small" Icon=@Icons.Material.Filled.Cancel Color="Color.Secondary" ButtonType="ButtonType.Reset" OnClick="@OnClearChatAsync" Disabled=@Disabled />
+        </MudToolBar>
     </MudStack>
 </MudPaper>
