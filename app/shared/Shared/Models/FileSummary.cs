@@ -8,4 +8,4 @@ using System.Threading.Tasks;
 
 namespace Shared.Models;
 
-public record FileSummary(string DataUrl, string fileName);
+public record FileSummary(string DataUrl, string FileName, string ContentType);

@@ -5,7 +5,20 @@
             <MudStack Row="true">
                 @foreach (var file in _files)
                 {
-                    <MudImage Src="@file.DataUrl" Alt="Image" Elevation="5" Width="100" Height="75" Class="rounded-lg ma-4" />
+                    if (file.ContentType == "image/jpeg" || file.ContentType == "image/png")
+                    {
+                        <MudImage Src="@file.DataUrl" Alt="Image" Elevation="5" Width="75" Height="50" Class="rounded-lg ma-4" />
+                    }
+
+                    @if (file.ContentType == "application/pdf")
+                    {
+                        <MudChip T="string" Icon="@Icons.Material.Filled.PictureAsPdf" IconColor="Color.Primary">@file.FileName</MudChip>
+                    }
+
+                    @if (file.ContentType == "text/plain" || file.ContentType == "text/csv" || file.ContentType == "text/richtext" || file.ContentType == "text/markdown" || file.ContentType == "text/xml")
+                    {
+                        <MudChip T="string" Icon="@Icons.Material.Filled.InsertDriveFile" IconColor="Color.Primary">@file.FileName</MudChip>
+                    }
                 }
             </MudStack>
         }
