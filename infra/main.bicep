@@ -54,6 +54,7 @@ param searchContentIndex string = 'manuals'
 @description('Name of the virtual network to use for the app. If empty, the app will be created without virtual network integration.')
 param virtualNetworkName string
 
+<<<<<<< HEAD
 param virtualNetworkResourceGroupName string
 
 param containerAppSubnetName string
@@ -63,6 +64,11 @@ param containerAppSubnetAddressPrefix string
 
 param privateEndpointSubnetName string
 
+=======
+@description('Address prefix for the container app subnet')
+param containerAppSubnetAddressPrefix string
+
+>>>>>>> main
 @description('Address prefix for the private endpoint subnet')
 param privateEndpointSubnetAddressPrefix string
 

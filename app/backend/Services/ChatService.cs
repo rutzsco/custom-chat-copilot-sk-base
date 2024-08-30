@@ -10,6 +10,7 @@ using MinimalApi.Services.ChatHistory;
 using MinimalApi.Services.Profile;
 using MinimalApi.Services.Profile.Prompts;
 using Shared.Models;
+using UglyToad.PdfPig.Graphics;
 
 namespace MinimalApi.Services;
 
@@ -46,36 +47,34 @@ internal sealed class ChatService : IChatService
         var userMessage = await PromptService.RenderPromptAsync(kernel, PromptService.GetPromptByName(PromptService.ChatSimpleUserPrompt), context);
         context["UserMessage"] = userMessage;
 
-        if (request.OptionFlags.ImageContentExists())
+
+    
+        if (request.FileUploads.Any())
         {
-            var imageString = request.OptionFlags.GetImageContent();
-            DataUriParser parser = new DataUriParser(imageString);
-            if (parser.MediaType == "image/jpeg" || parser.MediaType == "image/png")
+            var chatMessageContentItemCollection = new ChatMessageContentItemCollection();
+            chatMessageContentItemCollection.Add(new TextContent(userMessage));
+
+            foreach (var file in request.FileUploads)
             {
-                chatHistory.AddUserMessage(
-                [
-                   new TextContent(userMessage),
-                   new ImageContent(parser.Data, parser.MediaType) 
-                ]);
+                DataUriParser parser = new DataUriParser(file.DataUrl);
+                if (parser.MediaType == "image/jpeg" || parser.MediaType == "image/png")
+                {
+                    chatMessageContentItemCollection.Add(new ImageContent(parser.Data, parser.MediaType));
+                }
+                else if (parser.MediaType == "application/pdf")
+                {
+                    string pdfData = PDFTextExtractor.ExtractTextFromPdf(parser.Data);
+                    chatMessageContentItemCollection.Add(new TextContent(pdfData));
+                }
+                else
+                {
+                    string csvData = System.Text.Encoding.UTF8.GetString(parser.Data);
+                    chatMessageContentItemCollection.Add(new TextContent(csvData));
+
+                }
             }
-            else if (parser.MediaType == "application/pdf")
-            {
-                string pdfData = PDFTextExtractor.ExtractTextFromPdf(parser.Data);
-                chatHistory.AddUserMessage(
-                [
-                   new TextContent(pdfData),
-                   new TextContent(userMessage)
-                ]);
-            }
-            else
-            {
-                string csvData = System.Text.Encoding.UTF8.GetString(parser.Data);
-                chatHistory.AddUserMessage(
-                [
-                   new TextContent(csvData),
-                   new TextContent(userMessage)
-                ]);
-            }
+
+            chatHistory.AddUserMessage(chatMessageContentItemCollection);
         }
         else
         {

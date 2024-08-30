@@ -174,7 +174,7 @@ internal static class WebApplicationExtensions
         {
             ArgumentNullException.ThrowIfNull(profile.RAGSettings, "Profile RAGSettings is null");
 
-            var selectedDocument = request.SelectedFiles.FirstOrDefault();
+            var selectedDocument = request.SelectedUserCollectionFiles.FirstOrDefault();
             var documents = await documentService.GetDocumentUploadsAsync(userInfo);
             var document = documents.FirstOrDefault(d => d.SourceName == selectedDocument);
 
