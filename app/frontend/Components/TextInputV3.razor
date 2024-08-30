@@ -35,7 +35,7 @@
             {
                  <MudFileUpload T="IBrowserFile" FilesChanged="UploadFilesAsync" Style="margin-top: 0px">
                     <ButtonTemplate>
-                        <MudIconButton Class="pa-2" Size="Size.Small" HtmlTag="label" Color="Color.Primary" Icon="@Icons.Material.Filled.AttachFile" for="@context.Id"></MudIconButton>
+                        <MudIconButton Style="color: #616161" Class="pa-2" Size="Size.Small" HtmlTag="label"  Icon="@Icons.Material.Filled.AttachFile" for="@context.Id"></MudIconButton>
                     </ButtonTemplate>
                 </MudFileUpload>
             }
@@ -46,8 +46,8 @@
                 <span>GPT-4</span>
             }
             <MudSpacer />
+            <MudIconButton Style="color: #616161" Class="pa-2" Size="Size.Small" Icon=@Icons.Material.Filled.Cancel ButtonType="ButtonType.Reset" OnClick="@OnClearChatAsync" Disabled=@Disabled />
             <MudIconButton Class="pa-2" Size="Size.Small" Icon=@Icons.Material.Outlined.Send Color="Color.Secondary" OnClick="OnAskClickedAsync" Disabled=@Disabled></MudIconButton>
-            <MudIconButton Class="pa-2" Size="Size.Small" Icon=@Icons.Material.Filled.Cancel Color="Color.Secondary" ButtonType="ButtonType.Reset" OnClick="@OnClearChatAsync" Disabled=@Disabled />
         </MudToolBar>
     </MudStack>
 </MudPaper>
