@@ -1,39 +1,60 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-      "environmentName": {
-        "value": "${AZURE_ENV_NAME}"
-      },
-      "location": {
-        "value": "${AZURE_LOCATION}"
-      },
-      "backendExists": {
-        "value": "${SERVICE_WEB_RESOURCE_EXISTS=false}"
-      },
-      "backendDefinition": {
-        "value": {
-          "settings": [
-          ]
-        }
-      },
-      "principalId": {
-        "value": "${AZURE_PRINCIPAL_ID}"
-      },
-      "virtualNetworkName": {
-        "value": "${AZURE_VNET_NAME}"
-      },
-      "containerAppSubnetAddressPrefix": {
-        "value": "10.0.0.0/23"
-      },
-      "privateEndpointSubnetAddressPrefix": {
-        "value": "10.0.2.0/26"
-      },
-      "azureMonitorPrivateLinkScopeName": {
-        "value": "${AZURE_MONITOR_PRIVATE_LINK_SCOPE_NAME}"
-      },
-      "azureMonitorPrivateLinkScopeResourceGroupName": {
-        "value": "${AZURE_MONITOR_PRIVATE_LINK_SCOPE_RESOURCE_GROUP_NAME}"
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "${AZURE_ENV_NAME}"
+    },
+    "location": {
+      "value": "${AZURE_LOCATION}"
+    },
+    "backendExists": {
+      "value": "${SERVICE_WEB_RESOURCE_EXISTS=false}"
+    },
+    "backendDefinition": {
+      "value": {
+        "settings": []
       }
+    },
+    "principalId": {
+      "value": "${AZURE_PRINCIPAL_ID}"
+    },
+    "virtualNetworkName": {
+      "value": "${AZURE_VNET_NAME}"
+    },
+    "virtualNetworkResourceGroupName": {
+      "value": "${AZURE_VNET_RESOURCE_GROUP_NAME}"
+    },
+    "containerAppSubnetName": {
+      "value": "${AZURE_CONTAINER_APP_SUBNET_NAME}"
+    },
+    "containerAppSubnetAddressPrefix": {
+      "value": "${AZURE_CONTAINER_APP_SUBNET_ADDRESS_PREFIX}"
+    },
+    "privateEndpointSubnetName": {
+      "value": "${AZURE_PRIVATE_ENDPOINT_SUBNET_NAME}"
+    },
+    "privateEndpointSubnetAddressPrefix": {
+      "value": "${AZURE_PRIVATE_ENDPOINT_SUBNET_ADDRESS_PREFIX}"
+    },
+    "azureMonitorPrivateLinkScopeName": {
+      "value": "${AZURE_MONITOR_PRIVATE_LINK_SCOPE_NAME}"
+    },
+    "azureMonitorPrivateLinkScopeResourceGroupName": {
+      "value": "${AZURE_MONITOR_PRIVATE_LINK_SCOPE_RESOURCE_GROUP_NAME}"
+    },
+    "appContainerAppEnvironmentWorkloadProfileName": {
+      "value": "app"
+    },
+    "containerAppEnvironmentWorkloadProfiles": {
+      "value": [
+        {
+          "name": "app",
+          "workloadProfileType": "D4",
+          "minimumCount": 1,
+          "maximumCount": 10
+        }
+      ]
     }
+  }
 }

@@ -54,8 +54,14 @@ param searchContentIndex string = 'manuals'
 @description('Name of the virtual network to use for the app. If empty, the app will be created without virtual network integration.')
 param virtualNetworkName string
 
+param virtualNetworkResourceGroupName string
+
+param containerAppSubnetName string
+
 @description('Address prefix for the container app subnet')
 param containerAppSubnetAddressPrefix string
+
+param privateEndpointSubnetName string
 
 @description('Address prefix for the private endpoint subnet')
 param privateEndpointSubnetAddressPrefix string
@@ -65,6 +71,12 @@ param azureMonitorPrivateLinkScopeName string
 
 @description('Resource group name of the Azure Monitor private link scope')
 param azureMonitorPrivateLinkScopeResourceGroupName string
+
+@description('Workload profiles for the Container Apps environment')
+param containerAppEnvironmentWorkloadProfiles array = []
+
+@description('Name of the Container Apps Environment workload profile to use for the app')
+param appContainerAppEnvironmentWorkloadProfileName string
 
 // Tags that should be applied to all resources.
 // 
@@ -118,13 +130,14 @@ module virtualNetwork './app/virtual-network.bicep' = if(!empty(virtualNetworkNa
   params: {
     virtualNetworkName: virtualNetworkName
     location: location
-    containerAppSubnetName: 'container-app'
+    containerAppSubnetName: containerAppSubnetName
     containerAppSubnetAddressPrefix: containerAppSubnetAddressPrefix
     containerAppSubnetNsgName: '${abbrs.networkNetworkSecurityGroups}container-app-${resourceToken}'
-    privateEndpointSubnetName: 'private-endpoint'
+    privateEndpointSubnetName: privateEndpointSubnetName
     privateEndpointSubnetAddressPrefix: privateEndpointSubnetAddressPrefix
     privateEndpointSubnetNsgName: '${abbrs.networkNetworkSecurityGroups}private-endpoint-${resourceToken}'
   }
+  scope: resourceGroup(virtualNetworkResourceGroupName)
 }
 
 module registry './app/registry.bicep' = {
@@ -176,6 +189,7 @@ module appsEnv './app/apps-env.bicep' = {
     applicationInsightsName: monitoring.outputs.applicationInsightsName
     logAnalyticsWorkspaceName: monitoring.outputs.logAnalyticsWorkspaceName
     containerAppSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.containerAppSubnetId : ''
+    containerAppEnvironmentWorkloadProfiles: containerAppEnvironmentWorkloadProfiles
   }
 }
 
@@ -197,6 +211,10 @@ module storageAccount './app/storage-account.bicep' = {
     allowBlobPublicAccess: !empty(virtualNetworkName) ? false : true
     privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
     privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.storageStorageAccounts}${resourceToken}': ''
+    networkAcls: {
+      bypass: 'AzureServices'
+      defaultAction: !empty(virtualNetworkName) ? 'Deny' : 'Allow'
+    }
   }
 }
 
@@ -294,6 +312,7 @@ module app './app/app.bicep' = {
     tags: tags
     applicationInsightsName: monitoring.outputs.applicationInsightsName
     containerAppsEnvironmentName: appsEnv.outputs.name
+    containerAppsEnvironmentWorkloadProfileName: appContainerAppEnvironmentWorkloadProfileName
     containerRegistryName: registry.outputs.name
     exists: backendExists
     appDefinition: appDefinition

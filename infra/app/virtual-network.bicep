@@ -19,6 +19,14 @@ resource containerAppSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-01-0
     networkSecurityGroup: {
       id: containerAppSubnetNsg.id
     }
+    delegations:[
+      {
+        name: 'Microsoft.App/environments'
+        properties: {
+          serviceName: 'Microsoft.App/environments'
+        }
+      }
+    ]
   }
 }
 
