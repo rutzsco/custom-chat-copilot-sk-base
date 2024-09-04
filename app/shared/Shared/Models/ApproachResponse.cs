@@ -10,7 +10,7 @@ public record ResponseContext(string Profile, SupportingContentRecord[]? DataPoi
 
 
 public record ApproachResponse(
-    string Answer,
-    string CitationBaseUrl,
-    ResponseContext Context,
+    string? Answer,
+    string? CitationBaseUrl,
+    ResponseContext? Context,
     string? Error = null);

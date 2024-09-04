@@ -71,7 +71,7 @@ public sealed partial class Chat
         _selectedProfile = _profiles.First().Name;
         _selectedProfileSummary = _profiles.First();
 
-        //StateHasChanged();
+        StateHasChanged();
 
         if (AppConfiguration.ShowFileUploadSelection)
         {
@@ -109,6 +109,12 @@ public sealed partial class Chat
         return OnAskClickedAsync();
     }
 
+    private async Task OnRetryQuestionAsync()
+    {
+        _questionAndAnswerMap.Remove(_currentQuestion);
+        await OnAskClickedAsync();
+    }
+
     private async Task OnAskClickedAsync()
     {
         if (string.IsNullOrWhiteSpace(_userQuestion))
@@ -123,7 +129,9 @@ public sealed partial class Chat
 
         try
         {
-            var history = _questionAndAnswerMap.Where(x => x.Value is not null).Select(x => new ChatTurn(x.Key.Question, x.Value.Answer)).ToList();
+            var history = _questionAndAnswerMap.Where(x => x.Value is not null)
+                .Select(x => new ChatTurn(x.Key.Question, x.Value.Answer))
+                .ToList();
             history.Add(new ChatTurn(_userQuestion.Trim()));
 
             var options = new Dictionary<string, string>
@@ -133,9 +141,20 @@ public sealed partial class Chat
             };
 
             if (_userUploadProfileSummary != null && SelectedDocuments.Any())
+            {
                 options["PROFILE"] = _userUploadProfileSummary.Name;
- 
-            var request = new ChatRequest(_chatId, Guid.NewGuid(), history.ToArray(), SelectedDocuments.Select(x => x.Name), _files, options, Settings.Approach, Settings.Overrides);
+            }
+
+            var request = new ChatRequest(
+                _chatId,
+                Guid.NewGuid(),
+                history.ToArray(),
+                SelectedDocuments.Select(x => x.Name),
+                _files,
+                options,
+                Settings.Approach,
+                Settings.Overrides);
+
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming")
             {
                 Headers = { { "Accept", "application/json" } },
@@ -149,7 +168,7 @@ public sealed partial class Chat
             using Stream responseStream = await response.Content.ReadAsStreamAsync();
             var responseBuffer = new StringBuilder();
 
-            await foreach (ChatChunkResponse chunk in JsonSerializer.DeserializeAsyncEnumerable<ChatChunkResponse>(responseStream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, DefaultBufferSize = 128 }))
+            await foreach (ChatChunkResponse chunk in JsonSerializer.DeserializeAsyncEnumerable<ChatChunkResponse>(responseStream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, DefaultBufferSize = 32 }))
             {
                 if (chunk == null)
                 {
@@ -175,11 +194,25 @@ public sealed partial class Chat
                 StateHasChanged();
             }
         }
+        catch (HttpRequestException)
+        {
+            _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(string.Empty, null, null, "Error: Unable to get a response from the server.");
+        }
+        catch (JsonException)
+        {
+            _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(string.Empty, null, null, "Error: Failed to parse the server response.");
+        }
+        catch (Exception)
+        {
+            _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(string.Empty, null, null, "An unexpected error occurred.");
+        }
         finally
         {
             _isReceivingResponse = false;
+            StateHasChanged();
         }
     }
+
 
     private void OnSelectedDocumentsChanged()
     {
