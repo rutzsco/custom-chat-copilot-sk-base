@@ -27,18 +27,19 @@ public class SearchLogic<T> where T : IKnowledgeSource
     {
         // Generate the embedding for the query
         var queryEmbeddings = await GenerateEmbeddingsAsync(query, _openAIClient);
+        var ragSettings = arguments.GetProfileRAGSettingsDefinition();
 
         var searchOptions = new SearchOptions
         {
             Size = _documentFilesCount,
             VectorSearch = new()
             {
-                Queries = { new VectorizedQuery(queryEmbeddings.ToArray()) { KNearestNeighborsCount = DefaultSettings.KNearestNeighborsCount, Fields = { _embeddingFieldName } } }
+                Queries = { new VectorizedQuery(queryEmbeddings.ToArray()) { KNearestNeighborsCount = ragSettings.KNearestNeighborsCount, Fields = { _embeddingFieldName }, Exhaustive = ragSettings.Exhaustive } }
             }
         };
 
 
-        var ragSettings = arguments.GetProfileRAGSettingsDefinition();
+        
         if (ragSettings.UseSemanticRanker)
         {
             searchOptions.SemanticSearch = new SemanticSearchOptions

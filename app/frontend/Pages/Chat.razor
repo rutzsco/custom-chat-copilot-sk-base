@@ -42,7 +42,7 @@
                                 else if (answer is { Error.Length: > 0 })
                                 {
                                     <MudBadge Origin="Origin.TopLeft" Overlap="true" Color="Color.Error" Icon="@Icons.Material.Filled.Error">
-                                        <AnswerError Error="@answer" Question="@question" OnRetryClicked="@OnAskQuestionAsync" />
+                                        <AnswerError Error="@answer" Question="@question" OnRetryClicked="@OnRetryQuestionAsync" />
                                     </MudBadge>
                                 }
                                 else

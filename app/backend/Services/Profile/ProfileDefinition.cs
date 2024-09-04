@@ -89,6 +89,10 @@ public class RAGSettingsSummary
 
     public required bool UseSemanticRanker { get; set; }
     public string? SemanticConfigurationName { get; set; }
+
+    public required int KNearestNeighborsCount { get; set; } = 3;
+    public required bool Exhaustive { get; set; } = false;
+
 }
 
 public class DocumentCollectionRAGSettings
