@@ -60,6 +60,8 @@ else
     } 
 }
 
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
@@ -92,5 +94,7 @@ app.Use(next => context =>
 app.MapFallbackToFile("index.html");
 
 app.MapApi();
+
+app.MapHealthChecks("/healthz");
 
 app.Run();

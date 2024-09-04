@@ -101,6 +101,30 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
             cpu: json('1.0')
             memory: '2.0Gi'
           }
+          probes: [
+            {
+              type: 'Liveness'
+              httpGet: {
+                path: '/healthz'
+                port: 8080
+              }
+            }
+            {
+              type: 'Readiness'
+              httpGet: {
+                path: '/healthz'
+                port: 8080
+              }
+            }
+            {
+              type: 'Startup'
+              httpGet: {
+                path: '/healthz'
+                port: 8080
+              }
+            }
+
+          ]
         }
       ]
       scale: {
