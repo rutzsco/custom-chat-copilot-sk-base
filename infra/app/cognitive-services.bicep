@@ -22,7 +22,7 @@ resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
     networkAcls: {
       defaultAction: !empty(privateEndpointSubnetId) ? 'Deny' : 'Allow'
     }
-    customSubDomainName: 'cognitiveservices'
+    customSubDomainName: name
   }
   sku: sku
 }
