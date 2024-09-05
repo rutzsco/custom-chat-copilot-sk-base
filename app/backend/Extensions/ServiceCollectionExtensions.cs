@@ -227,6 +227,7 @@ internal static class ServiceCollectionExtensions
     {
         services.AddHealthChecks().AddCheck<CosmosDbReadinessHealthCheck>("CosmosDB Readiness Health Check", failureStatus: HealthStatus.Degraded, tags: ["readiness"]);
         services.AddHealthChecks().AddCheck<AzureStorageReadinessHealthCheck>("Azure Storage Readiness Health Check", failureStatus: HealthStatus.Degraded, tags: ["readiness"]);
+        //TODO: this is commented out until a refactor of the profiles is done. The Search Index must exist in order to check its readiness.
         //services.AddHealthChecks().AddCheck<AzureSearchReadinessHealthCheck>("Azure Search Readiness Health Check", failureStatus: HealthStatus.Degraded, tags: ["readiness"]);
 
         return services;
@@ -238,17 +239,17 @@ internal static class ServiceCollectionExtensions
         {
             Predicate = healthCheck => healthCheck.Tags.Contains("readiness"),
             ResponseWriter = WriteResponse
-        });//.RequireHost($"*:{AppConfiguration.Port}");
+        });
 
         app.MapHealthChecks("/healthz/live", new HealthCheckOptions
         {
             Predicate = _ => false
-        });//.RequireHost($"*:{AppConfiguration.Port}");
+        });
 
         app.MapHealthChecks("/healthz/startup", new HealthCheckOptions
         {
             Predicate = _ => false
-        });//.RequireHost($"*:{AppConfiguration.Port}");
+        });
 
         return app;
     }
