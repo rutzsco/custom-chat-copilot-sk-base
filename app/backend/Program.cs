@@ -60,7 +60,6 @@ else
     } 
 }
 
-builder.Services.AddSingleton<CosmosDbReadinessHealthCheck>();
 builder.Services.AddCustomHealthChecks();
 
 var app = builder.Build();
