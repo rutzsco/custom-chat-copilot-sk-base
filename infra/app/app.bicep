@@ -21,6 +21,7 @@ var env = map(filter(appSettingsArray, i => i.?secret == null), i => {
   name: i.name
   value: i.value
 })
+var port = 8080
 
 resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existing = {
   name: containerRegistryName
@@ -59,7 +60,7 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
     configuration: {
       ingress:  {
         external: true
-        targetPort: 8080
+        targetPort: port
         transport: 'auto'
       }
       registries: [
@@ -89,7 +90,7 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
             }
             {
               name: 'PORT'
-              value: '8080'
+              value: '${port}'
             }
           ],
           env,
@@ -101,6 +102,29 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
             cpu: json('1.0')
             memory: '2.0Gi'
           }
+          probes: [
+            {
+              type: 'Liveness'
+              httpGet: {
+                path: '/healthz/live'
+                port: port
+              }
+            }
+            {
+              type: 'Readiness'
+              httpGet: {
+                path: '/healthz/ready'
+                port: port
+              }
+            }
+            {
+              type: 'Startup'
+              httpGet: {
+                path: '/healthz/startup'
+                port: port
+              }
+            }
+          ]
         }
       ]
       scale: {

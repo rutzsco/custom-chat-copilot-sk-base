@@ -49,8 +49,6 @@ param azureEmbeddingModelName string = 'text-embedding-ada-002'
 @description('Capacity of the embedding deployment. Default: 30')
 param embeddingDeploymentCapacity int = 30
 
-param searchContentIndex string = 'manuals'
-
 @description('Name of the virtual network to use for the app. If empty, the app will be created without virtual network integration.')
 param virtualNetworkName string
 
@@ -272,10 +270,6 @@ var appDefinition = {
     {
       name: 'AzureSearchServiceEndpoint'
       value: search.outputs.endpoint
-    }
-    {
-      name: 'AzureSearchContentIndex'
-      value: searchContentIndex
     }
     {
       name: 'AOAIPremiumServiceEndpoint'
