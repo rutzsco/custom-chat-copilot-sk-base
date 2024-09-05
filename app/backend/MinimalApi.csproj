@@ -20,6 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Services\Profile\Profiles-rutzsco.json" />
     <Content Remove="Services\Profile\profiles.json" />
     <Content Remove="Services\Profile\profiles.local.json" />
   </ItemGroup>
@@ -37,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Services\Profile\profiles.local.json" />
+    <EmbeddedResource Include="Services\Profile\profiles-rutzsco.json" />
     <EmbeddedResource Include="Services\Profile\profiles.json" />
     <EmbeddedResource Include="Services\Profile\Prompts\CSVCopilotSystemPrompt.txt" />
     <EmbeddedResource Include="Services\Profile\Prompts\AutoBodyCopilotSystemPromptV2.txt" />

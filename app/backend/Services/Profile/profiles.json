@@ -1,51 +1,5 @@
 [
   {
-    "Name": "Auto Service Advisor",
-    "Id": "AutoServiceAdvisor",
-    "Approach": "RAG",
-    "SecurityModel": "None",
-    "SecurityModelGroupMembership": [ "LocalDevUser" ],
-    "SampleQuestions": [
-      "How do I change the oil?",
-      "What are the different maintenance intervals?",
-      "What is the air filter part number?"
-    ],
-    "RAGSettings": {
-      "GenerateSearchQueryPluginName": "GenerateSearchQuery",
-      "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
-      "DocumentRetrievalPluginName": "DocumentRetrieval",
-      "DocumentRetrievalPluginQueryFunctionName": "KwiecienV2",
-      "DocumentRetrievalIndexName": "manuals-auto-ci-20240528182950",
-      "ChatSystemMessageFile": "RAGChatSystemPrompt",
-      "StorageContianer": "manuals-auto-chunks",
-      "CitationUseSourcePage": true,
-      "DocumentRetrievalDocumentCount": 50,
-      "UseSemanticRanker": true,
-      "SemanticConfigurationName": "Default"
-    }
-  },
-  {
-    "Name": "Boat Service Advisor",
-    "Id": "BoatServiceAdvisor",
-    "Approach": "RAG",
-    "SecurityModel": "None",
-    "SecurityModelGroupMembership": [ "LocalDevUser" ],
-    "SampleQuestions": [
-      "How do I change the oil?",
-      "How do I winterize?",
-      "How calibrate the gas gauge?"
-    ],
-    "RAGSettings": {
-      "GenerateSearchQueryPluginName": "GenerateSearchQuery",
-      "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
-      "DocumentRetrievalPluginName": "DocumentRetrieval",
-      "DocumentRetrievalPluginQueryFunctionName": "KwiecienV2",
-      "DocumentRetrievalIndexName": "manuals-boat-ci-20240708121734",
-      "ChatSystemMessageFile": "RAGChatSystemPrompt",
-      "StorageContianer": "manuals-boat"
-    }
-  },
-  {
     "Name": "General",
     "Id": "General",
     "Approach": "Chat",
@@ -61,41 +15,10 @@
     "Id": "AutoBodyDamageAdvisor",
     "Approach": "Chat",
     "SecurityModel": "None",
-    "ChatSystemMessageFile": "AutoBodyCopilotSystemPrompt",
+    "ChatSystemMessageFile": "AutoBodyCopilotSystemPromptV2",
     "SampleQuestions": [
       "What is the brand and model of this vehicle?",
       "Classify this vehicle into 'Motorbike', 'SUV', 'Sedan', 'Truck', 'Convertible'"
     ]
-  },
-  {
-    "Name": "Document Chat",
-    "Id": "DocumentChat",
-    "Approach": "UserDocumentChat",
-    "SecurityModel": "None",
-    "SampleQuestions": [
-    ],
-    "RAGSettings": {
-      "GenerateSearchQueryPluginName": "GenerateSearchQuery",
-      "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
-      "DocumentRetrievalPluginName": "DocumentRetrieval",
-      "DocumentRetrievalPluginQueryFunctionName": "KwiecienV2",
-      "ChatSystemMessageFile": "RAGChatSystemPrompt",
-      "StorageContianer": "content"
-    }
-  },
-  {
-    "Name": "Weather Advisor",
-    "Id": "WeatherAdvisor",
-    "Approach": "EndpointAssistant",
-    "SecurityModel": "None",
-    "SecurityModelGroupMembership": [ "LocalDevUser" ],
-    "SampleQuestions": [
-      "Q1?",
-      "Q1?"
-    ],
-    "AssistantEndpointSettings": {
-      "APIEndpointSetting": "WeatherAssistantAPIEndpoint",
-      "APIEndpointKeySetting": "WeatherAssistantAPIEndpointKey"
-    }
   }
 ]
