@@ -15,6 +15,8 @@ public static class AppConfiguration
     public static string UserDocumentUploadBlobStorageContentContainer { get; private set; }
     public static string UserDocumentUploadBlobStorageExtractContainer { get; private set; }
 
+    public static int Port { get; private set; }
+
     public static void Load(IConfiguration configuration)
     {
         SearchIndexDocumentCount = configuration.GetValue<int>("SearchIndexDocumentCount", 15);
@@ -26,6 +28,7 @@ public static class AppConfiguration
         UserDocumentUploadBlobStorageContentContainer = configuration.GetValue<string>("UserDocumentUploadBlobStorageContentContainer", "content");
 
         UserDocumentUploadBlobStorageExtractContainer = configuration.GetValue<string>("UserDocumentUploadBlobStorageExtractContainer", "content-extract");
+        Port = configuration.GetValue<int>("PORT", 8080);
     }
 }
 
@@ -50,5 +53,9 @@ public static class AppConfigurationSetting
     // Ingestion Pipeline
     public static string IngestionPipelineAPI { get; } = "IngestionPipelineAPI";
     public static string IngestionPipelineAPIKey { get; } = "IngestionPipelineAPIKey";
-    
+
+    public static string Port { get; } = "PORT";
+
+    public static string ApplicationInsightsConnectionString { get; } = "APPLICATIONINSIGHTS_CONNECTION_STRING";
+
 }

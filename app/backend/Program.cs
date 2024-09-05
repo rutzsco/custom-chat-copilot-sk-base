@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System.Configuration;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.DataProtection;
 using MinimalApi;
+using MinimalApi.Services.HealthChecks;
 using MinimalApi.Services.Profile;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -38,7 +38,7 @@ else
     //static string? GetEnvVar(string key) => Environment.GetEnvironmentVariable(key);
 
     // set application telemetry
-    if (GetEnvVar("APPLICATIONINSIGHTS_CONNECTION_STRING") is string appInsightsConnectionString && !string.IsNullOrEmpty(appInsightsConnectionString))
+    if (GetEnvVar(AppConfigurationSetting.ApplicationInsightsConnectionString) is string appInsightsConnectionString && !string.IsNullOrEmpty(appInsightsConnectionString))
     {
         builder.Services.AddApplicationInsightsTelemetry((option) =>
         {
@@ -60,7 +60,8 @@ else
     } 
 }
 
-builder.Services.AddHealthChecks();
+builder.Services.AddSingleton<CosmosDbReadinessHealthCheck>();
+builder.Services.AddCustomHealthChecks();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
@@ -95,6 +96,7 @@ app.MapFallbackToFile("index.html");
 
 app.MapApi();
 
-app.MapHealthChecks("/healthz");
+app.MapCustomHealthChecks();
 
 app.Run();
+
