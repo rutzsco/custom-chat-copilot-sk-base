@@ -13,7 +13,7 @@ using Shared.Models;
 namespace MinimalApi.Services.ChatHistory;
 
 
-public class DocumentService
+public class DocumentService : IDocumentService
 {
     private readonly CosmosClient _cosmosClient;
     private readonly Container _cosmosContainer;
@@ -25,7 +25,7 @@ public class DocumentService
     {
         _cosmosClient = cosmosClient;
         _blobStorageService = blobStorageService;
-        
+
         if (configuration[AppConfigurationSetting.IngestionPipelineAPI] != null)
         {
             _httpClient = httpClient;
@@ -65,7 +65,7 @@ public class DocumentService
 
         var indexName = await response.Content.ReadAsStringAsync();
 
-        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, fileSummary.FileName, fileSummary.FileName, contentType, fileSummary.Size, indexName, user.SessionId, DocumentProcessingStatus.New);   
+        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, fileSummary.FileName, fileSummary.FileName, contentType, fileSummary.Size, indexName, user.SessionId, DocumentProcessingStatus.New);
         await _cosmosContainer.CreateItemAsync(document, partitionKey: new PartitionKey(document.UserId));
 
         var request = new ProcessingData()

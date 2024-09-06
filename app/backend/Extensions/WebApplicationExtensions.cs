@@ -111,7 +111,7 @@ internal static class WebApplicationExtensions
     }
     private static async Task<IResult> OnPostDocumentAsync(HttpContext context, [FromForm] IFormFileCollection files,
         [FromServices] AzureBlobStorageService service,
-        [FromServices] DocumentService documentService,
+        [FromServices] IDocumentService documentService,
         [FromServices] ILogger<AzureBlobStorageService> logger,
         CancellationToken cancellationToken)
     {
@@ -128,20 +128,20 @@ internal static class WebApplicationExtensions
         var userInfo = context.GetUserInfo();
         return TypedResults.Ok(userInfo);
     }
-    private static async Task<IResult> OnGetUserDocumentsAsync(HttpContext context, DocumentService documentService)
+    private static async Task<IResult> OnGetUserDocumentsAsync(HttpContext context, IDocumentService documentService)
     {
         var userInfo = context.GetUserInfo();
         var documents = await documentService.GetDocumentUploadsAsync(userInfo);
         return TypedResults.Ok(documents.Select(d => new DocumentSummary(d.Id, d.SourceName, d.ContentType, d.Size, d.Status, d.StatusMessage,d.ProcessingProgress, d.Timestamp)));
     }
-    private static async Task<IResult> OnPostChatRatingAsync(HttpContext context, ChatRatingRequest request, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
+    private static async Task<IResult> OnPostChatRatingAsync(HttpContext context, ChatRatingRequest request, IChatHistoryService chatHistoryService, CancellationToken cancellationToken)
     {
         var userInfo = context.GetUserInfo();
         await chatHistoryService.RecordRatingAsync(userInfo, request);
         return Results.Ok();
     }
 
-    private static async Task<IResult> OnPostChatAsync(HttpContext context, ChatRequest request, ReadRetrieveReadChatService chatService, ChatHistoryService chatHistoryService, CancellationToken cancellationToken)
+    private static async Task<IResult> OnPostChatAsync(HttpContext context, ChatRequest request, ReadRetrieveReadChatService chatService, IChatHistoryService chatHistoryService, CancellationToken cancellationToken)
     {
         // Get user information
         var userInfo = context.GetUserInfo();
@@ -161,7 +161,7 @@ internal static class WebApplicationExtensions
         return Results.BadRequest();
     }
 
-    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, ChatHistoryService chatHistoryService, EndpointChatService endpointChatService, DocumentService documentService, [EnumeratorCancellation] CancellationToken cancellationToken)
+    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, IChatHistoryService chatHistoryService, EndpointChatService endpointChatService, IDocumentService documentService, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var userInfo = context.GetUserInfo();
         var profile = request.OptionFlags.GetChatProfile();
@@ -203,14 +203,14 @@ internal static class WebApplicationExtensions
         return ragChatService;
     }
 
-    private static async Task<IEnumerable<ChatHistoryResponse>> OnGetHistoryAsync(HttpContext context, ChatHistoryService chatHistoryService)
+    private static async Task<IEnumerable<ChatHistoryResponse>> OnGetHistoryAsync(HttpContext context, IChatHistoryService chatHistoryService)
     {
         var userInfo = context.GetUserInfo();
         var response = await chatHistoryService.GetMostRecentChatItemsAsync(userInfo);
         return response.AsFeedbackResponse();
     }
 
-    private static async Task<IEnumerable<ChatSessionModel>> OnGetHistoryV2Async(HttpContext context, ChatHistoryService chatHistoryService)
+    private static async Task<IEnumerable<ChatSessionModel>> OnGetHistoryV2Async(HttpContext context, IChatHistoryService chatHistoryService)
     {
         var userInfo = context.GetUserInfo();
         var response = await chatHistoryService.GetMostRecentChatItemsAsync(userInfo);
@@ -226,7 +226,7 @@ internal static class WebApplicationExtensions
     }
 
 
-    private static async Task<IEnumerable<ChatHistoryResponse>> OnGetChatHistorySessionAsync(string chatId, HttpContext context, ChatHistoryService chatHistoryService)
+    private static async Task<IEnumerable<ChatHistoryResponse>> OnGetChatHistorySessionAsync(string chatId, HttpContext context, IChatHistoryService chatHistoryService)
     {
         var userInfo = context.GetUserInfo();
         var response = await chatHistoryService.GetChatHistoryMessagesAsync(userInfo, chatId);
@@ -234,7 +234,7 @@ internal static class WebApplicationExtensions
         return apiResponseModel;
     }
 
-    private static async Task<IEnumerable<ChatHistoryResponse>> OnGetFeedbackAsync(HttpContext context, ChatHistoryService chatHistoryService)
+    private static async Task<IEnumerable<ChatHistoryResponse>> OnGetFeedbackAsync(HttpContext context, IChatHistoryService chatHistoryService)
     {
         var userInfo = context.GetUserInfo();
         var response = await chatHistoryService.GetMostRecentRatingsItemsAsync(userInfo);

@@ -10,9 +10,9 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Identity.Client.Platforms.Features.DesktopOs.Kerberos;
 using MinimalApi.Services.ChatHistory;
 using MinimalApi.Services.HealthChecks;
+using MinimalApi.Services.Documents;
 using MinimalApi.Services.Search;
 using MinimalApi.Services.Skills;
 
@@ -91,14 +91,6 @@ internal static class ServiceCollectionExtensions
 
             return new OpenAIClientFacade(deployedModelName3, kernel3, deployedModelName4, kernel4);
         });
-        services.AddSingleton((sp) => {
-            var config = sp.GetRequiredService<IConfiguration>();
-            var cosmosDBConnectionString = config[AppConfigurationSetting.CosmosDBConnectionString];
-            CosmosClientBuilder configurationBuilder = new CosmosClientBuilder(cosmosDBConnectionString);
-            return configurationBuilder
-                    .Build();
-        }); ;
-
 
         services.AddSingleton<SearchClientFactory>(sp =>
         {
@@ -106,16 +98,32 @@ internal static class ServiceCollectionExtensions
             return new SearchClientFactory(config, null, new AzureKeyCredential(config[AppConfigurationSetting.AzureSearchServiceKey]));
         });
 
-        services.AddSingleton<ChatHistoryService>();
+        // Add ChatHistory and document upload services if the connection string is provided
+        if (string.IsNullOrEmpty(configuration[AppConfigurationSetting.CosmosDBConnectionString]))
+        {
+            services.AddSingleton<IChatHistoryService,ChatHistoryServiceStub>();
+            services.AddSingleton<IDocumentService, DocumentServiceSub>();
+            services.AddHttpClient();
+        }
+        else
+        {
+            services.AddSingleton((sp) => {
+                var config = sp.GetRequiredService<IConfiguration>();
+                var cosmosDBConnectionString = config[AppConfigurationSetting.CosmosDBConnectionString];
+                CosmosClientBuilder configurationBuilder = new CosmosClientBuilder(cosmosDBConnectionString);
+                return configurationBuilder
+                        .Build();
+            }); ;
+            services.AddSingleton<IChatHistoryService, ChatHistoryService>();
+            services.AddSingleton<IDocumentService, DocumentService>();
+            services.AddHttpClient<DocumentService, DocumentService>();
+        }
 
         services.AddSingleton<ChatService>();
         services.AddSingleton<ReadRetrieveReadChatService>();
         services.AddSingleton<ReadRetrieveReadStreamingChatService>();
         services.AddSingleton<EndpointChatService>();
-
         services.AddSingleton<AzureBlobStorageService>();
-        services.AddSingleton<DocumentService>();
-        services.AddHttpClient<DocumentService, DocumentService>();
 
         return services;
     }
@@ -197,7 +205,14 @@ internal static class ServiceCollectionExtensions
             return new SearchClientFactory(config, s_azureCredential);
         });
 
-        services.AddSingleton<ChatHistoryService>();
+        if (string.IsNullOrEmpty(configuration[AppConfigurationSetting.CosmosDBConnectionString]))
+        {
+            services.AddSingleton<IChatHistoryService, ChatHistoryServiceStub>();
+        }
+        else
+        {
+            services.AddSingleton<IChatHistoryService, ChatHistoryService>();
+        }
 
         services.AddSingleton<ChatService>();
         services.AddSingleton<ReadRetrieveReadChatService>();

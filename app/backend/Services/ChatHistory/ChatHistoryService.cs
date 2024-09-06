@@ -7,7 +7,7 @@ using Shared.Models;
 namespace MinimalApi.Services.ChatHistory;
 
 
-public class ChatHistoryService
+public class ChatHistoryService : IChatHistoryService
 {
     private readonly CosmosClient _cosmosClient;
     private readonly Container _cosmosContainer;
@@ -31,7 +31,7 @@ public class ChatHistoryService
     {
         var chatRatingId = chatRatingRequest.MessageId.ToString();
         var partitionKey = new PartitionKey(chatRatingRequest.ChatId.ToString());
-        var response = await _cosmosContainer.ReadItemAsync<ChatMessageRecord>(chatRatingId,partitionKey);
+        var response = await _cosmosContainer.ReadItemAsync<ChatMessageRecord>(chatRatingId, partitionKey);
         var existingChatRating = response.Resource;
 
         var rating = new ChatRating(chatRatingRequest.Feedback, chatRatingRequest.Rating);
