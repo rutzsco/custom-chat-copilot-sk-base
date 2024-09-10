@@ -22,11 +22,11 @@
                       Label="Exclude category" Placeholder="Exclude category" Class="pa-2"
                       @bind-Value="Settings.Overrides.ExcludeCategory" Clearable="true" />
 
-        <MudCheckBox @bind-Checked="@Settings.Overrides.SemanticRanker" Size="Size.Large"
+        <MudCheckBox T="bool" @bind-Checked="@Settings.Overrides.SemanticRanker" Size="Size.Large"
                      Color="Color.Primary" Label="Use semantic ranker for retrieval" />
 
         <MudText Typo="Typo.subtitle1">Retrieval Mode</MudText>
-        <MudRadioGroup Required="true" @bind-SelectedOption="@Settings.Overrides.RetrievalMode" Class="pa-2">
+        <MudRadioGroup T="string" Required="true" @bind-SelectedOption="@Settings.Overrides.RetrievalMode" Class="pa-2">
             <MudRadio T="string" Option="@("Text")" Color="Color.Primary">
                 Text
             </MudRadio>
@@ -37,13 +37,13 @@
                 Vector
             </MudRadio>
         </MudRadioGroup>
-        <MudCheckBox @bind-Checked="@Settings.Overrides.SemanticCaptions" Size="Size.Large"
+        <MudCheckBox T="bool?" @bind-Checked="@Settings.Overrides.SemanticCaptions" Size="Size.Large"
                      Color="Color.Primary" 
                      Label="Use query-contrextual summaries instead of whole documents" />
     
         @if (_supportedSettings is not SupportedSettings.Chat)
         {
-            <MudCheckBox @bind-Checked="@Settings.Overrides.SuggestFollowupQuestions" Size="Size.Large"
+            <MudCheckBox T="bool" @bind-Checked="@Settings.Overrides.SuggestFollowupQuestions" Size="Size.Large"
                          Color="Color.Primary" Label="Suggest follow-up questions"
                          aria-label="Suggest follow-up questions checkbox." />
         }

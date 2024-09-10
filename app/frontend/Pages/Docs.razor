@@ -54,7 +54,7 @@
                                         </div>
                                     </TitleContent>
                                     <ChildContent>
-                                        <MudList>
+                                        <MudList T="string">
                                             @foreach (var file in context ?? new List<IBrowserFile>())
                                             {
                                                 <MudListItem IconColor="Color.Error" @key="@file"
