@@ -4,7 +4,7 @@
 
 <MudGrid Justify="Justify.Center">
     <MudItem id="uploads" xs="12" Class="overflow-x-auto">
-        <MudCard>
+        <MudCard Class="ma-1">
             <MudForm @ref="@_form">
                 <MudCardHeader>
                     <CardHeaderContent>
@@ -22,15 +22,14 @@
                         Each file cannot exceed a file size of @(MaxIndividualFileSize.ToHumanReadableSize())
                     </MudText>
                     <MudFileUpload @ref="_fileUpload" T="IReadOnlyList<IBrowserFile>" Accept=".pdf" MaximumFileCount="5" FilesChanged=@(files => StateHasChanged()) Required="true" RequiredError="You must select at least one file to upload.">
-                        <ButtonTemplate>
+                        <ActivatorContent>
                             <MudButton HtmlTag="label"
                                        Variant="Variant.Filled"
                                        StartIcon="@Icons.Material.Filled.FileOpen"
-                                       Size="Size.Large"
-                                       for="@context">
+                                       Size="Size.Large">
                                 Select Documents
                             </MudButton>
-                        </ButtonTemplate>
+                        </ActivatorContent>
                         <SelectedTemplate>
                             <MudExpansionPanels Class="pt-4" Elevation=2>
                                 @{
@@ -91,8 +90,7 @@
         </MudCard>
     </MudItem>
     <MudItem xs="12">
-        <MudTable Items="@_documents" Dense="true" Hover="true" Bordered="true"
-                  FixedHeader="true" Filter="OnFilter" Elevation="4">
+        <MudTable Items="@_documents" Dense="true" Hover="true" Bordered="true" FixedHeader="true" Filter="OnFilter" Elevation="4" Class="ma-1">
             <ToolBarContent>
                 @if (_isLoadingDocuments)
                 {

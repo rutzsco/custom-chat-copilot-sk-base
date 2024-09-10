@@ -30,13 +30,13 @@
                       AutoGrow="true"
                       Placeholder="Enter your message..." Class="mt-n4 pl-2" OnKeyUp="@OnKeyUpAsync" @bind-Value="@UserQuestion" />
     
-        <MudToolBar DisableGutters="true" Class="mt-n4 pb-0">     
+        <MudToolBar Gutters="false" Class="mt-n4 pb-0">
             @if (SupportsFileUpload)
             {
                  <MudFileUpload T="IBrowserFile" FilesChanged="UploadFilesAsync" Style="margin-top: 0px">
-                    <ButtonTemplate>
-                        <MudIconButton Style="color: #616161" Class="pa-2" Size="Size.Small" HtmlTag="label"  Icon="@Icons.Material.Filled.AttachFile" for="@context.Id"></MudIconButton>
-                    </ButtonTemplate>
+                    <ActivatorContent>
+                        <MudIconButton Style="color: #616161" Class="pa-2" Size="Size.Small" HtmlTag="label"  Icon="@Icons.Material.Filled.AttachFile"></MudIconButton>
+                    </ActivatorContent>
                 </MudFileUpload>
             }
             @if (AppConfiguration.ShowPremiumAOAIToggleSelection)

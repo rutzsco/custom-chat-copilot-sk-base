@@ -23,7 +23,7 @@
                     {
                         <MudStack Justify="Justify.Center" AlignItems="AlignItems.Start" Spacing="4">
                             <MudBadge Origin="Origin.TopLeft" Overlap="true" Color="Color.Secondary" Icon="@Icons.Material.Filled.QuestionMark" Class="d-flex align-self-end">
-                                <MudPaper Class="pa-6 d-flex flex-column" Elevation="3">
+                                <MudPaper Class="ma-1 pa-6 d-flex flex-column" Elevation="3">
                                     <MudText Typo="Typo.body1" Align="Align.End">@question</MudText>
                                     <MudText Typo="Typo.caption" Align="Align.End" Color="Color.Secondary">
                                         @($"Asked at {askedOn:h:mm:ss tt} on {askedOn:M/dd/yy}")
@@ -34,7 +34,7 @@
                                 @if (answer is null)
                                 {
                                     <MudBadge Origin="Origin.TopLeft" Overlap="true" Color="Color.Secondary" Icon="@Icons.Material.Filled.Lightbulb" Class="full-width">
-                                        <MudPaper Class="pa-6" Elevation="3">
+                                        <MudPaper Class="ma-1 pa-6" Elevation="3">
                                             <Loading />
                                         </MudPaper>
                                     </MudBadge>
@@ -89,7 +89,7 @@
                                     <MudButton Style="height: 36px" StartIcon="@Icons.Material.Filled.UploadFile" EndIcon="@Icons.Material.Filled.KeyboardArrowDown">@_selectedDocument</MudButton>
                                 </ActivatorContent>
                                 <ChildContent>
-                                    <MudMenuItem Color="Color.Primary" Href="/documents">Upload File</MudMenuItem>
+                                    <MudMenuItem Href="/documents">Upload File</MudMenuItem>
                                     <MudTable Style="padding: 10px;" T="DocumentSummary" Items="@_userDocuments" MultiSelection="true" @bind-SelectedItems="SelectedDocuments">
                                         <RowTemplate>
                                             <MudTd DataLabel="Nr">@context.Name</MudTd>
@@ -98,22 +98,7 @@
                                 </ChildContent>
                             </MudMenu>
                         }
-
-
-
                      </MudButtonGroup>
- @*                    @if (!string.IsNullOrEmpty(_imageFileName))
-                    {
-                        @if (_imageFileName.Contains(".pdf"))
-                        {
-                            <MudChip T="string" Icon="@Icons.Material.Filled.PictureAsPdf" IconColor="Color.Primary">@_imageFileName</MudChip>
-                        }
-
-                        @if (_imageFileName.Contains(".csv") || _imageFileName.Contains(".txt") || _imageFileName.Contains(".xml"))
-                        {
-                            <MudChip T="string" Icon="@Icons.Material.Filled.InsertDriveFile" IconColor="Color.Primary">@_imageFileName</MudChip>
-                        }
-                    }  *@
                 </MudItem>
                 <MudItem xs="12" lg="12">
                     <TextInputV3 Label="Prompt"

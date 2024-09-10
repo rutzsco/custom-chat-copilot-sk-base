@@ -9,7 +9,7 @@ namespace ClientApp.Pages;
 
 public sealed partial class Chat
 {
-    private const long MaxIndividualFileSize = 1_024L * 1_024;
+    //private const long MaxIndividualFileSize = 1_024L * 1_024;
 
     private MudForm _form = null!;
 
@@ -117,6 +117,8 @@ public sealed partial class Chat
 
     private async Task OnAskClickedAsync()
     {
+        Console.WriteLine($"OnAskClickedAsync: {_userQuestion}");
+
         if (string.IsNullOrWhiteSpace(_userQuestion))
         {
             return;
@@ -152,8 +154,8 @@ public sealed partial class Chat
                 SelectedDocuments.Select(x => x.Name),
                 _files,
                 options,
-                Settings.Approach,
-                Settings.Overrides);
+                Approach.ReadRetrieveRead,
+                null);
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming")
             {
@@ -202,10 +204,11 @@ public sealed partial class Chat
         {
             _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(string.Empty, null, null, "Error: Failed to parse the server response.");
         }
-        catch (Exception)
-        {
-            _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(string.Empty, null, null, "An unexpected error occurred.");
-        }
+        //catch (Exception ex)
+        //{
+        //    Console.WriteLine($"OnAskClickedAsync: {ex}");
+        //    _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(string.Empty, null, null, "An unexpected error occurred.");
+        //}
         finally
         {
             _isReceivingResponse = false;

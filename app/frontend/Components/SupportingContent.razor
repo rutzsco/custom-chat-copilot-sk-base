@@ -1,4 +1,4 @@
-﻿<MudList T="string" Clickable="false">
+﻿<MudList T="string">
     @foreach (var (index, value) in _supportingContent.Select((item, i) => (i, item)))
     {
         if (value.IsEmpty)

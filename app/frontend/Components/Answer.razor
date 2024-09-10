@@ -5,88 +5,87 @@
     var html = answer.AnswerHtml;
 
     <MudItem xs="12">
-        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true">
-            <MudTabPanel Icon="@Icons.Material.Filled.Quickreply" Text="Answer" ToolTip="Answer text">
-                <ChildContent>
-                    <MudPaper Class="pa-6" Elevation="3">
-                        <MudText Typo="Typo.body1">
-                            @((MarkupString)html)
-                        </MudText>
-                        @if (answer is { Citations.Count: > 0 })
-                        {
-                            <div class="pt-4">
-                                <MudText Typo="Typo.subtitle2" Class="pb-2">Citations:</MudText>
-                                @foreach (var citation in answer.Citations)
-                                {       if (citation.Name.Contains("https"))
-                                        {
-                                            var yticon = @Icons.Custom.Brands.Vimeo;
-                                            int index = citation.Name.IndexOf("https");
-                                            string trimmedString = citation.Name.Substring(index);
-                                            <MudChip T="string" Variant="Variant.Text" Color="Color.Info" Icon="@yticon">
-                                                <a href="@trimmedString" target="_blank">@($"{citation.Number}. {trimmedString}")</a>
-                                           </MudChip>
-         
-                                        }
-                                        else
-                                        {
-                                            var icon = citation.Name.EndsWith(".pdf") ? @Icons.Custom.FileFormats.FilePdf : null;
-                                            <MudChip T="string" Variant="Variant.Text" Color="Color.Info" Icon="@icon" OnClick="@(_ => OnShowCitation(citation))">
-                                                @($"{citation.Number}. {citation.Name}")
-                                            </MudChip>
-                                        } 
-                                }
-                            </div>
-                        }
-                        @if (answer is { FollowupQuestions.Count: > 0 })
-                        {
-                            <div class="pt-4">
-                                <MudText Typo="Typo.subtitle2" Class="pb-2">Follow-up questions:</MudText>
-                                @foreach (var followup in answer.FollowupQuestions)
-                                {
-                                    <MudChip T="string" Variant="Variant.Text" Color="Color.Tertiary"
-                                        OnClick="@(_ => OnAskFollowupAsync(followup))">
-                                            @followup
-                                    </MudChip>
-                                }
-                            </div>
-                        }
-                            <div class="pt-2">
-                                <MudFab StartIcon="@Icons.Material.Filled.ThumbUp" DisableElevation="true" Size="Size.Small" OnClick="OnPositiveFeedbackClickedAsync" />
-                                <MudFab StartIcon="@Icons.Material.Filled.ThumbDown" DisableElevation="true" Size="Size.Small" OnClick="OnNegativeFeedbackClickedAsync" />
-@*                                 <MudRating SelectedValue="_newRating" Size="Size.Small" Class="pt-2" SelectedValueChanged="OnRatingClickedAsync" /> *@
-                            </div>
-                    </MudPaper>
-                </ChildContent>
-            </MudTabPanel>
-                <MudTabPanel Icon="@Icons.Material.Filled.Lightbulb" Text="Thought process" ToolTip="Show thought process." Disabled="@(!Retort.HasThoughts())">
-                <ChildContent>
-                    <MudPaper Class="pa-6" Elevation="3">
-                        @foreach (var thought in Retort.Context.Thoughts)
+            <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" Class="ma-1">
+                <MudTabPanel Icon="@Icons.Material.Filled.Quickreply" Text="Answer" ToolTip="Answer text">
+                    <ChildContent>
+                        <MudPaper Class="pa-6" Elevation="3">
+                            <MudText Typo="Typo.body1">
+                                @((MarkupString)html)
+                            </MudText>
+                            @if (answer is { Citations.Count: > 0 })
                             {
-                                <MudCard Class="mb-6" Style="background-color: #fbfbfb;" Outlined="true">
-                                    <MudCardHeader Style="padding: 10px">
-                                        <CardHeaderContent>
-                                            <MudText Typo="Typo.h6">@thought.Title</MudText>
-                                        </CardHeaderContent>
-                                    </MudCardHeader>
-                                    <MudCardContent>
-                                        <pre style="white-space: pre; font-size: 1em; padding-top: 2px">
-                                            @thought.Description
-                                        </pre>
-                                    </MudCardContent>
-                                </MudCard>
+                                <div class="pt-4">
+                                    <MudText Typo="Typo.subtitle2" Class="pb-2">Citations:</MudText>
+                                    @foreach (var citation in answer.Citations)
+                                    {       if (citation.Name.Contains("https"))
+                                            {
+                                                var yticon = @Icons.Custom.Brands.Vimeo;
+                                                int index = citation.Name.IndexOf("https");
+                                                string trimmedString = citation.Name.Substring(index);
+                                                <MudChip T="string" Variant="Variant.Text" Color="Color.Info" Icon="@yticon">
+                                                    <a href="@trimmedString" target="_blank">@($"{citation.Number}. {trimmedString}")</a>
+                                               </MudChip>
+         
+                                            }
+                                            else
+                                            {
+                                                var icon = citation.Name.EndsWith(".pdf") ? @Icons.Custom.FileFormats.FilePdf : null;
+                                                <MudChip T="string" Variant="Variant.Text" Color="Color.Info" Icon="@icon" OnClick="@(_ => OnShowCitation(citation))">
+                                                    @($"{citation.Number}. {citation.Name}")
+                                                </MudChip>
+                                            } 
+                                    }
+                                </div>
                             }
-                    </MudPaper>
-                </ChildContent>
-            </MudTabPanel>
-            <MudTabPanel Icon="@Icons.Material.Filled.TextSnippet" Text="Supporting Content" ToolTip="Show the supporting content." Disabled="@(!Retort.HasDataPoints())">
-                <ChildContent>
-                    <MudPaper Class="pa-2" Elevation="3">
-                        <SupportingContent DataPoints="Retort.Context.DataPoints" />
-                    </MudPaper>
-                </ChildContent>
-            </MudTabPanel>
-        </MudTabs>
+                            @if (answer is { FollowupQuestions.Count: > 0 })
+                            {
+                                <div class="pt-4">
+                                    <MudText Typo="Typo.subtitle2" Class="pb-2">Follow-up questions:</MudText>
+                                    @foreach (var followup in answer.FollowupQuestions)
+                                    {
+                                        <MudChip T="string" Variant="Variant.Text" Color="Color.Tertiary"
+                                            OnClick="@(_ => OnAskFollowupAsync(followup))">
+                                                @followup
+                                        </MudChip>
+                                    }
+                                </div>
+                            }
+                                <div class="pt-2">
+                                    <MudFab StartIcon="@Icons.Material.Filled.ThumbUp" Size="Size.Small" DropShadow=false OnClick="OnPositiveFeedbackClickedAsync" />
+                                    <MudFab StartIcon="@Icons.Material.Filled.ThumbDown" Size="Size.Small" DropShadow=false OnClick="OnNegativeFeedbackClickedAsync" />
+                                </div>
+                        </MudPaper>
+                    </ChildContent>
+                </MudTabPanel>
+                    <MudTabPanel Icon="@Icons.Material.Filled.Lightbulb" Text="Thought process" ToolTip="Show thought process." Disabled="@(!Retort.HasThoughts())">
+                    <ChildContent>
+                        <MudPaper Class="pa-6" Elevation="3">
+                            @foreach (var thought in Retort.Context.Thoughts)
+                                {
+                                    <MudCard Class="mb-6" Style="background-color: #fbfbfb;" Outlined="true">
+                                        <MudCardHeader Style="padding: 10px">
+                                            <CardHeaderContent>
+                                                <MudText Typo="Typo.h6">@thought.Title</MudText>
+                                            </CardHeaderContent>
+                                        </MudCardHeader>
+                                        <MudCardContent>
+                                            <pre style="white-space: pre; font-size: 1em; padding-top: 2px">
+                                                @thought.Description
+                                            </pre>
+                                        </MudCardContent>
+                                    </MudCard>
+                                }
+                        </MudPaper>
+                    </ChildContent>
+                </MudTabPanel>
+                <MudTabPanel Icon="@Icons.Material.Filled.TextSnippet" Text="Supporting Content" ToolTip="Show the supporting content." Disabled="@(!Retort.HasDataPoints())">
+                    <ChildContent>
+                        <MudPaper Class="pa-2" Elevation="3">
+                            <SupportingContent DataPoints="Retort.Context.DataPoints" />
+                        </MudPaper>
+                    </ChildContent>
+                </MudTabPanel>
+            </MudTabs>
     </MudItem>
 }
 </MudGrid>
