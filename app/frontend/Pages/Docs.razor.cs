@@ -7,7 +7,9 @@ public sealed partial class Docs : IDisposable
     private const long MaxIndividualFileSize = 1_024 * 1_024 * 10;
 
     private MudForm _form = null!;
-    private MudFileUpload<IReadOnlyList<IBrowserFile>> _fileUpload = null!;
+
+    private IList<IBrowserFile> _files = new List<IBrowserFile>();
+    //private MudFileUpload<IReadOnlyList<IBrowserFile>> _fileUpload = null!;
     private Task _getDocumentsTask = null!;
     private bool _isLoadingDocuments = false;
     private string _filter = "";
@@ -28,7 +30,7 @@ public sealed partial class Docs : IDisposable
     [Inject]
     public required IJSRuntime JSRuntime { get; set; }
 
-    private bool FilesSelected => _fileUpload is { Files.Count: > 0 };
+    //private bool FilesSelected => _fileUpload is { _files.: > 0 };
 
     protected override void OnInitialized()
     {
@@ -65,10 +67,10 @@ public sealed partial class Docs : IDisposable
     }
     private async Task SubmitFilesForUploadAsync()
     {
-        if (_fileUpload is { Files.Count: > 0 })
+        if (_fileUploads.Any())
         {
             var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
-            var result = await Client.UploadDocumentsAsync(_fileUpload.Files, MaxIndividualFileSize, cookie);
+            var result = await Client.UploadDocumentsAsync(_fileUploads.ToArray(), MaxIndividualFileSize, cookie);
 
             Logger.LogInformation("Result: {x}", result);
 
@@ -83,7 +85,7 @@ public sealed partial class Docs : IDisposable
                         options.VisibleStateDuration = 10_000;
                     });
 
-                await _fileUpload.ResetAsync();
+                _fileUploads.Clear();
             }
             else
             {
@@ -99,6 +101,15 @@ public sealed partial class Docs : IDisposable
         }
 
         await GetDocumentsAsync();
+    }
+
+    private IList<IBrowserFile> _fileUploads = new List<IBrowserFile>();
+    private void UploadFiles(IReadOnlyList<IBrowserFile> files)
+    {
+        foreach (var file in files)
+        {
+            _fileUploads.Add(file);
+        }
     }
 
     private void OnShowDocumentAsync(DocumentSummary document)

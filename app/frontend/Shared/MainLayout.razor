@@ -1,12 +1,9 @@
-﻿@inherits             LayoutComponentBase
+﻿@inherits LayoutComponentBase
 
 <MudThemeProvider @bind-IsDarkMode="@_isDarkTheme" Theme="_theme" />
-<MudDialogProvider FullWidth="true" MaxWidth="MaxWidth.Small"
-                   CloseButton="true"
-                   DisableBackdropClick="true"
-                   Position="DialogPosition.Center"
-                   CloseOnEscapeKey="true" />
+<MudDialogProvider FullWidth="true" MaxWidth="MaxWidth.Small" CloseButton="true" Position="DialogPosition.Center" CloseOnEscapeKey="true" />
 <MudSnackbarProvider />
+<MudPopoverProvider />
 
 <HeadContent>
     <ConditionalStyles IsDarkTheme=@_isDarkTheme />
@@ -31,14 +28,10 @@
             <MudSpacer />
             @if (SettingsDisabled is false)
             {
-                <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Tertiary" Size="Size.Large"
-                           Title="Open the developer settings side panel"
-                           OnClick="@(_ => _settingsOpen = _settingsOpen is false)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Tertiary" Size="Size.Large" OnClick="@(_ => _settingsOpen = _settingsOpen is false)" />
             }
             <MudToggleIconButton Toggled="@_isDarkTheme" ToggledChanged=@OnThemeChanged Size="Size.Large"
-                                ToggledSize="Size.Large"
-                                Title="Switch to Dark theme" Icon=@Icons.Material.Filled.DarkMode Color="@Color.Inherit"
-                                ToggledTitle="Switch to Light theme" ToggledIcon=@Icons.Material.Filled.WbSunny ToggledColor=@Color.Warning />
+                                ToggledSize="Size.Large" Icon=@Icons.Material.Filled.DarkMode Color="@Color.Inherit" ToggledIcon=@Icons.Material.Filled.WbSunny ToggledColor=@Color.Warning />
            
             <LogoutDisplay />
         </MudAppBar>
@@ -47,13 +40,8 @@
         </MudDrawer>
         <MudMainContent>
             <MudContainer MaxWidth="MaxWidth.ExtraLarge" Style="display: flex; flex-direction: column; height: 85vh;" Class="my-6">
-                <CascadingValue Value="_settingsPanel?.Settings" Name="Settings">
-                    <CascadingValue Value="_isReversed" Name="IsReversed">
-                        @Body
-                    </CascadingValue>
-                </CascadingValue>
-            </MudContainer>
-            <SettingsPanel @ref="_settingsPanel" @bind-Open="@_settingsOpen" />
+                @Body
+            </MudContainer> 
         </MudMainContent>
     </MudLayout>
 </MudRTLProvider>

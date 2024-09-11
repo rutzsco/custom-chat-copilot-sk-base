@@ -176,12 +176,12 @@ iframe {
 }
 
 .dim {
-    filter: brightness(90%);
+    filter: brightness(95%);
 }
 
     .dim:hover {
         transition: all 0.3s ease-out;
-        filter: brightness(80%);
+        filter: brightness(90%);
     }
 
 .text-align-center {
@@ -189,16 +189,16 @@ iframe {
 }
 
 /* Address various Lighthouse audit issues */
-.mud-snackbar.mud-snackbar-blurred {
+/*.mud-snackbar.mud-snackbar-blurred {
     -webkit-backdrop-filter: blur(18px);
     backdrop-filter: blur(18px);
-}
+}*/
 
-.mud-input-control.mud-input-number-control input[type=number] {
+/*.mud-input-control.mud-input-number-control input[type=number] {
     -moz-appearance: textfield;
     -webkit-appearance: textfield;
     appearance: textfield;
-}
+}*/
 
 button {
     -moz-user-select: none;

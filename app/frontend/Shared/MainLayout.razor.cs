@@ -8,7 +8,7 @@ public sealed partial class MainLayout
 {
     private readonly MudTheme _theme = new()
     {
-        Palette = new PaletteLight
+        PaletteLight = new PaletteLight
         {
             Primary = AppConfiguration.ColorPaletteLightPrimary,
             AppbarBackground = AppConfiguration.ColorPaletteLightAppbarBackground, 

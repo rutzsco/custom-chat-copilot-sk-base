@@ -5,15 +5,14 @@
                 <MudItem xs="12">
                     <MudTextField @bind-Value="_feedback" Label="Feedback Response"></MudTextField>
                 </MudItem>
-                <MudItem xs="12" Class="justify-right">
-@*                     <MudRating SelectedValue="Rating" Size="Size.Medium" />*@                  
+                <MudItem xs="12" Class="justify-right">           
                     @if (Rating == 5)
                     {
-                        <MudFab StartIcon="@Icons.Material.Filled.ThumbUp" DisableElevation="true" Size="Size.Medium" Disabled="true" />
+                        <MudFab StartIcon="@Icons.Material.Filled.ThumbUp" Size="Size.Medium" Disabled="true" />
                     }
                     @if (Rating == 0)
                     {
-                        <MudFab StartIcon="@Icons.Material.Filled.ThumbDown" DisableElevation="true" Size="Size.Medium" Disabled="true" />
+                        <MudFab StartIcon="@Icons.Material.Filled.ThumbDown" Size="Size.Medium" Disabled="true" />
                     }
                 </MudItem>
             </MudGrid>           
