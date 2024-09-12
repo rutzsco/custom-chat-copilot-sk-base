@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Antiforgery;
 using MinimalApi.Services;
 using MinimalApi.Services.ChatHistory;
 using MinimalApi.Services.Profile;
+using MinimalApi.Services.Search;
 using MinimalApi.Services.Security;
 using Shared.Models;
 
@@ -45,6 +46,8 @@ internal static class WebApplicationExtensions
         api.MapGet("token/csrf", OnGetAntiforgeryTokenAsync);
 
         api.MapGet("status", OnGetStatus);
+
+        api.MapPost("ingestion/trigger", OnPostTriggerIngestionPipelineAsync);
         return app;
     }
 
@@ -239,5 +242,11 @@ internal static class WebApplicationExtensions
         var userInfo = context.GetUserInfo();
         var response = await chatHistoryService.GetMostRecentRatingsItemsAsync(userInfo);
         return response.AsFeedbackResponse();
+    }
+
+    private static async Task<IResult> OnPostTriggerIngestionPipelineAsync([FromServices] IngestionService ingestionService, IngestionRequest ingestionRequest)
+    {
+        await ingestionService.TriggerIngestionPipelineAsync(ingestionRequest);
+        return Results.Ok();
     }
 }

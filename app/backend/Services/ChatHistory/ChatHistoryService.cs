@@ -22,7 +22,11 @@ public class ChatHistoryService : IChatHistoryService
 
     public async Task RecordChatMessageAsync(UserInformation user, ChatRequest chatRequest, ApproachResponse response)
     {
-        var prompt = chatRequest.History.LastOrDefault().User;
+        var lastHistoryItem = chatRequest.History?.LastOrDefault();
+        var prompt = lastHistoryItem?.User;
+        if (prompt == null)
+            throw new InvalidOperationException("The prompt cannot be null.");
+
         var chatMessage = new ChatMessageRecord(user.UserId, chatRequest.ChatId.ToString(), chatRequest.ChatTurnId.ToString(), prompt, response.Answer, response.Context);
         await _cosmosContainer.CreateItemAsync(chatMessage, partitionKey: new PartitionKey(chatMessage.ChatId));
     }
