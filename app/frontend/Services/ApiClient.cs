@@ -6,6 +6,14 @@ namespace ClientApp.Services;
 
 public sealed class ApiClient(HttpClient httpClient)
 {
+    public async Task IngestionTriggerAsync(string sourceContainer, string indexName)
+    {
+        var request = new IngestionRequest(sourceContainer, $"{sourceContainer}-extract", indexName);
+        var json = JsonSerializer.Serialize(request, SerializerOptions.Default);
+        using var body = new StringContent(json, Encoding.UTF8, "application/json");
+        var response = await httpClient.PostAsync("api/ingestion/trigger", body);
+    }
+
     public async Task<UserInformation> GetUserAsync()
     {
         var response = await httpClient.GetAsync("api/user");
