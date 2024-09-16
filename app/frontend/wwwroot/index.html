@@ -31,6 +31,7 @@
         <a class="dismiss">🗙</a>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
+    <script>navigator.serviceWorker.register('service-worker.js');</script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/languages/csharp.min.js" defer></script>
@@ -53,28 +54,28 @@
     <script src="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.js" defer></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
     <script>
-        window.hljsPlugInAdded = false;
-        window.highlight = () => {
+                ljsPlugInAdded = false;
+                ighlight = () => {
             if (!window.hljsPlugInAdded) {
                 hljs.addPlugin(new CopyButtonPlugin());
                 window.hljsPlugInAdded = true;
-            }
+                    }
             hljs.highlightAll();
-        };
+                };
 
         function scrollToBottom(elementId) {
-            var element = document.getElementById(elementId);
+                    var element = document.getElementById(elementId);
             element.scrollTop = element.scrollHeight;
-        }
+                }
 
         MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)'], ['\[', '\]']] }
-        };
-        window.renderMathJax = () => {
+                };
+            ow.renderMathJax = () => {
             if (window.MathJax) {
-                window.MathJax.typesetPromise();
-            }
-        };
+                    window.MathJax.typesetPromise();
+                    }
+                };
     </script>
 </body>
 </html>
