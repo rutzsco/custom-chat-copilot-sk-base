@@ -53,28 +53,28 @@
     <script src="https://unpkg.com/highlightjs-copy/dist/highlightjs-copy.min.js" defer></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
     <script>
-                ljsPlugInAdded = false;
-                ighlight = () => {
+        window.hljsPlugInAdded = false;
+        window.highlight = () => {
             if (!window.hljsPlugInAdded) {
                 hljs.addPlugin(new CopyButtonPlugin());
                 window.hljsPlugInAdded = true;
-                    }
+            }
             hljs.highlightAll();
-                };
+        };
 
         function scrollToBottom(elementId) {
-                    var element = document.getElementById(elementId);
+            var element = document.getElementById(elementId);
             element.scrollTop = element.scrollHeight;
-                }
+        }
 
         MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)'], ['\[', '\]']] }
-                };
-            ow.renderMathJax = () => {
+        };
+        window.renderMathJax = () => {
             if (window.MathJax) {
-                    window.MathJax.typesetPromise();
-                    }
-                };
+                window.MathJax.typesetPromise();
+            }
+        };
     </script>
 </body>
 </html>
