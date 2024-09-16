@@ -8,6 +8,7 @@ using System.Security.Policy;
 using Azure.AI.OpenAI;
 using Azure.Core;
 using ClientApp.Pages;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Cosmos.Serialization.HybridRow;
 using Microsoft.SemanticKernel.ChatCompletion;
 using MinimalApi.Extensions;
@@ -15,6 +16,7 @@ using MinimalApi.Services.ChatHistory;
 using MinimalApi.Services.Profile;
 using MinimalApi.Services.Profile.Prompts;
 using Shared.Models;
+using static MudBlazor.CategoryTypes;
 
 namespace MinimalApi.Services;
 
@@ -34,17 +36,25 @@ internal sealed class EndpointChatService : IChatService
 
     public async IAsyncEnumerable<ChatChunkResponse> ReplyAsync(UserInformation user, ProfileDefinition profile, ChatRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        var payload = JsonSerializer.Serialize(request.History);
+
         var apiRequest = new HttpRequestMessage(HttpMethod.Post, _configuration[profile.AssistantEndpointSettings.APIEndpointSetting]);
         apiRequest.Headers.Add("X-Api-Key", _configuration[profile.AssistantEndpointSettings.APIEndpointKeySetting]);
-
-
-        var payload = JsonSerializer.Serialize(request.History);
         apiRequest.Content = new StringContent(payload, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.SendAsync(apiRequest);
+        var response = await _httpClient.SendAsync(apiRequest, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
+        using (var responseStream = await response.Content.ReadAsStreamAsync())
+        {
+            await foreach (ChatChunkResponse chunk in JsonSerializer.DeserializeAsyncEnumerable<ChatChunkResponse>(responseStream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, DefaultBufferSize = 32 }))
+            {
+                if (chunk == null)
+                    continue;
 
-        var responseContent = await response.Content.ReadFromJsonAsync<ChatChunkResponse>();
-        yield return responseContent;
+                yield return chunk;
+                await Task.Yield();
+            }
+        }
+ 
     }
 }
