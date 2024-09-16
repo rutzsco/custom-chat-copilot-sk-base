@@ -65,9 +65,9 @@ public static class SKExtensions
         foreach (var chatTurn in history.SkipLast(1))
         {
             chatHistory.AddUserMessage(chatTurn.User);
-            if (chatTurn.Bot != null)
+            if (chatTurn.Assistant != null)
             {
-                chatHistory.AddAssistantMessage(chatTurn.Bot);
+                chatHistory.AddAssistantMessage(chatTurn.Assistant);
             }
         }
 
