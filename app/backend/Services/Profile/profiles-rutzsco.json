@@ -90,8 +90,7 @@
     "SecurityModel": "None",
     "SecurityModelGroupMembership": [ "LocalDevUser" ],
     "SampleQuestions": [
-      "Q1?",
-      "Q1?"
+      "What is the forcast for Mankato MN?"
     ],
     "AssistantEndpointSettings": {
       "APIEndpointSetting": "WeatherAssistantAPIEndpoint",

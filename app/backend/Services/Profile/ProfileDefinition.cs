@@ -11,6 +11,16 @@ public class ProfileDefinition
 
     public static void Load(IConfiguration configuration)
     {
+        var profileConfig = configuration["ProfileConfiguration"];
+        if (profileConfig != null)
+        {
+            var bytes = Convert.FromBase64String(profileConfig);
+            var profiles = JsonConvert.DeserializeObject<List<ProfileDefinition>>(Encoding.UTF8.GetString(bytes));
+            All = profiles;
+            return;
+        }
+
+
         var fileName = configuration["ProfileFileName"];
         if (fileName == null)
         {
