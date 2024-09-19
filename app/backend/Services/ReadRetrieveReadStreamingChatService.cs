@@ -52,7 +52,7 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
         var systemMessagePrompt = string.Empty;
         if (!string.IsNullOrEmpty(profile.RAGSettings.ChatSystemMessageFile))
         {
-            systemMessagePrompt = PromptService.GetPromptByName(profile.ChatSystemMessageFile);
+            systemMessagePrompt = PromptService.GetPromptByName(profile.RAGSettings.ChatSystemMessageFile);
             context["SystemMessagePrompt"] = systemMessagePrompt;
         }
 
