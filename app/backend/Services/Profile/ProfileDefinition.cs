@@ -77,7 +77,8 @@ public class ProfileDefinition
     public AssistantEndpointSettingsSummary? AssistantEndpointSettings { get; set; }
 
     public string ChatSystemMessageFile { get; set; }
-
+    public string ChatSystemMessage { get; set; }
+    
     public List<string> SampleQuestions { get; set; }
 }
 
@@ -91,7 +92,7 @@ public class RAGSettingsSummary
     public required string DocumentRetrievalIndexName { get; set; }
 
     public required int DocumentRetrievalDocumentCount { get; set; }
-
+    public required string ChatSystemMessage { get; set; }
     public required string ChatSystemMessageFile { get; set; }
     public required string StorageContianer { get; set; }
 
