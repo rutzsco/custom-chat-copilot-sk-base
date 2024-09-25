@@ -76,6 +76,9 @@ param containerAppEnvironmentWorkloadProfiles array = []
 @description('Name of the Container Apps Environment workload profile to use for the app')
 param appContainerAppEnvironmentWorkloadProfileName string
 
+@description('Should deploy Azure OpenAI service')
+param shouldDeployAzureOpenAIService bool = true
+
 // Tags that should be applied to all resources.
 // 
 // Note that 'azd-service-name' tags should be applied separately to service host resources.
@@ -246,13 +249,7 @@ var appDefinition = {
       value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${storageAccount.outputs.storageAccountConnectionStringSecretName}'
       secretRef: 'azurestorageconnectionstring'
       secret: true
-    }
-    {
-      name: 'AOAIStandardServiceKey'
-      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${azureOpenAi.outputs.cognitiveServicesKeySecretName}'
-      secretRef: 'aoaistandardservicekey'
-      secret: true
-    }
+    }    
     {
       name: 'AzureSearchServiceKey'
       value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${search.outputs.searchKeySecretName}'
@@ -283,10 +280,7 @@ var appDefinition = {
       name: 'AOAIPremiumChatGptDeployment'
       value: azureChatGptPremiumDeploymentName
     }
-    {
-      name: 'AOAIStandardServiceEndpoint'
-      value: azureOpenAi.outputs.endpoint
-    }
+    
     {
       name: 'AOAIStandardChatGptDeployment'
       value: azureChatGptStandardDeploymentName
@@ -295,7 +289,19 @@ var appDefinition = {
       name: 'AOAIEmbeddingsDeployment'
       value: azureEmbeddingDeploymentName
     }
-  ]))
+  ], 
+  (shouldDeployAzureOpenAIService) ? [
+    {
+      name: 'AOAIStandardServiceEndpoint'
+      value: azureOpenAi.outputs.endpoint
+    }
+    {
+      name: 'AOAIStandardServiceKey'
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${azureOpenAi.outputs.cognitiveServicesKeySecretName}'
+      secretRef: 'aoaistandardservicekey'
+      secret: true
+    }
+  ] : []))
 }
 
 module app './app/app.bicep' = {
@@ -314,7 +320,7 @@ module app './app/app.bicep' = {
   }
 }
 
-module azureOpenAi './app/cognitive-services.bicep' =  {
+module azureOpenAi './app/cognitive-services.bicep' = if(shouldDeployAzureOpenAIService) {
   name: 'openai'
   params: {
     name: '${abbrs.cognitiveServicesAccounts}${resourceToken}'

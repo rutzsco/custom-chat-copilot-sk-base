@@ -55,6 +55,9 @@
           "maximumCount": 10
         }
       ]
+    },
+    "shouldDeployAzureOpenAIService": {
+      "value": "${SHOULD_DEPLOY_AZURE_OPENAI_SERVICE}"
     }
   }
 }
