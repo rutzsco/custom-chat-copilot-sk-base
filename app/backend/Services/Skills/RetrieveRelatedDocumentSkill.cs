@@ -12,9 +12,9 @@ public sealed class RetrieveRelatedDocumentSkill
 {
     private readonly IConfiguration _config;
     private readonly SearchClientFactory _searchClientFactory;
-    private readonly OpenAIClient _openAIClient;
+    private readonly AzureOpenAIClient _openAIClient;
 
-    public RetrieveRelatedDocumentSkill(IConfiguration config, SearchClientFactory searchClientFactory, OpenAIClient openAIClient)
+    public RetrieveRelatedDocumentSkill(IConfiguration config, SearchClientFactory searchClientFactory, AzureOpenAIClient openAIClient)
     {
         _config= config;
         _searchClientFactory = searchClientFactory;
@@ -48,7 +48,7 @@ public sealed class RetrieveRelatedDocumentSkill
         return result.FormattedSourceText;
     }
 
-    private Func<string, KernelArguments,Task<KnowledgeSourceSummary>> ResolveRetrievalLogic(OpenAIClient client, SearchClientFactory factory, RAGSettingsSummary ragSettings, string embeddingModelName, string version)
+    private Func<string, KernelArguments,Task<KnowledgeSourceSummary>> ResolveRetrievalLogic(AzureOpenAIClient client, SearchClientFactory factory, RAGSettingsSummary ragSettings, string embeddingModelName, string version)
     {
         async Task<KnowledgeSourceSummary> func1(string searchQuery, KernelArguments arguments)
         {

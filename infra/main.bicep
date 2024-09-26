@@ -280,7 +280,10 @@ var appDefinition = {
       name: 'AOAIPremiumChatGptDeployment'
       value: azureChatGptPremiumDeploymentName
     }
-    
+    {
+      name: 'AOAIStandardServiceEndpoint'
+      value: (shouldDeployAzureOpenAIService) ? azureOpenAi.outputs.endpoint : ''
+    }
     {
       name: 'AOAIStandardChatGptDeployment'
       value: azureChatGptStandardDeploymentName
@@ -291,16 +294,12 @@ var appDefinition = {
     }
   ], 
   (shouldDeployAzureOpenAIService) ? [
-    {
-      name: 'AOAIStandardServiceEndpoint'
-      value: azureOpenAi.outputs.endpoint
-    }
-    {
-      name: 'AOAIStandardServiceKey'
-      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${azureOpenAi.outputs.cognitiveServicesKeySecretName}'
-      secretRef: 'aoaistandardservicekey'
-      secret: true
-    }
+      {
+        name: 'AOAIStandardServiceKey'
+        value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${azureOpenAi.outputs.cognitiveServicesKeySecretName}'
+        secretRef: 'aoaistandardservicekey'
+        secret: true
+      }
   ] : []))
 }
 

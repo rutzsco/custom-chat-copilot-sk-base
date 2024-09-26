@@ -15,6 +15,11 @@ using MinimalApi.Services.HealthChecks;
 using MinimalApi.Services.Documents;
 using MinimalApi.Services.Search;
 using MinimalApi.Services.Skills;
+using Microsoft.Azure.Cosmos.Linq;
+using Azure.AI.OpenAI;
+using Azure.Core.Pipeline;
+using System.Net.Http;
+using System.ClientModel.Primitives;
 
 namespace MinimalApi.Extensions;
 
@@ -52,34 +57,107 @@ internal static class ServiceCollectionExtensions
 
             ArgumentNullException.ThrowIfNullOrEmpty(deployedModelName3);
             ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceEndpoint3);
-            ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceKey3);
 
             var deployedModelName4 = config["AOAIPremiumChatGptDeployment"];
             var azureOpenAiServiceEndpoint4 = config["AOAIPremiumServiceEndpoint"];
             var azureOpenAiServiceKey4 = config["AOAIPremiumServiceKey"];
             ArgumentNullException.ThrowIfNullOrEmpty(deployedModelName4);
             ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceEndpoint4);
-            ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceKey4);
 
             // Build Plugins
             var searchClientFactory = sp.GetRequiredService<SearchClientFactory>();
-            var openAIClient3 = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint3), new AzureKeyCredential(azureOpenAiServiceKey3));
+
+            AzureOpenAIClient? openAIClient3 = null;
+            AzureOpenAIClient? openAIClient4 = null;
+
+            if (config.GetValue<string>("AZURE_CLIENT_ID") != null
+                && config.GetValue<string>("AZURE_CLIENT_SECRET") != null
+                && config.GetValue<string>("AZURE_TENANT_ID") != null)
+            {
+                var credential = new EnvironmentCredential(new EnvironmentCredentialOptions
+                {
+                    AuthorityHost = new Uri(config["AZURE_AUTHORITY"])
+                    // other values will be read via standard environment variables
+                    // see https://learn.microsoft.com/en-us/dotnet/api/azure.identity.environmentcredential?view=azure-dotnet
+                });
+
+                var httpClient = new HttpClient();
+                //if the configuration specifies a subscription key, add it to the request headers
+                if (config.GetValue<string>("Ocp-Apim-Subscription-Key") != null)
+                {
+                    httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", config["Ocp-Apim-Subscription-Key"]);
+                }
+
+                openAIClient3 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), credential, new AzureOpenAIClientOptions
+                {
+                    Audience = config["AZURE_OPENAI_AUDIENCE"],
+                    Transport = new HttpClientPipelineTransport(httpClient)
+                });
+                openAIClient4 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), credential, new AzureOpenAIClientOptions
+                {
+                    Audience = config["AZURE_OPENAI_AUDIENCE"],
+                    Transport = new HttpClientPipelineTransport(httpClient)
+                });
+            }
+            else
+            {
+                ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceKey3);
+                ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceKey4);
+
+                openAIClient3 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), new AzureKeyCredential(azureOpenAiServiceKey3));
+                openAIClient4 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint4), new AzureKeyCredential(azureOpenAiServiceKey4));
+            }
+
             var retrieveRelatedDocumentPlugin3 = new RetrieveRelatedDocumentSkill(config, searchClientFactory, openAIClient3);
-            
-            var openAIClient4 = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint3), new AzureKeyCredential(azureOpenAiServiceKey3));
+
             var retrieveRelatedDocumentPlugin4 = new RetrieveRelatedDocumentSkill(config, searchClientFactory, openAIClient4);
-            
+
             var generateSearchQueryPlugin = new GenerateSearchQuerySkill();
             var chatPlugin = new ChatSkill();
 
-            // Build Kernels
-            Kernel kernel3 = Kernel.CreateBuilder()
-               .AddAzureOpenAIChatCompletion(deployedModelName3, azureOpenAiServiceEndpoint3, azureOpenAiServiceKey3)
-               .Build();
+            Kernel? kernel3 = null;
+            Kernel? kernel4 = null;
 
-            Kernel kernel4 = Kernel.CreateBuilder()
-               .AddAzureOpenAIChatCompletion(deployedModelName4, azureOpenAiServiceEndpoint4, azureOpenAiServiceKey4)
-               .Build();
+            if (config.GetValue<string>("AZURE_CLIENT_ID") != null
+                && config.GetValue<string>("AZURE_CLIENT_SECRET") != null
+                && config.GetValue<string>("AZURE_TENANT_ID") != null)
+            {
+                var credential = new EnvironmentCredential(new EnvironmentCredentialOptions
+                {
+                    AuthorityHost = new Uri(config["AZURE_AUTHORITY"])
+                    // other values will be read via standard environment variables
+                    // see https://learn.microsoft.com/en-us/dotnet/api/azure.identity.environmentcredential?view=azure-dotnet
+                });
+
+                
+
+                var httpClient = new HttpClient();
+
+                //if the configuration specifies a subscription key, add it to the request headers
+                if (config.GetValue<string>("Ocp-Apim-Subscription-Key") != null)
+                {
+                    httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", config["Ocp-Apim-Subscription-Key"]);
+                }
+
+                kernel3 = Kernel.CreateBuilder()
+                    .AddAzureOpenAIChatCompletion(deployedModelName3, azureOpenAiServiceEndpoint3, credential, httpClient: httpClient)
+                    .Build();
+
+                kernel4 = Kernel.CreateBuilder()
+                    .AddAzureOpenAIChatCompletion(deployedModelName4, azureOpenAiServiceEndpoint4, credential, httpClient: httpClient)
+                    .Build();
+            }
+            else
+            {
+                // Build Kernels
+                kernel3 = Kernel.CreateBuilder()
+                .AddAzureOpenAIChatCompletion(deployedModelName3, azureOpenAiServiceEndpoint3, azureOpenAiServiceKey3)
+                .Build();
+
+                kernel4 = Kernel.CreateBuilder()
+                .AddAzureOpenAIChatCompletion(deployedModelName4, azureOpenAiServiceEndpoint4, azureOpenAiServiceKey4)
+                .Build();
+            }
 
             kernel3.ImportPluginFromObject(retrieveRelatedDocumentPlugin3, DefaultSettings.DocumentRetrievalPluginName);
             kernel3.ImportPluginFromObject(generateSearchQueryPlugin, DefaultSettings.GenerateSearchQueryPluginName);
@@ -163,10 +241,10 @@ internal static class ServiceCollectionExtensions
 
             // Build Plugins
             var searchClientFactory = sp.GetRequiredService<SearchClientFactory>();
-            var openAIClient3 = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint3), s_azureCredential);
+            var openAIClient3 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), s_azureCredential);
             var retrieveRelatedDocumentPlugin3 = new RetrieveRelatedDocumentSkill(config, searchClientFactory, openAIClient3);
 
-            var openAIClient4 = new OpenAIClient(new Uri(azureOpenAiServiceEndpoint3), s_azureCredential);
+            var openAIClient4 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), s_azureCredential);
             var retrieveRelatedDocumentPlugin4 = new RetrieveRelatedDocumentSkill(config, searchClientFactory, openAIClient4);
 
             var generateSearchQueryPlugin = new GenerateSearchQuerySkill();
