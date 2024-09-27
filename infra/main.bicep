@@ -79,6 +79,14 @@ param appContainerAppEnvironmentWorkloadProfileName string
 @description('Should deploy Azure OpenAI service')
 param shouldDeployAzureOpenAIService bool = true
 
+param azureClientId string = ''
+@secure()
+param azureClientSecret string = ''
+param azureTenantId string = ''
+param azureAuthority string = ''
+param ocpApimSubscriptionId string = ''
+param azureOpenAiAudience string = ''
+
 // Tags that should be applied to all resources.
 // 
 // Note that 'azd-service-name' tags should be applied separately to service host resources.
@@ -300,6 +308,32 @@ var appDefinition = {
         secretRef: 'aoaistandardservicekey'
         secret: true
       }
+  ] : [],
+  (azureClientId != '') ? [
+    {
+      name: 'AZURE_CLIENT_ID'
+      value: azureClientId
+    }
+    {
+      name: 'AZURE_CLIENT_SECRET'
+      value: azureClientSecret
+    }
+    {
+      name: 'AZURE_TENANT_ID'
+      value: azureTenantId
+    }
+    {
+      name: 'AZURE_AUTHORITY'
+      value: azureAuthority
+    }
+    {
+      name: 'Ocp-Apim-Subscription-Key'
+      value: ocpApimSubscriptionId
+    }
+    {
+      name: 'AZURE_OPENAI_AUDIENCE'
+      value: azureOpenAiAudience
+    }
   ] : []))
 }
 

@@ -20,6 +20,7 @@ using Azure.AI.OpenAI;
 using Azure.Core.Pipeline;
 using System.Net.Http;
 using System.ClientModel.Primitives;
+using Microsoft.Extensions.Azure;
 
 namespace MinimalApi.Extensions;
 
@@ -122,36 +123,40 @@ internal static class ServiceCollectionExtensions
                 && config.GetValue<string>("AZURE_CLIENT_SECRET") != null
                 && config.GetValue<string>("AZURE_TENANT_ID") != null)
             {
-                var credential = new EnvironmentCredential(new EnvironmentCredentialOptions
-                {
-                    AuthorityHost = new Uri(config["AZURE_AUTHORITY"])
-                    // other values will be read via standard environment variables
-                    // see https://learn.microsoft.com/en-us/dotnet/api/azure.identity.environmentcredential?view=azure-dotnet
-                });
-
-                
-
-                var httpClient = new HttpClient();
-
-                //if the configuration specifies a subscription key, add it to the request headers
+                var builder3 = Kernel.CreateBuilder();
                 if (config.GetValue<string>("Ocp-Apim-Subscription-Key") != null)
                 {
-                    httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", config["Ocp-Apim-Subscription-Key"]);
+                    builder3.Services.ConfigureHttpClientDefaults(c =>
+                    {
+                        c.ConfigureHttpClient(x =>
+                        {
+                            x.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", config["Ocp-Apim-Subscription-Key"]);
+                        });
+                    });
                 }
 
-                kernel3 = Kernel.CreateBuilder()
-                    .AddAzureOpenAIChatCompletion(deployedModelName3, azureOpenAiServiceEndpoint3, credential, httpClient: httpClient)
-                    .Build();
+                builder3.AddAzureOpenAIChatCompletion(deployedModelName3, openAIClient3);
+                kernel3 = builder3.Build();
 
-                kernel4 = Kernel.CreateBuilder()
-                    .AddAzureOpenAIChatCompletion(deployedModelName4, azureOpenAiServiceEndpoint4, credential, httpClient: httpClient)
-                    .Build();
+                var builder4 = Kernel.CreateBuilder();
+                if (config.GetValue<string>("Ocp-Apim-Subscription-Key") != null)
+                {
+                    builder4.Services.ConfigureHttpClientDefaults(c =>
+                    {
+                        c.ConfigureHttpClient(x =>
+                        {
+                            x.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", config["Ocp-Apim-Subscription-Key"]);
+                        });
+                    });
+                }
+                builder4.AddAzureOpenAIChatCompletion(deployedModelName4, openAIClient4);
+                kernel4 = builder4.Build();
             }
             else
             {
                 // Build Kernels
                 kernel3 = Kernel.CreateBuilder()
-                .AddAzureOpenAIChatCompletion(deployedModelName3, azureOpenAiServiceEndpoint3, azureOpenAiServiceKey3)
+                .AddAzureOpenAIChatCompletion(deployedModelName3, azureOpenAiServiceEndpoint3, azureOpenAiServiceKey3)                
                 .Build();
 
                 kernel4 = Kernel.CreateBuilder()

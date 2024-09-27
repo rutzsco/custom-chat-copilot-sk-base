@@ -58,6 +58,24 @@
     },
     "shouldDeployAzureOpenAIService": {
       "value": "${SHOULD_DEPLOY_AZURE_OPENAI_SERVICE}"
+    },
+    "azureClientId": {
+      "value": "${AZURE_CLIENT_ID}"
+    },
+    "azureClientSecret": {
+      "value": "${AZURE_CLIENT_SECRET}"
+    },
+    "azureTenantId": {
+      "value": "${AZURE_TENANT_ID}"
+    },
+    "azureAuthority": {
+      "value": "${AZURE_AUTHORITY}"
+    },
+    "ocpApimSubscriptionKey": {
+      "value": "${OCP_APIM_SUBSCRIPTION_KEY}"
+    },
+    "azureOpenAiAudience": {
+      "value": "${AZURE_OPENAI_AUDIENCE}"
     }
   }
 }

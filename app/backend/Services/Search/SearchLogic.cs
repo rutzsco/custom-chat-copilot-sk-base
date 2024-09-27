@@ -105,6 +105,6 @@ public class SearchLogic<T> where T : IKnowledgeSource
     private async Task<ReadOnlyMemory<float>> GenerateEmbeddingsAsync(string text, AzureOpenAIClient openAIClient)
     {
         var response = await openAIClient.GetEmbeddingClient(_embeddingModelName).GenerateEmbeddingsAsync(new List<string>{ text });
-        return response.Value[0].ToFloats();
+        return response.Value[0].Vector;
     }
 }
