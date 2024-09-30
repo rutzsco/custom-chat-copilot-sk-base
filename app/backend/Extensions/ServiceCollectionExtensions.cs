@@ -33,7 +33,8 @@ internal static class ServiceCollectionExtensions
         services.AddHttpClient();
 
         var sp = services.BuildServiceProvider();
-        
+        var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
+
         services.AddSingleton<BlobServiceClient>(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
@@ -78,12 +79,16 @@ internal static class ServiceCollectionExtensions
                 && config.GetValue<string>("AZURE_CLIENT_SECRET") != null
                 && config.GetValue<string>("AZURE_TENANT_ID") != null)
             {
-                var credential = new EnvironmentCredential(new EnvironmentCredentialOptions
-                {
-                    AuthorityHost = new Uri(config["AZURE_AUTHORITY"])
-                    // other values will be read via standard environment variables
-                    // see https://learn.microsoft.com/en-us/dotnet/api/azure.identity.environmentcredential?view=azure-dotnet
-                });
+                //var credential = new EnvironmentCredential(new EnvironmentCredentialOptions
+                var credential = new OnBehalfOfCredential(
+                    tenantId: config["AZURE_TENANT_ID"],
+                    clientId: config["AZURE_CLIENT_ID"],
+                    clientSecret: config["AZURE_CLIENT_SECRET"],
+                    userAssertion: httpContextAccessor.HttpContext?.Request?.Headers["X-MS-TOKEN-AAD-ACCESS-TOKEN"],
+                    new OnBehalfOfCredentialOptions
+                    {
+                        AuthorityHost = new Uri(config["AZURE_AUTHORITY"])
+                    });
 
                 var httpClient = sp.GetService<IHttpClientFactory>().CreateClient();
 

@@ -26,6 +26,7 @@ resource account 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
     isVirtualNetworkFilterEnabled: false
     virtualNetworkRules: []
     disableKeyBasedMetadataWriteAccess: false
+    disableLocalAuth: false
     enableFreeTier: false
     enableAnalyticalStorage: false
     createMode: 'Default'
@@ -48,6 +49,7 @@ resource account 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
     capabilities: [
       {
         name: 'EnableServerless'
+        
       }
     ]
   }
@@ -59,7 +61,7 @@ resource database  'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2020-06-0
   tags: tags
   properties: {
     resource: {
-      id: databaseName
+      id: databaseName      
     }
     options: {
     }

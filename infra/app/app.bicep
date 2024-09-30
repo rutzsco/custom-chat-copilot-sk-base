@@ -136,6 +136,57 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
   }
 }
 
+resource authSettings 'Microsoft.App/containerApps/authConfigs@2024-03-01' = {
+  name: 'current'
+  parent: app
+  properties: {
+    globalValidation: {
+      redirectToProvider: 'azureactivedirectory'
+      unauthenticatedClientAction: 'RedirectToLoginPage'
+    }
+    identityProviders: {
+      azureActiveDirectory: {
+        login: {
+          loginParameters: [
+            'scope=openid profile offline_access api://64e98b3c-95ce-4558-8530-63483166ad26/user_impersonation'
+          ]
+        }
+        registration: {
+          clientId: '64e98b3c-95ce-4558-8530-63483166ad26'
+          clientSecretSettingName: 'microsoft-provider-authentication-secret'
+          openIdIssuer: 'https://sts.windows.net/66beb9f0-9df6-4ded-8e48-126b39813500/v2.0'
+        }
+        validation: {
+          allowedAudiences: [
+            'api://64e98b3c-95ce-4558-8530-63483166ad26'
+          ]
+          defaultAuthorizationPolicy: {
+            allowedApplications: [
+              '64e98b3c-95ce-4558-8530-63483166ad26'
+            ]
+            allowedPrincipals: {
+              identities: [
+                '630f67df-3cfc-460c-893c-00684dd28d8b'
+              ]
+            }
+          }
+        }
+      }
+    }
+    login: {
+      tokenStore: {
+        azureBlobStorage: {
+          sasUrlSettingName: 'token-store-sas'
+        }
+        enabled: true
+      }
+    }
+    platform: {
+      enabled: true
+    }
+  }
+}
+
 output defaultDomain string = containerAppsEnvironment.properties.defaultDomain
 output name string = app.name
 output uri string = 'https://${app.properties.configuration.ingress.fqdn}'

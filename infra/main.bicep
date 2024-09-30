@@ -84,8 +84,9 @@ param azureClientId string = ''
 param azureClientSecret string = ''
 param azureTenantId string = ''
 param azureAuthority string = ''
-param ocpApimSubscriptionId string = ''
+param ocpApimSubscriptionKey string = ''
 param azureOpenAiAudience string = ''
+param azureOpenAiEndpoint string = ''
 
 // Tags that should be applied to all resources.
 // 
@@ -265,6 +266,18 @@ var appDefinition = {
       secret: true
     }
     {
+      name: 'microsoft-provider-authentication-secret'
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/microsoft-provider-authentication-secret'
+      secretRef: 'microsoft-provider-authentication-secret'
+      secret: true
+    }
+    {
+      name: 'token-store-sas'
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/token-store-sas'
+      secretRef: 'token-store-sas'
+      secret: true
+    }
+    {
       name: 'AzureStorageAccountEndpoint'
       value: storageAccount.outputs.primaryEndpoints.blob
     }
@@ -290,7 +303,7 @@ var appDefinition = {
     }
     {
       name: 'AOAIStandardServiceEndpoint'
-      value: (shouldDeployAzureOpenAIService) ? azureOpenAi.outputs.endpoint : ''
+      value: (shouldDeployAzureOpenAIService) ? azureOpenAi.outputs.endpoint : azureOpenAiEndpoint
     }
     {
       name: 'AOAIStandardChatGptDeployment'
@@ -328,7 +341,7 @@ var appDefinition = {
     }
     {
       name: 'Ocp-Apim-Subscription-Key'
-      value: ocpApimSubscriptionId
+      value: ocpApimSubscriptionKey
     }
     {
       name: 'AZURE_OPENAI_AUDIENCE'

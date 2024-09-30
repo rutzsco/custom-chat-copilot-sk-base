@@ -53,6 +53,12 @@
           "workloadProfileType": "D4",
           "minimumCount": 1,
           "maximumCount": 10
+        },
+        {
+          "name": "func",
+          "workloadProfileType": "D4",
+          "minimumCount": 1,
+          "maximumCount": 20
         }
       ]
     },
@@ -76,6 +82,15 @@
     },
     "azureOpenAiAudience": {
       "value": "${AZURE_OPENAI_AUDIENCE}"
+    },
+    "azureOpenAiEndpoint": {
+      "value": "${AZURE_OPENAI_ENDPOINT}"
+    },
+    "azureChatGptStandardDeploymentName": {
+      "value": "${AZURE_CHAT_GPT_STANDARD_DEPLOYMENT_NAME}"
+    },
+    "azureEmbeddingDeploymentName": {
+      "value": "${AZURE_EMBEDDING_DEPLOYMENT_NAME}"
     }
   }
 }
