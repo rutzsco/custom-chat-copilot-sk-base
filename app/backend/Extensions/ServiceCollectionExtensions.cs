@@ -98,14 +98,7 @@ internal static class ServiceCollectionExtensions
             return new SearchClientFactory(config, null, new AzureKeyCredential(config[AppConfigurationSetting.AzureSearchServiceKey]));
         });
 
-        // Add ChatHistory and document upload services if the connection string is provided
-        if (string.IsNullOrEmpty(configuration[AppConfigurationSetting.CosmosDBConnectionString]))
-        {
-            services.AddSingleton<IChatHistoryService,ChatHistoryServiceStub>();
-            services.AddSingleton<IDocumentService, DocumentServiceSub>();
-            services.AddHttpClient();
-        }
-        else
+        if (!string.IsNullOrEmpty(configuration[AppConfigurationSetting.CosmosDBConnectionString]))
         {
             services.AddSingleton((sp) => {
                 var config = sp.GetRequiredService<IConfiguration>();
@@ -113,18 +106,11 @@ internal static class ServiceCollectionExtensions
                 CosmosClientBuilder configurationBuilder = new CosmosClientBuilder(cosmosDBConnectionString);
                 return configurationBuilder
                         .Build();
-            }); ;
-            services.AddSingleton<IChatHistoryService, ChatHistoryService>();
-            services.AddSingleton<IDocumentService, DocumentService>();
-            services.AddHttpClient<DocumentService, DocumentService>();
+            });
         }
 
-        services.AddSingleton<ChatService>();
-        services.AddSingleton<ReadRetrieveReadChatService>();
-        services.AddSingleton<ReadRetrieveReadStreamingChatService>();
-        services.AddSingleton<EndpointChatService>();
-        services.AddSingleton<AzureBlobStorageService>();
-        services.AddHttpClient<IngestionService, IngestionService>();
+        RegisterDomainServices(services, configuration);
+
         return services;
     }
 
@@ -145,7 +131,6 @@ internal static class ServiceCollectionExtensions
             var azureStorageContainer = configuration[AppConfigurationSetting.AzureStorageContainer];
             return sp.GetRequiredService<BlobServiceClient>().GetBlobContainerClient(azureStorageContainer);
         });
-
 
         services.AddSingleton<OpenAIClientFacade>(sp =>
         {
@@ -205,24 +190,44 @@ internal static class ServiceCollectionExtensions
             return new SearchClientFactory(config, s_azureCredential);
         });
 
-        if (string.IsNullOrEmpty(configuration[AppConfigurationSetting.CosmosDBConnectionString]))
+        if (!string.IsNullOrEmpty(configuration[AppConfigurationSetting.CosmosDBEndpoint]))
+        {
+            services.AddSingleton((sp) => {
+                var config = sp.GetRequiredService<IConfiguration>();
+                var endpoint = config[AppConfigurationSetting.CosmosDBEndpoint];
+                CosmosClientBuilder configurationBuilder = new CosmosClientBuilder(endpoint,s_azureCredential);
+                return configurationBuilder
+                        .Build();
+            });
+        }
+
+        RegisterDomainServices(services, configuration);
+
+        return services;
+    }
+
+    private static void RegisterDomainServices(IServiceCollection services, IConfiguration configuration)
+    {
+        // Add ChatHistory and document upload services if the connection string is provided
+        if (string.IsNullOrEmpty(configuration[AppConfigurationSetting.CosmosDBConnectionString]) && string.IsNullOrEmpty(configuration[AppConfigurationSetting.CosmosDBEndpoint]))
         {
             services.AddSingleton<IChatHistoryService, ChatHistoryServiceStub>();
+            services.AddSingleton<IDocumentService, DocumentServiceSub>();
+            services.AddHttpClient();
         }
         else
         {
             services.AddSingleton<IChatHistoryService, ChatHistoryService>();
+            services.AddSingleton<IDocumentService, DocumentService>();
+            services.AddHttpClient<DocumentService, DocumentService>();
         }
 
         services.AddSingleton<ChatService>();
         services.AddSingleton<ReadRetrieveReadChatService>();
         services.AddSingleton<ReadRetrieveReadStreamingChatService>();
-
+        services.AddSingleton<EndpointChatService>();
         services.AddSingleton<AzureBlobStorageService>();
-        services.AddSingleton<DocumentService>();
-        services.AddHttpClient<DocumentService, DocumentService>();
         services.AddHttpClient<IngestionService, IngestionService>();
-        return services;
     }
 
     internal static IServiceCollection AddCrossOriginResourceSharing(this IServiceCollection services)
