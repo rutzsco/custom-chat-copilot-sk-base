@@ -73,13 +73,13 @@ module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEnd
   }
 }
 
-var storageBlobDataOwnerRoleDefinitionId = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b'
+var storageBlobDataContributorRoleDefinitionId = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 
-resource managedIdentityStorageBlobDataOwnerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(useManagedIdentityResourceAccess) {
-  name: guid(subscription().id, managedIdentityPrincipalId, storageBlobDataOwnerRoleDefinitionId)
+resource managedIdentityStorageBlobDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(useManagedIdentityResourceAccess) {
+  name: guid(subscription().id, managedIdentityPrincipalId, storageBlobDataContributorRoleDefinitionId)
   properties: {
     principalId: managedIdentityPrincipalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataOwnerRoleDefinitionId)
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributorRoleDefinitionId)
     principalType: 'ServicePrincipal'
   }
 }
