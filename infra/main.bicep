@@ -87,6 +87,8 @@ param azureAuthority string = ''
 param ocpApimSubscriptionKey string = ''
 param azureOpenAiAudience string = ''
 param azureOpenAiEndpoint string = ''
+param azureClientIdScope string = ''
+param useManagedIdentityResourceAccess bool = false
 
 // Tags that should be applied to all resources.
 // 
@@ -173,6 +175,8 @@ module cosmos './app/cosmosdb.bicep' = {
     keyVaultName: keyVault.outputs.name
     privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
     privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.documentDBDatabaseAccounts}${resourceToken}': ''
+    useManagedIdentityResourceAccess: useManagedIdentityResourceAccess
+    managedIdentityPrincipalId: managedIdentity.outputs.identityPrincipalId
   }
 }
 
@@ -225,6 +229,8 @@ module storageAccount './app/storage-account.bicep' = {
       bypass: 'AzureServices'
       defaultAction: !empty(virtualNetworkName) ? 'Deny' : 'Allow'
     }
+    useManagedIdentityResourceAccess: useManagedIdentityResourceAccess
+    managedIdentityPrincipalId: managedIdentity.outputs.identityPrincipalId
   }
 }
 
@@ -236,8 +242,13 @@ module search './app/search-services.bicep' = {
     publicNetworkAccess: !empty(virtualNetworkName) ? 'disabled' : 'enabled'
     privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
     privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.searchSearchServices}${resourceToken}': ''
+    useManagedIdentityResourceAccess: useManagedIdentityResourceAccess
+    managedIdentityPrincipalId: managedIdentity.outputs.identityPrincipalId
   }
 }
+
+var tokenStoreSasSecretName = 'token-store-sas'
+var clientSecretSecretName = 'microsoft-provider-authentication-secret'
 
 var appDefinition = {
   settings : (union(array(backendDefinition.settings), [
@@ -266,17 +277,12 @@ var appDefinition = {
       secret: true
     }
     {
-      name: 'microsoft-provider-authentication-secret'
-      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/microsoft-provider-authentication-secret'
-      secretRef: 'microsoft-provider-authentication-secret'
+      name: clientSecretSecretName
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${clientSecretSecretName}'
+      secretRef: clientSecretSecretName
       secret: true
     }
-    {
-      name: 'token-store-sas'
-      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/token-store-sas'
-      secretRef: 'token-store-sas'
-      secret: true
-    }
+    
     {
       name: 'AzureStorageAccountEndpoint'
       value: storageAccount.outputs.primaryEndpoints.blob
@@ -347,7 +353,19 @@ var appDefinition = {
       name: 'AZURE_OPENAI_AUDIENCE'
       value: azureOpenAiAudience
     }
-  ] : []))
+    {
+      name: tokenStoreSasSecretName
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${tokenStoreSasSecretName}'
+      secretRef: tokenStoreSasSecretName
+      secret: true
+    }
+  ] : [],
+  (useManagedIdentityResourceAccess) ? [
+    {
+      name: 'UseManagedIdentityResourceAccess'
+      value: string(useManagedIdentityResourceAccess)
+    }
+  ]: []))
 }
 
 module app './app/app.bicep' = {
@@ -363,6 +381,13 @@ module app './app/app.bicep' = {
     exists: backendExists
     appDefinition: appDefinition
     identityName: managedIdentity.outputs.identityName
+    clientId: azureClientId
+    clientSecret: azureClientSecret
+    clientIdAudience: azureOpenAiAudience
+    clientIdScope: azureClientIdScope
+    keyVaultName: keyVault.outputs.name
+    storageAccountName: storageAccount.outputs.storageAccountName
+    clientSecretSecretName: clientSecretSecretName
   }
 }
 

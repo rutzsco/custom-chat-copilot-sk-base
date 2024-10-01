@@ -1,7 +1,6 @@
 param name string
 param location string = resourceGroup().location
 param tags object = {}
-
 param containerRegistryName string
 param containerAppsEnvironmentName string
 param containerAppsEnvironmentWorkloadProfileName string
@@ -10,6 +9,14 @@ param exists bool
 @secure()
 param appDefinition object
 param identityName string
+param storageAccountName string
+param keyVaultName string
+param clientId string
+@secure()
+param clientSecret string
+param clientIdAudience string
+param clientIdScope string
+param clientSecretSecretName string
 
 var appSettingsArray = filter(array(appDefinition.settings), i => i.name != '')
 var secrets = map(filter(appSettingsArray, i => i.?secret != null), i => {
@@ -136,54 +143,17 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
   }
 }
 
-resource authSettings 'Microsoft.App/containerApps/authConfigs@2024-03-01' = {
-  name: 'current'
-  parent: app
-  properties: {
-    globalValidation: {
-      redirectToProvider: 'azureactivedirectory'
-      unauthenticatedClientAction: 'RedirectToLoginPage'
-    }
-    identityProviders: {
-      azureActiveDirectory: {
-        login: {
-          loginParameters: [
-            'scope=openid profile offline_access api://64e98b3c-95ce-4558-8530-63483166ad26/user_impersonation'
-          ]
-        }
-        registration: {
-          clientId: '64e98b3c-95ce-4558-8530-63483166ad26'
-          clientSecretSettingName: 'microsoft-provider-authentication-secret'
-          openIdIssuer: 'https://sts.windows.net/66beb9f0-9df6-4ded-8e48-126b39813500/v2.0'
-        }
-        validation: {
-          allowedAudiences: [
-            'api://64e98b3c-95ce-4558-8530-63483166ad26'
-          ]
-          defaultAuthorizationPolicy: {
-            allowedApplications: [
-              '64e98b3c-95ce-4558-8530-63483166ad26'
-            ]
-            allowedPrincipals: {
-              identities: [
-                '630f67df-3cfc-460c-893c-00684dd28d8b'
-              ]
-            }
-          }
-        }
-      }
-    }
-    login: {
-      tokenStore: {
-        azureBlobStorage: {
-          sasUrlSettingName: 'token-store-sas'
-        }
-        enabled: true
-      }
-    }
-    platform: {
-      enabled: true
-    }
+module appAuthorization './app-authorization.bicep' = if (clientId != '') {
+  name: 'app-authorization'
+  params: {
+    appName: app.name
+    clientId: clientId
+    clientSecret: clientSecret
+    clientIdAudience: clientIdAudience
+    clientIdScope: clientIdScope
+    keyVaultName: keyVaultName
+    storageAccountName: storageAccountName
+    clientSecretSecretName: clientSecretSecretName
   }
 }
 

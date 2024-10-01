@@ -21,6 +21,8 @@ param keyVaultName string
 
 param privateEndpointSubnetId string
 param privateEndpointName string
+param managedIdentityPrincipalId string
+param useManagedIdentityResourceAccess bool
 
 var searchKeySecretName = 'search-key'
 
@@ -56,6 +58,17 @@ module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEnd
     groupIds: ['searchService']
     privateLinkServiceId: search.id
     subnetId: privateEndpointSubnetId
+  }
+}
+
+var searchIndexDataContributorRoleDefinitionId = '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
+
+resource managedIdentitySearchIndexDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(useManagedIdentityResourceAccess) {
+  name: guid(subscription().id, managedIdentityPrincipalId, searchIndexDataContributorRoleDefinitionId)
+  properties: {
+    principalId: managedIdentityPrincipalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', searchIndexDataContributorRoleDefinitionId)
+    principalType: 'ServicePrincipal'
   }
 }
 

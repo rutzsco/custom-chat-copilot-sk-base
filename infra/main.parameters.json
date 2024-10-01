@@ -91,6 +91,12 @@
     },
     "azureEmbeddingDeploymentName": {
       "value": "${AZURE_EMBEDDING_DEPLOYMENT_NAME}"
+    },
+    "azureClientIdScope": {
+      "value": "${AZURE_CLIENT_ID_SCOPE}"
+    },
+    "useManagedIdentityResourceAccess": {
+      "value": "${USE_MANAGED_IDENTITY_RESOURCE_ACCESS}"
     }
   }
 }

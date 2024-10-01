@@ -14,6 +14,8 @@ param keyVaultName string
 
 param privateEndpointSubnetId string
 param privateEndpointName string
+param managedIdentityPrincipalId string
+param useManagedIdentityResourceAccess bool
 
 resource account 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
   name: toLower(accountName)
@@ -124,6 +126,18 @@ module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEnd
     groupIds: ['Sql']
     privateLinkServiceId: account.id
     subnetId: privateEndpointSubnetId
+  }
+}
+
+var cosmosDbDataContributorRoleDefinitionId = '00000000-0000-0000-0000-000000000002'
+
+resource cosmosDbDataContributorRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-05-15' = if(useManagedIdentityResourceAccess) {
+  name: guid(subscription().id, managedIdentityPrincipalId, cosmosDbDataContributorRoleDefinitionId, account.id)
+  parent: account
+  properties: {
+    principalId: managedIdentityPrincipalId
+    roleDefinitionId: '/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${database.name}/sqlRoleDefinitions/${cosmosDbDataContributorRoleDefinitionId}'
+    scope: account.id
   }
 }
 

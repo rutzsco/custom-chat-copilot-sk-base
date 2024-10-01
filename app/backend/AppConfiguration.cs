@@ -58,4 +58,11 @@ public static class AppConfigurationSetting
 
     public static string ApplicationInsightsConnectionString { get; } = "APPLICATIONINSIGHTS_CONNECTION_STRING";
 
+    // On-Behalf-Of (OBO) Flow
+    public static string AzureClientID { get; } = "AZURE_CLIENT_ID";
+    public static string AzureClientSecret { get; } = "AZURE_CLIENT_SECRET";
+    public static string AzureTenantID { get; } = "AZURE_TENANT_ID";
+    public static string AzureAuthority { get; } = "AZURE_AUTHORITY";
+    public static string AzureOpenAIAudience { get; } = "AZURE_OPENAI_AUDIENCE";
+
 }
