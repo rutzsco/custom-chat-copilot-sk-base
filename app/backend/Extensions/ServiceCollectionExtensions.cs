@@ -21,6 +21,7 @@ using Azure.Core.Pipeline;
 using System.Net.Http;
 using System.ClientModel.Primitives;
 using Microsoft.Extensions.Azure;
+using Microsoft.AspNetCore.Http;
 
 namespace MinimalApi.Extensions;
 
@@ -52,8 +53,7 @@ internal static class ServiceCollectionExtensions
             return sp.GetRequiredService<BlobServiceClient>().GetBlobContainerClient(azureStorageContainer);
         });
 
-
-        services.AddSingleton<OpenAIClientFacade>(sp =>
+        services.AddScoped<OpenAIClientFacade>(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
             var deployedModelName3 = config["AOAIStandardChatGptDeployment"];
@@ -77,37 +77,10 @@ internal static class ServiceCollectionExtensions
 
             if (config.GetValue<string>("AZURE_CLIENT_ID") != null
                 && config.GetValue<string>("AZURE_CLIENT_SECRET") != null
-                && config.GetValue<string>("AZURE_TENANT_ID") != null)
+                && config.GetValue<string>("AZURE_TENANT_ID") != null
+                && config.GetValue<string>("AZURE_AUTHORITY") != null)
             {
-                //var credential = new EnvironmentCredential(new EnvironmentCredentialOptions
-                var credential = new OnBehalfOfCredential(
-                    tenantId: config["AZURE_TENANT_ID"],
-                    clientId: config["AZURE_CLIENT_ID"],
-                    clientSecret: config["AZURE_CLIENT_SECRET"],
-                    userAssertion: httpContextAccessor.HttpContext?.Request?.Headers["X-MS-TOKEN-AAD-ACCESS-TOKEN"],
-                    new OnBehalfOfCredentialOptions
-                    {
-                        AuthorityHost = new Uri(config["AZURE_AUTHORITY"])
-                    });
-
-                var httpClient = sp.GetService<IHttpClientFactory>().CreateClient();
-
-                //if the configuration specifies a subscription key, add it to the request headers
-                if (config.GetValue<string>("Ocp-Apim-Subscription-Key") != null)
-                {
-                    httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", config["Ocp-Apim-Subscription-Key"]);
-                }
-
-                openAIClient3 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), credential, new AzureOpenAIClientOptions
-                {
-                    Audience = config["AZURE_OPENAI_AUDIENCE"],
-                    Transport = new HttpClientPipelineTransport(httpClient)
-                });
-                openAIClient4 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), credential, new AzureOpenAIClientOptions
-                {
-                    Audience = config["AZURE_OPENAI_AUDIENCE"],
-                    Transport = new HttpClientPipelineTransport(httpClient)
-                });
+                SetupOpenAIClientsUsingOnBehalfOfOthersFlowAndSubscriptionKey(sp, httpContextAccessor, config, azureOpenAiServiceEndpoint3, out openAIClient3, out openAIClient4);
             }
             else
             {
@@ -127,47 +100,31 @@ internal static class ServiceCollectionExtensions
 
             Kernel? kernel3 = null;
             Kernel? kernel4 = null;
+            IKernelBuilder? builder3 = null;
+            IKernelBuilder? builder4 = null;
 
-            if (config.GetValue<string>("AZURE_CLIENT_ID") != null
-                && config.GetValue<string>("AZURE_CLIENT_SECRET") != null
-                && config.GetValue<string>("AZURE_TENANT_ID") != null)
+            if (openAIClient3 != null)
             {
-                var builder3 = Kernel.CreateBuilder();
-                //if (config.GetValue<string>("Ocp-Apim-Subscription-Key") != null)
-                //{
-                //    builder3.Services.ConfigureHttpClientDefaults(c =>
-                //    {
-                //        c.ConfigureHttpClient(x =>
-                //        {
-                //            x.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", config["Ocp-Apim-Subscription-Key"]);
-                //        });
-                //    });                    
-                //}
-
+                builder3 = Kernel.CreateBuilder();
                 builder3.AddAzureOpenAIChatCompletion(deployedModelName3, openAIClient3);
                 kernel3 = builder3.Build();
-
-                var builder4 = Kernel.CreateBuilder();
-                //if (config.GetValue<string>("Ocp-Apim-Subscription-Key") != null)
-                //{
-                //    builder4.Services.ConfigureHttpClientDefaults(c =>
-                //    {
-                //        c.ConfigureHttpClient(x =>
-                //        {
-                //            x.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", config["Ocp-Apim-Subscription-Key"]);
-                //        });
-                //    });
-                //}
-                builder4.AddAzureOpenAIChatCompletion(deployedModelName4, openAIClient4);
-                kernel4 = builder4.Build();
             }
             else
             {
                 // Build Kernels
                 kernel3 = Kernel.CreateBuilder()
-                .AddAzureOpenAIChatCompletion(deployedModelName3, azureOpenAiServiceEndpoint3, azureOpenAiServiceKey3)                
+                .AddAzureOpenAIChatCompletion(deployedModelName3, azureOpenAiServiceEndpoint3, azureOpenAiServiceKey3)
                 .Build();
+            }
 
+            if (openAIClient4 != null)
+            { 
+                builder4 = Kernel.CreateBuilder();
+                builder4.AddAzureOpenAIChatCompletion(deployedModelName4, openAIClient4);
+                kernel4 = builder4.Build();
+            }
+            else
+            {
                 kernel4 = Kernel.CreateBuilder()
                 .AddAzureOpenAIChatCompletion(deployedModelName4, azureOpenAiServiceEndpoint4, azureOpenAiServiceKey4)
                 .Build();
@@ -222,6 +179,9 @@ internal static class ServiceCollectionExtensions
 
     internal static IServiceCollection AddAzureWithMICredentialsServices(this IServiceCollection services, IConfiguration configuration)
     {
+        var sp = services.BuildServiceProvider();
+        var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
+
         services.AddSingleton<BlobServiceClient>(sp =>
         {
             var azureStorageAccountEndpoint = configuration[AppConfigurationSetting.AzureStorageAccountEndpoint];
@@ -238,8 +198,7 @@ internal static class ServiceCollectionExtensions
             return sp.GetRequiredService<BlobServiceClient>().GetBlobContainerClient(azureStorageContainer);
         });
 
-
-        services.AddSingleton<OpenAIClientFacade>(sp =>
+        services.AddScoped(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
             var deployedModelName3 = config["AOAIStandardChatGptDeployment"];
@@ -253,25 +212,59 @@ internal static class ServiceCollectionExtensions
             ArgumentNullException.ThrowIfNullOrEmpty(deployedModelName4);
             ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceEndpoint4);
 
+            AzureOpenAIClient? openAIClient3 = null;
+            AzureOpenAIClient? openAIClient4 = null;
+
+            if (config.GetValue<string>("AZURE_CLIENT_ID") != null
+                && config.GetValue<string>("AZURE_CLIENT_SECRET") != null
+                && config.GetValue<string>("AZURE_TENANT_ID") != null
+                && config.GetValue<string>("AZURE_AUTHORITY") != null
+                && config.GetValue<string>("AZURE_OPENAI_AUDIENCE") != null)
+            {
+                SetupOpenAIClientsUsingOnBehalfOfOthersFlowAndSubscriptionKey(sp, httpContextAccessor, config, azureOpenAiServiceEndpoint3, out openAIClient3, out openAIClient4);
+            }
+            else
+            {
+                openAIClient3 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), s_azureCredential);
+                openAIClient4 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), s_azureCredential);
+            }
+
             // Build Plugins
             var searchClientFactory = sp.GetRequiredService<SearchClientFactory>();
-            var openAIClient3 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), s_azureCredential);
-            var retrieveRelatedDocumentPlugin3 = new RetrieveRelatedDocumentSkill(config, searchClientFactory, openAIClient3);
 
-            var openAIClient4 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), s_azureCredential);
+            var retrieveRelatedDocumentPlugin3 = new RetrieveRelatedDocumentSkill(config, searchClientFactory, openAIClient3);
             var retrieveRelatedDocumentPlugin4 = new RetrieveRelatedDocumentSkill(config, searchClientFactory, openAIClient4);
 
             var generateSearchQueryPlugin = new GenerateSearchQuerySkill();
             var chatPlugin = new ChatSkill();
 
-            // Build Kernels
-            Kernel kernel3 = Kernel.CreateBuilder()
-               .AddAzureOpenAIChatCompletion(deployedModelName3, azureOpenAiServiceEndpoint3, s_azureCredential)
-               .Build();
+            Kernel? kernel3 = null;
+            Kernel? kernel4 = null;
 
-            Kernel kernel4 = Kernel.CreateBuilder()
-               .AddAzureOpenAIChatCompletion(deployedModelName4, azureOpenAiServiceEndpoint4, s_azureCredential)
-               .Build();
+            // Build Kernels
+            if (config.GetValue<string>("AZURE_CLIENT_ID") != null
+                && config.GetValue<string>("AZURE_CLIENT_SECRET") != null
+                && config.GetValue<string>("AZURE_TENANT_ID") != null
+                && config.GetValue<string>("AZURE_AUTHORITY") != null
+                && config.GetValue<string>("AZURE_OPENAI_AUDIENCE") != null)
+            {
+                kernel3 = Kernel.CreateBuilder()
+                    .AddAzureOpenAIChatCompletion(deployedModelName3, openAIClient3)
+                    .Build();
+                kernel4 = Kernel.CreateBuilder()
+                    .AddAzureOpenAIChatCompletion(deployedModelName4, openAIClient4)
+                    .Build();
+            }
+            else
+            {
+                kernel3 = Kernel.CreateBuilder()
+                   .AddAzureOpenAIChatCompletion(deployedModelName3, azureOpenAiServiceEndpoint3, s_azureCredential)
+                   .Build();
+
+                kernel4 = Kernel.CreateBuilder()
+                   .AddAzureOpenAIChatCompletion(deployedModelName4, azureOpenAiServiceEndpoint4, s_azureCredential)
+                   .Build();
+            }
 
             kernel3.ImportPluginFromObject(retrieveRelatedDocumentPlugin3, DefaultSettings.DocumentRetrievalPluginName);
             kernel3.ImportPluginFromObject(generateSearchQueryPlugin, DefaultSettings.GenerateSearchQueryPluginName);
@@ -288,8 +281,7 @@ internal static class ServiceCollectionExtensions
             var cosmosDBEndpoint = config[AppConfigurationSetting.CosmosDBEndpoint];
             var client = new CosmosClient(cosmosDBEndpoint, s_azureCredential);
             return client;
-        }); ;
-
+        });
 
         services.AddSingleton<SearchClientFactory>(sp =>
         {
@@ -315,6 +307,38 @@ internal static class ServiceCollectionExtensions
         services.AddHttpClient<DocumentService, DocumentService>();
         services.AddHttpClient<IngestionService, IngestionService>();
         return services;
+    }
+
+    private static void SetupOpenAIClientsUsingOnBehalfOfOthersFlowAndSubscriptionKey(IServiceProvider sp, IHttpContextAccessor httpContextAccessor, IConfiguration config, string? azureOpenAiServiceEndpoint3, out AzureOpenAIClient? openAIClient3, out AzureOpenAIClient? openAIClient4)
+    {
+        var credential = new OnBehalfOfCredential(
+                            tenantId: config["AZURE_TENANT_ID"],
+                            clientId: config["AZURE_CLIENT_ID"],
+                            clientSecret: config["AZURE_CLIENT_SECRET"],
+                            userAssertion: httpContextAccessor.HttpContext?.Request?.Headers["X-MS-TOKEN-AAD-ACCESS-TOKEN"],
+                            new OnBehalfOfCredentialOptions
+                            {
+                                AuthorityHost = new Uri(config["AZURE_AUTHORITY"])
+                            });
+
+        var httpClient = sp.GetService<IHttpClientFactory>().CreateClient();
+
+        //if the configuration specifies a subscription key, add it to the request headers
+        if (config.GetValue<string>("Ocp-Apim-Subscription-Key") != null)
+        {
+            httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", config["Ocp-Apim-Subscription-Key"]);
+        }
+
+        openAIClient3 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), credential, new AzureOpenAIClientOptions
+        {
+            Audience = config["AZURE_OPENAI_AUDIENCE"],
+            Transport = new HttpClientPipelineTransport(httpClient)
+        });
+        openAIClient4 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), credential, new AzureOpenAIClientOptions
+        {
+            Audience = config["AZURE_OPENAI_AUDIENCE"],
+            Transport = new HttpClientPipelineTransport(httpClient)
+        });
     }
 
     internal static IServiceCollection AddCrossOriginResourceSharing(this IServiceCollection services)
