@@ -30,9 +30,11 @@ public sealed partial class TextInputV3
         Console.WriteLine($"OnKeyUpAsync - {UserQuestion}");
         if (args is { Key: "Enter", ShiftKey: false } && OnEnterKeyPressed.HasDelegate)
         {
-            UserQuestion.TrimEnd('\n');
-            Console.WriteLine($"OnKeyUpAsync - {UserQuestion}");
-            await OnEnterKeyPressed.InvokeAsync(UserQuestion);
+            var question = UserQuestion;
+            UserQuestion = string.Empty;
+            question.TrimEnd('\n');
+            Console.WriteLine($"OnKeyUpAsync - {question}");
+            await OnEnterKeyPressed.InvokeAsync(question);
         }
     }
     private async Task OnAskClickedAsync()
