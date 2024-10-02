@@ -73,10 +73,10 @@ internal static class ServiceCollectionExtensions
             AzureOpenAIClient? openAIClient3 = null;
             AzureOpenAIClient? openAIClient4 = null;
 
-            if (config.GetValue<string>("AZURE_CLIENT_ID") != null
-                && config.GetValue<string>("AZURE_CLIENT_SECRET") != null
-                && config.GetValue<string>("AZURE_TENANT_ID") != null
-                && config.GetValue<string>("AZURE_AUTHORITY") != null)
+            if (config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalClientID) != null
+                && config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalClientSecret) != null
+                && config.GetValue<string>(AppConfigurationSetting.AzureTenantID) != null
+                && config.GetValue<string>(AppConfigurationSetting.AzureAuthorityHost) != null)
             {
                 SetupOpenAIClientsUsingOnBehalfOfOthersFlowAndSubscriptionKey(sp, httpContextAccessor, config, azureOpenAiServiceEndpoint3, out openAIClient3, out openAIClient4);
             }
