@@ -4,7 +4,6 @@ param appName string
 param clientId string
 @secure()
 param clientSecret string
-param clientIdAudience string
 param clientIdScope string
 param utcValue string = utcNow()
 param clientSecretSecretName string

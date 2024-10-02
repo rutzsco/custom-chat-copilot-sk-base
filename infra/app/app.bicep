@@ -14,7 +14,6 @@ param keyVaultName string
 param clientId string
 @secure()
 param clientSecret string
-param clientIdAudience string
 param clientIdScope string
 param clientSecretSecretName string
 
@@ -149,7 +148,6 @@ module appAuthorization './app-authorization.bicep' = if (clientId != '') {
     appName: app.name
     clientId: clientId
     clientSecret: clientSecret
-    clientIdAudience: clientIdAudience
     clientIdScope: clientIdScope
     keyVaultName: keyVaultName
     storageAccountName: storageAccountName

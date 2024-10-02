@@ -57,12 +57,12 @@ azd env set SHOULD_DEPLOY_AZURE_OPENAI_SERVICE false
 **NOTE**: If you want to use a Entra ID service principal to authorize requests to the OpenAI Service (using the On-Behalf-Of flow) behind API Management, you can specify the following commands to indicate the Entra ID values. The authority is the FQDN of the Entra ID tenant in either Azure Commercial or one of the sovereign clouds.
 
 ```shell
-azd env set AZURE_CLIENT_ID <client-id>
-azd env set AZURE_CLIENT_SECRET <client-secret>
+azd env set AZURE_SP_CLIENT_ID <client-id>
+azd env set AZURE_SP_CLIENT_SECRET <client-secret>
 azd env set AZURE_TENANT_ID <tenant-id>
-azd env set AZURE_AUDIENCE <audience-of-the-OpenAI-service-principal>
-azd env set AZURE_AUTHORITY https://login.microsoftonline.com/
-azd env set AZURE_CLIENT_ID_SCOPE api://<client-id>/user_impersonation
+azd env set AZURE_SP_OPENAI_AUDIENCE <audience-of-the-OpenAI-service-principal>
+azd env set AZURE_AUTHORITY_HOST https://login.microsoftonline.com/
+azd env set AZURE_SP_CLIENT_ID_SCOPE api://<client-id>/user_impersonation
 azd end set AZURE_OPENAI_ENDPOINT <apim-endpoint>
 ```
 

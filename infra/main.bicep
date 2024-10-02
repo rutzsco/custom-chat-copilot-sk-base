@@ -79,15 +79,15 @@ param appContainerAppEnvironmentWorkloadProfileName string
 @description('Should deploy Azure OpenAI service')
 param shouldDeployAzureOpenAIService bool = true
 
-param azureClientId string = ''
+param azureSpClientId string = ''
 @secure()
-param azureClientSecret string = ''
+param azureSpClientSecret string = ''
 param azureTenantId string = ''
-param azureAuthority string = ''
+param azureAuthorityHost string = ''
 param ocpApimSubscriptionKey string = ''
-param azureOpenAiAudience string = ''
+param azureSpOpenAiAudience string = ''
 param azureOpenAiEndpoint string = ''
-param azureClientIdScope string = ''
+param azureSpClientIdScope string = ''
 param useManagedIdentityResourceAccess bool = false
 
 // Tags that should be applied to all resources.
@@ -339,30 +339,30 @@ var appDefinition = {
         secret: true
       }
   ] : [],
-  (azureClientId != '') ? [
+  (azureSpClientId != '') ? [
     {
-      name: 'AZURE_CLIENT_ID'
-      value: azureClientId
+      name: 'AZURE_SP_CLIENT_ID'
+      value: azureSpClientId
     }
     {
-      name: 'AZURE_CLIENT_SECRET'
-      value: azureClientSecret
+      name: 'AZURE_SP_CLIENT_SECRET'
+      value: azureSpClientSecret
     }
     {
       name: 'AZURE_TENANT_ID'
       value: azureTenantId
     }
     {
-      name: 'AZURE_AUTHORITY'
-      value: azureAuthority
+      name: 'AZURE_AUTHORITY_HOST'
+      value: azureAuthorityHost
     }
     {
       name: 'Ocp-Apim-Subscription-Key'
       value: ocpApimSubscriptionKey
     }
     {
-      name: 'AZURE_OPENAI_AUDIENCE'
-      value: azureOpenAiAudience
+      name: 'AZURE_SP_OPENAI_AUDIENCE'
+      value: azureSpOpenAiAudience
     }
     {
       name: tokenStoreSasSecretName
@@ -396,10 +396,9 @@ module app './app/app.bicep' = {
     exists: backendExists
     appDefinition: appDefinition
     identityName: managedIdentity.outputs.identityName
-    clientId: azureClientId
-    clientSecret: azureClientSecret
-    clientIdAudience: azureOpenAiAudience
-    clientIdScope: azureClientIdScope
+    clientId: azureSpClientId
+    clientSecret: azureSpClientSecret
+    clientIdScope: azureSpClientIdScope
     keyVaultName: keyVault.outputs.name
     storageAccountName: storageAccount.outputs.storageAccountName
     clientSecretSecretName: clientSecretSecretName

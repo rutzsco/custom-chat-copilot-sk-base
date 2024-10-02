@@ -65,23 +65,23 @@
     "shouldDeployAzureOpenAIService": {
       "value": "${SHOULD_DEPLOY_AZURE_OPENAI_SERVICE}"
     },
-    "azureClientId": {
-      "value": "${AZURE_CLIENT_ID}"
+    "azureSpClientId": {
+      "value": "${AZURE_SP_CLIENT_ID}"
     },
-    "azureClientSecret": {
-      "value": "${AZURE_CLIENT_SECRET}"
+    "azureSpClientSecret": {
+      "value": "${AZURE_SP_CLIENT_SECRET}"
     },
     "azureTenantId": {
       "value": "${AZURE_TENANT_ID}"
     },
-    "azureAuthority": {
-      "value": "${AZURE_AUTHORITY}"
+    "azureAuthorityHost": {
+      "value": "${AZURE_AUTHORITY_HOST}"
     },
     "ocpApimSubscriptionKey": {
       "value": "${OCP_APIM_SUBSCRIPTION_KEY}"
     },
-    "azureOpenAiAudience": {
-      "value": "${AZURE_OPENAI_AUDIENCE}"
+    "azureSpOpenAiAudience": {
+      "value": "${AZURE_SP_OPENAI_AUDIENCE}"
     },
     "azureOpenAiEndpoint": {
       "value": "${AZURE_OPENAI_ENDPOINT}"
@@ -92,8 +92,8 @@
     "azureEmbeddingDeploymentName": {
       "value": "${AZURE_EMBEDDING_DEPLOYMENT_NAME}"
     },
-    "azureClientIdScope": {
-      "value": "${AZURE_CLIENT_ID_SCOPE}"
+    "azureSpClientIdScope": {
+      "value": "${AZURE_SP_CLIENT_ID_SCOPE}"
     },
     "useManagedIdentityResourceAccess": {
       "value": "${USE_MANAGED_IDENTITY_RESOURCE_ACCESS}"

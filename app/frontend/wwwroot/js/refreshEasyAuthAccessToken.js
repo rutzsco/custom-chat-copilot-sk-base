@@ -9,4 +9,4 @@
 
 refreshTokens();
 
-setInterval(refreshTokens, 1800000); // refresh the EasyAuth access token every 30 minutes since this is used by the OBO flow to get the access token for the backend API
+setInterval(refreshTokens, 3000000); // refresh the EasyAuth access token every 50 minutes since this is used by the OBO flow to get the access token for the backend API, we need the EasyAuth framework to refresh the token for us

@@ -60,10 +60,12 @@ public static class AppConfigurationSetting
     public static string ApplicationInsightsConnectionString { get; } = "APPLICATIONINSIGHTS_CONNECTION_STRING";
 
     // On-Behalf-Of (OBO) Flow
-    public static string AzureClientID { get; } = "AZURE_CLIENT_ID";
-    public static string AzureClientSecret { get; } = "AZURE_CLIENT_SECRET";
+    public static string AzureServicePrincipalClientID { get; } = "AZURE_SP_CLIENT_ID";
+    public static string AzureServicePrincipalClientSecret { get; } = "AZURE_SP_CLIENT_SECRET";
     public static string AzureTenantID { get; } = "AZURE_TENANT_ID";
-    public static string AzureAuthority { get; } = "AZURE_AUTHORITY";
-    public static string AzureOpenAIAudience { get; } = "AZURE_OPENAI_AUDIENCE";
+    public static string AzureAuthorityHost { get; } = "AZURE_AUTHORITY_HOST";
+    public static string AzureServicePrincipalOpenAIAudience { get; } = "AZURE_SP_OPENAI_AUDIENCE";
+    public static string OcpApimSubscriptionKey { get; } = "Ocp-Apim-Subscription-Key";
+    public static string XMsTokenAadAccessToken { get; } = "X-MS-TOKEN-AAD-ACCESS-TOKEN";
 
 }

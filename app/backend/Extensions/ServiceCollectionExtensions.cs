@@ -204,11 +204,11 @@ internal static class ServiceCollectionExtensions
             AzureOpenAIClient? openAIClient3 = null;
             AzureOpenAIClient? openAIClient4 = null;
 
-            if (config.GetValue<string>("AZURE_CLIENT_ID") != null
-                && config.GetValue<string>("AZURE_CLIENT_SECRET") != null
-                && config.GetValue<string>("AZURE_TENANT_ID") != null
-                && config.GetValue<string>("AZURE_AUTHORITY") != null
-                && config.GetValue<string>("AZURE_OPENAI_AUDIENCE") != null)
+            if (config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalClientID) != null
+                && config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalClientSecret) != null
+                && config.GetValue<string>(AppConfigurationSetting.AzureTenantID) != null
+                && config.GetValue<string>(AppConfigurationSetting.AzureAuthorityHost) != null
+                && config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalOpenAIAudience) != null)
             {
                 SetupOpenAIClientsUsingOnBehalfOfOthersFlowAndSubscriptionKey(sp, httpContextAccessor, config, azureOpenAiServiceEndpoint3, out openAIClient3, out openAIClient4);
             }
@@ -231,11 +231,11 @@ internal static class ServiceCollectionExtensions
             Kernel? kernel4 = null;
 
             // Build Kernels
-            if (config.GetValue<string>("AZURE_CLIENT_ID") != null
-                && config.GetValue<string>("AZURE_CLIENT_SECRET") != null
-                && config.GetValue<string>("AZURE_TENANT_ID") != null
-                && config.GetValue<string>("AZURE_AUTHORITY") != null
-                && config.GetValue<string>("AZURE_OPENAI_AUDIENCE") != null)
+            if (config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalClientID) != null
+                && config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalClientSecret) != null
+                && config.GetValue<string>(AppConfigurationSetting.AzureTenantID) != null
+                && config.GetValue<string>(AppConfigurationSetting.AzureAuthorityHost) != null
+                && config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalOpenAIAudience) != null)
             {
                 kernel3 = Kernel.CreateBuilder()
                     .AddAzureOpenAIChatCompletion(deployedModelName3, openAIClient3)
@@ -321,32 +321,32 @@ internal static class ServiceCollectionExtensions
     private static void SetupOpenAIClientsUsingOnBehalfOfOthersFlowAndSubscriptionKey(IServiceProvider sp, IHttpContextAccessor httpContextAccessor, IConfiguration config, string? azureOpenAiServiceEndpoint3, out AzureOpenAIClient? openAIClient3, out AzureOpenAIClient? openAIClient4)
     {
         var credential = new OnBehalfOfCredential(
-                            tenantId: config["AZURE_TENANT_ID"],
-                            clientId: config["AZURE_CLIENT_ID"],
-                            clientSecret: config["AZURE_CLIENT_SECRET"],
-                            userAssertion: httpContextAccessor.HttpContext?.Request?.Headers["X-MS-TOKEN-AAD-ACCESS-TOKEN"],
+                            tenantId: config[AppConfigurationSetting.AzureTenantID],
+                            clientId: config[AppConfigurationSetting.AzureServicePrincipalClientID],
+                            clientSecret: config[AppConfigurationSetting.AzureServicePrincipalClientSecret],
+                            userAssertion: httpContextAccessor.HttpContext?.Request?.Headers[AppConfigurationSetting.XMsTokenAadAccessToken],
                             new OnBehalfOfCredentialOptions
                             {
-                                AuthorityHost = new Uri(config["AZURE_AUTHORITY"])
+                                AuthorityHost = new Uri(config[AppConfigurationSetting.AzureAuthorityHost])
                             });
         
         var httpClient = sp.GetService<IHttpClientFactory>().CreateClient();
 
         //if the configuration specifies a subscription key, add it to the request headers
-        if (config.GetValue<string>("Ocp-Apim-Subscription-Key") != null)
+        if (config.GetValue<string>(AppConfigurationSetting.OcpApimSubscriptionKey) != null)
         {
-            httpClient.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", config["Ocp-Apim-Subscription-Key"]);
+            httpClient.DefaultRequestHeaders.Add(AppConfigurationSetting.OcpApimSubscriptionKey, config[AppConfigurationSetting.OcpApimSubscriptionKey]);
         }
 
         openAIClient3 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), credential, new AzureOpenAIClientOptions
         {
-            Audience = config["AZURE_OPENAI_AUDIENCE"],
+            Audience = config[AppConfigurationSetting.AzureServicePrincipalOpenAIAudience],
             Transport = new HttpClientPipelineTransport(httpClient)
         });
         
         openAIClient4 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), credential, new AzureOpenAIClientOptions
         {
-            Audience = config["AZURE_OPENAI_AUDIENCE"],
+            Audience = config[AppConfigurationSetting.AzureServicePrincipalOpenAIAudience],
             Transport = new HttpClientPipelineTransport(httpClient)
         });
     }
