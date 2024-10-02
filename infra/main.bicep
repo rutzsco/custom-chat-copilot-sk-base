@@ -253,6 +253,22 @@ module search './app/search-services.bicep' = {
 
 var tokenStoreSasSecretName = 'token-store-sas'
 var clientSecretSecretName = 'microsoft-provider-authentication-secret'
+var apimSubscriptionKeySecretName = 'apim-subscription-key'
+var tokenStoreContainerName = 'token-store'
+
+module appAuthorizationSecrets './app/app-authorization-secrets.bicep' = if(azureSpClientId != '') {
+  name: 'app-authorization-secrets'
+  params: {
+    keyVaultName: keyVault.outputs.name
+    storageAccountName: storageAccount.outputs.storageAccountName
+    tokenStoreContainerName: tokenStoreContainerName
+    tokenStoreSasSecretName: tokenStoreSasSecretName
+    clientSecretSecretName: clientSecretSecretName
+    clientSecret: azureSpClientSecret
+    apimSubscriptionKey: ocpApimSubscriptionKey
+    apimSubscriptionKeySecretName: apimSubscriptionKeySecretName
+  }
+}
 
 var appDefinition = {
   settings : (union(array(backendDefinition.settings), [
@@ -346,7 +362,9 @@ var appDefinition = {
     }
     {
       name: 'AZURE_SP_CLIENT_SECRET'
-      value: azureSpClientSecret
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${clientSecretSecretName}'
+      secretRef: clientSecretSecretName
+      secret: true
     }
     {
       name: 'AZURE_TENANT_ID'
@@ -358,7 +376,9 @@ var appDefinition = {
     }
     {
       name: 'Ocp-Apim-Subscription-Key'
-      value: ocpApimSubscriptionKey
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${apimSubscriptionKeySecretName}'
+      secretRef: apimSubscriptionKeySecretName
+      secret: true
     }
     {
       name: 'AZURE_SP_OPENAI_AUDIENCE'
@@ -397,11 +417,9 @@ module app './app/app.bicep' = {
     appDefinition: appDefinition
     identityName: managedIdentity.outputs.identityName
     clientId: azureSpClientId
-    clientSecret: azureSpClientSecret
     clientIdScope: azureSpClientIdScope
-    keyVaultName: keyVault.outputs.name
-    storageAccountName: storageAccount.outputs.storageAccountName
     clientSecretSecretName: clientSecretSecretName
+    tokenStoreSasSecretName: tokenStoreSasSecretName
   }
 }
 

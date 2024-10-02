@@ -9,13 +9,10 @@ param exists bool
 @secure()
 param appDefinition object
 param identityName string
-param storageAccountName string
-param keyVaultName string
 param clientId string
-@secure()
-param clientSecret string
 param clientIdScope string
 param clientSecretSecretName string
+param tokenStoreSasSecretName string
 
 var appSettingsArray = filter(array(appDefinition.settings), i => i.name != '')
 var secrets = map(filter(appSettingsArray, i => i.?secret != null), i => {
@@ -147,11 +144,9 @@ module appAuthorization './app-authorization.bicep' = if (clientId != '') {
   params: {
     appName: app.name
     clientId: clientId
-    clientSecret: clientSecret
     clientIdScope: clientIdScope
-    keyVaultName: keyVaultName
-    storageAccountName: storageAccountName
     clientSecretSecretName: clientSecretSecretName
+    tokenStoreSasSecretName: tokenStoreSasSecretName
   }
 }
 
