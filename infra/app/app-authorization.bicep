@@ -47,7 +47,7 @@ module tokenStoreSasSecret '../shared/keyvault-secret.bicep' = {
   params: {
     keyVaultName: keyVaultName
     name: tokenStoreSasSecretName
-    secretValue: storageAccount.listServiceSas(storageAccount.apiVersion, sasConfig).serviceSasToken
+    secretValue: 'https://${storageAccountName}.blob.${environment().suffixes.storage}/${tokenStoreContainerName}?${storageAccount.listServiceSas(storageAccount.apiVersion, sasConfig).serviceSasToken}'
     exp: dateTimeToEpoch(expiry)
   }
 }
@@ -87,7 +87,7 @@ resource authSettings 'Microsoft.App/containerApps/authConfigs@2024-03-01' = {
         }
         validation: {
           allowedAudiences: [
-            '${clientIdAudience}'
+            '${clientIdScope}'
           ]
           defaultAuthorizationPolicy: {
             allowedApplications: [

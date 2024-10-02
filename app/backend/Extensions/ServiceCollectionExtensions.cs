@@ -27,8 +27,6 @@ namespace MinimalApi.Extensions;
 
 internal static class ServiceCollectionExtensions
 {
-    private static readonly DefaultAzureCredential s_azureCredential = new();
-
     internal static IServiceCollection AddAzureServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHttpClient();
@@ -167,13 +165,17 @@ internal static class ServiceCollectionExtensions
     {
         var sp = services.BuildServiceProvider();
         var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
+        DefaultAzureCredential azureCredential = new(new DefaultAzureCredentialOptions
+        {
+            ManagedIdentityClientId = configuration[AppConfigurationSetting.UserAssignedManagedIdentityClientId]
+        });
 
         services.AddSingleton<BlobServiceClient>(sp =>
         {
             var azureStorageAccountEndpoint = configuration[AppConfigurationSetting.AzureStorageAccountEndpoint];
             ArgumentNullException.ThrowIfNullOrEmpty(azureStorageAccountEndpoint);
 
-            var blobServiceClient = new BlobServiceClient(new Uri(azureStorageAccountEndpoint), s_azureCredential);
+            var blobServiceClient = new BlobServiceClient(new Uri(azureStorageAccountEndpoint), azureCredential);
 
             return blobServiceClient;
         });
@@ -195,6 +197,7 @@ internal static class ServiceCollectionExtensions
 
             var deployedModelName4 = config["AOAIPremiumChatGptDeployment"];
             var azureOpenAiServiceEndpoint4 = config["AOAIPremiumServiceEndpoint"];
+
             ArgumentNullException.ThrowIfNullOrEmpty(deployedModelName4);
             ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceEndpoint4);
 
@@ -211,8 +214,8 @@ internal static class ServiceCollectionExtensions
             }
             else
             {
-                openAIClient3 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), s_azureCredential);
-                openAIClient4 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), s_azureCredential);
+                openAIClient3 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), azureCredential);
+                openAIClient4 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), azureCredential);
             }
 
             // Build Plugins
@@ -244,11 +247,11 @@ internal static class ServiceCollectionExtensions
             else
             {
                 kernel3 = Kernel.CreateBuilder()
-                   .AddAzureOpenAIChatCompletion(deployedModelName3, azureOpenAiServiceEndpoint3, s_azureCredential)
+                   .AddAzureOpenAIChatCompletion(deployedModelName3, azureOpenAiServiceEndpoint3, azureCredential)
                    .Build();
 
                 kernel4 = Kernel.CreateBuilder()
-                   .AddAzureOpenAIChatCompletion(deployedModelName4, azureOpenAiServiceEndpoint4, s_azureCredential)
+                   .AddAzureOpenAIChatCompletion(deployedModelName4, azureOpenAiServiceEndpoint4, azureCredential)
                    .Build();
             }
 
@@ -265,14 +268,14 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton((sp) => {
             var config = sp.GetRequiredService<IConfiguration>();
             var cosmosDBEndpoint = config[AppConfigurationSetting.CosmosDBEndpoint];
-            var client = new CosmosClient(cosmosDBEndpoint, s_azureCredential);
+            var client = new CosmosClient(cosmosDBEndpoint, azureCredential);
             return client;
         });
 
         services.AddSingleton<SearchClientFactory>(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
-            return new SearchClientFactory(config, s_azureCredential);
+            return new SearchClientFactory(config, azureCredential);
         });
 
         if (!string.IsNullOrEmpty(configuration[AppConfigurationSetting.CosmosDBEndpoint]))
@@ -280,7 +283,7 @@ internal static class ServiceCollectionExtensions
             services.AddSingleton((sp) => {
                 var config = sp.GetRequiredService<IConfiguration>();
                 var endpoint = config[AppConfigurationSetting.CosmosDBEndpoint];
-                CosmosClientBuilder configurationBuilder = new CosmosClientBuilder(endpoint,s_azureCredential);
+                CosmosClientBuilder configurationBuilder = new CosmosClientBuilder(endpoint,azureCredential);
                 return configurationBuilder
                         .Build();
             });
@@ -326,7 +329,7 @@ internal static class ServiceCollectionExtensions
                             {
                                 AuthorityHost = new Uri(config["AZURE_AUTHORITY"])
                             });
-
+        
         var httpClient = sp.GetService<IHttpClientFactory>().CreateClient();
 
         //if the configuration specifies a subscription key, add it to the request headers
@@ -340,6 +343,7 @@ internal static class ServiceCollectionExtensions
             Audience = config["AZURE_OPENAI_AUDIENCE"],
             Transport = new HttpClientPipelineTransport(httpClient)
         });
+        
         openAIClient4 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), credential, new AzureOpenAIClientOptions
         {
             Audience = config["AZURE_OPENAI_AUDIENCE"],

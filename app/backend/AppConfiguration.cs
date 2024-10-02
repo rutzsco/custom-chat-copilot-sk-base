@@ -35,7 +35,8 @@ public static class AppConfiguration
 public static class AppConfigurationSetting
 {
     public static string UseManagedIdentityResourceAccess { get; } = "UseManagedIdentityResourceAccess";
-    
+    public static string UserAssignedManagedIdentityClientId { get; } = "UserAssignedManagedIdentityClientId";
+
     // CosmosDB
     public static string CosmosDBEndpoint { get; } = "CosmosDBEndpoint";
     public static string CosmosDBConnectionString { get; } = "CosmosDBConnectionString";

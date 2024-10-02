@@ -208,6 +208,7 @@ module appsEnv './app/apps-env.bicep' = {
 }
 
 var storageAccountContainerName = 'content'
+var dataProtectionKeysContainerName = 'dataprotectionkeys'
 
 module storageAccount './app/storage-account.bicep' = {
   name: 'storage'
@@ -219,6 +220,9 @@ module storageAccount './app/storage-account.bicep' = {
     containers: [
       {
         name: storageAccountContainerName
+      }
+      {
+        name: dataProtectionKeysContainerName
       }
     ]
     publicNetworkAccess: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
@@ -282,7 +286,10 @@ var appDefinition = {
       secretRef: clientSecretSecretName
       secret: true
     }
-    
+    {
+      name: 'CosmosDBEndpoint'
+      value: cosmos.outputs.endpoint
+    }
     {
       name: 'AzureStorageAccountEndpoint'
       value: storageAccount.outputs.primaryEndpoints.blob
@@ -318,6 +325,10 @@ var appDefinition = {
     {
       name: 'AOAIEmbeddingsDeployment'
       value: azureEmbeddingDeploymentName
+    }
+    {
+      name: 'EnableDataProtectionBlobKeyStorage'
+      value: string(false)
     }
   ], 
   (shouldDeployAzureOpenAIService) ? [
@@ -364,6 +375,10 @@ var appDefinition = {
     {
       name: 'UseManagedIdentityResourceAccess'
       value: string(useManagedIdentityResourceAccess)
+    }
+    {
+      name: 'UserAssignedManagedIdentityClientId'
+      value: managedIdentity.outputs.identityClientId
     }
   ]: []))
 }

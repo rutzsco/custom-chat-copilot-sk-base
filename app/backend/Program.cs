@@ -30,6 +30,7 @@ AppConfiguration.Load(builder.Configuration);
 ProfileDefinition.Load(builder.Configuration);
 
 static string? GetEnvVar(string key) => Environment.GetEnvironmentVariable(key);
+
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddDistributedMemoryCache();
