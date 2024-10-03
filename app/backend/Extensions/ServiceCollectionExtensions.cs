@@ -51,7 +51,7 @@ internal static class ServiceCollectionExtensions
             return sp.GetRequiredService<BlobServiceClient>().GetBlobContainerClient(azureStorageContainer);
         });
 
-        services.AddScoped<OpenAIClientFacade>(sp =>
+        services.AddSingleton<OpenAIClientFacade>(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
             var deployedModelName3 = config["AOAIStandardChatGptDeployment"];
@@ -186,7 +186,7 @@ internal static class ServiceCollectionExtensions
             return sp.GetRequiredService<BlobServiceClient>().GetBlobContainerClient(azureStorageContainer);
         });
 
-        services.AddScoped(sp =>
+        services.AddSingleton(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
             var deployedModelName3 = config["AOAIStandardChatGptDeployment"];
