@@ -76,6 +76,20 @@ param containerAppEnvironmentWorkloadProfiles array = []
 @description('Name of the Container Apps Environment workload profile to use for the app')
 param appContainerAppEnvironmentWorkloadProfileName string
 
+@description('Should deploy Azure OpenAI service')
+param shouldDeployAzureOpenAIService bool = true
+
+param azureSpClientId string = ''
+@secure()
+param azureSpClientSecret string = ''
+param azureTenantId string = ''
+param azureAuthorityHost string = ''
+param ocpApimSubscriptionKey string = ''
+param azureSpOpenAiAudience string = ''
+param azureOpenAiEndpoint string = ''
+param azureSpClientIdScope string = ''
+param useManagedIdentityResourceAccess bool = false
+
 // Tags that should be applied to all resources.
 // 
 // Note that 'azd-service-name' tags should be applied separately to service host resources.
@@ -161,6 +175,8 @@ module cosmos './app/cosmosdb.bicep' = {
     keyVaultName: keyVault.outputs.name
     privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
     privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.documentDBDatabaseAccounts}${resourceToken}': ''
+    useManagedIdentityResourceAccess: useManagedIdentityResourceAccess
+    managedIdentityPrincipalId: managedIdentity.outputs.identityPrincipalId
   }
 }
 
@@ -192,6 +208,7 @@ module appsEnv './app/apps-env.bicep' = {
 }
 
 var storageAccountContainerName = 'content'
+var dataProtectionKeysContainerName = 'dataprotectionkeys'
 
 module storageAccount './app/storage-account.bicep' = {
   name: 'storage'
@@ -204,6 +221,9 @@ module storageAccount './app/storage-account.bicep' = {
       {
         name: storageAccountContainerName
       }
+      {
+        name: dataProtectionKeysContainerName
+      }
     ]
     publicNetworkAccess: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
     allowBlobPublicAccess: !empty(virtualNetworkName) ? false : true
@@ -213,6 +233,8 @@ module storageAccount './app/storage-account.bicep' = {
       bypass: 'AzureServices'
       defaultAction: !empty(virtualNetworkName) ? 'Deny' : 'Allow'
     }
+    useManagedIdentityResourceAccess: useManagedIdentityResourceAccess
+    managedIdentityPrincipalId: managedIdentity.outputs.identityPrincipalId
   }
 }
 
@@ -224,6 +246,27 @@ module search './app/search-services.bicep' = {
     publicNetworkAccess: !empty(virtualNetworkName) ? 'disabled' : 'enabled'
     privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
     privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.searchSearchServices}${resourceToken}': ''
+    useManagedIdentityResourceAccess: useManagedIdentityResourceAccess
+    managedIdentityPrincipalId: managedIdentity.outputs.identityPrincipalId
+  }
+}
+
+var tokenStoreSasSecretName = 'token-store-sas'
+var clientSecretSecretName = 'microsoft-provider-authentication-secret'
+var apimSubscriptionKeySecretName = 'apim-subscription-key'
+var tokenStoreContainerName = 'token-store'
+
+module appAuthorizationSecrets './app/app-authorization-secrets.bicep' = if(azureSpClientId != '') {
+  name: 'app-authorization-secrets'
+  params: {
+    keyVaultName: keyVault.outputs.name
+    storageAccountName: storageAccount.outputs.storageAccountName
+    tokenStoreContainerName: tokenStoreContainerName
+    tokenStoreSasSecretName: tokenStoreSasSecretName
+    clientSecretSecretName: clientSecretSecretName
+    clientSecret: azureSpClientSecret
+    apimSubscriptionKey: ocpApimSubscriptionKey
+    apimSubscriptionKeySecretName: apimSubscriptionKeySecretName
   }
 }
 
@@ -246,18 +289,22 @@ var appDefinition = {
       value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${storageAccount.outputs.storageAccountConnectionStringSecretName}'
       secretRef: 'azurestorageconnectionstring'
       secret: true
-    }
-    {
-      name: 'AOAIStandardServiceKey'
-      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${azureOpenAi.outputs.cognitiveServicesKeySecretName}'
-      secretRef: 'aoaistandardservicekey'
-      secret: true
-    }
+    }    
     {
       name: 'AzureSearchServiceKey'
       value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${search.outputs.searchKeySecretName}'
       secretRef: 'azuresearchservicekey'
       secret: true
+    }
+    {
+      name: clientSecretSecretName
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${clientSecretSecretName}'
+      secretRef: clientSecretSecretName
+      secret: true
+    }
+    {
+      name: 'CosmosDBEndpoint'
+      value: cosmos.outputs.endpoint
     }
     {
       name: 'AzureStorageAccountEndpoint'
@@ -285,7 +332,7 @@ var appDefinition = {
     }
     {
       name: 'AOAIStandardServiceEndpoint'
-      value: azureOpenAi.outputs.endpoint
+      value: (shouldDeployAzureOpenAIService) ? azureOpenAi.outputs.endpoint : azureOpenAiEndpoint
     }
     {
       name: 'AOAIStandardChatGptDeployment'
@@ -295,7 +342,65 @@ var appDefinition = {
       name: 'AOAIEmbeddingsDeployment'
       value: azureEmbeddingDeploymentName
     }
-  ]))
+    {
+      name: 'EnableDataProtectionBlobKeyStorage'
+      value: string(false)
+    }
+  ], 
+  (shouldDeployAzureOpenAIService) ? [
+      {
+        name: 'AOAIStandardServiceKey'
+        value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${azureOpenAi.outputs.cognitiveServicesKeySecretName}'
+        secretRef: 'aoaistandardservicekey'
+        secret: true
+      }
+  ] : [],
+  (azureSpClientId != '') ? [
+    {
+      name: 'AZURE_SP_CLIENT_ID'
+      value: azureSpClientId
+    }
+    {
+      name: 'AZURE_SP_CLIENT_SECRET'
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${clientSecretSecretName}'
+      secretRef: clientSecretSecretName
+      secret: true
+    }
+    {
+      name: 'AZURE_TENANT_ID'
+      value: azureTenantId
+    }
+    {
+      name: 'AZURE_AUTHORITY_HOST'
+      value: azureAuthorityHost
+    }
+    {
+      name: 'Ocp-Apim-Subscription-Key'
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${apimSubscriptionKeySecretName}'
+      secretRef: apimSubscriptionKeySecretName
+      secret: true
+    }
+    {
+      name: 'AZURE_SP_OPENAI_AUDIENCE'
+      value: azureSpOpenAiAudience
+    }
+    {
+      name: tokenStoreSasSecretName
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${tokenStoreSasSecretName}'
+      secretRef: tokenStoreSasSecretName
+      secret: true
+    }
+  ] : [],
+  (useManagedIdentityResourceAccess) ? [
+    {
+      name: 'UseManagedIdentityResourceAccess'
+      value: string(useManagedIdentityResourceAccess)
+    }
+    {
+      name: 'UserAssignedManagedIdentityClientId'
+      value: managedIdentity.outputs.identityClientId
+    }
+  ]: []))
 }
 
 module app './app/app.bicep' = {
@@ -311,10 +416,14 @@ module app './app/app.bicep' = {
     exists: backendExists
     appDefinition: appDefinition
     identityName: managedIdentity.outputs.identityName
+    clientId: azureSpClientId
+    clientIdScope: azureSpClientIdScope
+    clientSecretSecretName: clientSecretSecretName
+    tokenStoreSasSecretName: tokenStoreSasSecretName
   }
 }
 
-module azureOpenAi './app/cognitive-services.bicep' =  {
+module azureOpenAi './app/cognitive-services.bicep' = if(shouldDeployAzureOpenAIService) {
   name: 'openai'
   params: {
     name: '${abbrs.cognitiveServicesAccounts}${resourceToken}'

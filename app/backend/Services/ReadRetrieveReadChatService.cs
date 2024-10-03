@@ -42,7 +42,7 @@ internal sealed class ReadRetrieveReadChatService
 
             sw.Stop();
 
-            var result = context.BuildResoponse(profile, request, _configuration, _openAIClientFacade.GetKernelDeploymentName(request.OptionFlags.IsChatGpt4Enabled()), sw.ElapsedMilliseconds);
+            var result = context.BuildResponse(profile, request, _configuration, _openAIClientFacade.GetKernelDeploymentName(request.OptionFlags.IsChatGpt4Enabled()), sw.ElapsedMilliseconds);
 
             var diagnostics = result.Context.Diagnostics;
             _logger.LogInformation($"CHAT_DIAGNOSTICS: CompletionTokens={diagnostics.AnswerDiagnostics.CompletionTokens}, PromptTokens={diagnostics.AnswerDiagnostics.PromptTokens}, TotalTokens={diagnostics.AnswerDiagnostics.TotalTokens}, DurationMilliseconds={diagnostics.AnswerDiagnostics.AnswerDurationMilliseconds}");

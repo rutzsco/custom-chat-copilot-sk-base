@@ -15,6 +15,7 @@ builder.Services.AddOutputCache();
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 builder.Services.AddCrossOriginResourceSharing();
+builder.Services.AddHttpContextAccessor();
 
 // Add Azure services to the container.
 var isMIBasedAuthentication = builder.Configuration[AppConfigurationSetting.UseManagedIdentityResourceAccess];
@@ -29,6 +30,7 @@ AppConfiguration.Load(builder.Configuration);
 ProfileDefinition.Load(builder.Configuration);
 
 static string? GetEnvVar(string key) => Environment.GetEnvironmentVariable(key);
+
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddDistributedMemoryCache();

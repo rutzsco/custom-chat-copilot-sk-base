@@ -53,8 +53,50 @@
           "workloadProfileType": "D4",
           "minimumCount": 1,
           "maximumCount": 10
+        },
+        {
+          "name": "func",
+          "workloadProfileType": "D4",
+          "minimumCount": 1,
+          "maximumCount": 20
         }
       ]
+    },
+    "shouldDeployAzureOpenAIService": {
+      "value": "${SHOULD_DEPLOY_AZURE_OPENAI_SERVICE}"
+    },
+    "azureSpClientId": {
+      "value": "${AZURE_SP_CLIENT_ID}"
+    },
+    "azureSpClientSecret": {
+      "value": "${AZURE_SP_CLIENT_SECRET}"
+    },
+    "azureTenantId": {
+      "value": "${AZURE_TENANT_ID}"
+    },
+    "azureAuthorityHost": {
+      "value": "${AZURE_AUTHORITY_HOST}"
+    },
+    "ocpApimSubscriptionKey": {
+      "value": "${OCP_APIM_SUBSCRIPTION_KEY}"
+    },
+    "azureSpOpenAiAudience": {
+      "value": "${AZURE_SP_OPENAI_AUDIENCE}"
+    },
+    "azureOpenAiEndpoint": {
+      "value": "${AZURE_OPENAI_ENDPOINT}"
+    },
+    "azureChatGptStandardDeploymentName": {
+      "value": "${AZURE_CHAT_GPT_STANDARD_DEPLOYMENT_NAME}"
+    },
+    "azureEmbeddingDeploymentName": {
+      "value": "${AZURE_EMBEDDING_DEPLOYMENT_NAME}"
+    },
+    "azureSpClientIdScope": {
+      "value": "${AZURE_SP_CLIENT_ID_SCOPE}"
+    },
+    "useManagedIdentityResourceAccess": {
+      "value": "${USE_MANAGED_IDENTITY_RESOURCE_ACCESS}"
     }
   }
 }

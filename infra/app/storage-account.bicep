@@ -23,6 +23,8 @@ param keyVaultName string
 
 param privateEndpointSubnetId string
 param privateEndpointName string
+param useManagedIdentityResourceAccess bool
+param managedIdentityPrincipalId string
 
 var storageAccountConnectionStringSecretName = 'storage-account-connection-string'
 
@@ -68,6 +70,17 @@ module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEnd
     groupIds: ['blob']
     privateLinkServiceId: storage.id
     subnetId: privateEndpointSubnetId
+  }
+}
+
+var storageBlobDataContributorRoleDefinitionId = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+
+resource managedIdentityStorageBlobDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(useManagedIdentityResourceAccess) {
+  name: guid(subscription().id, managedIdentityPrincipalId, storageBlobDataContributorRoleDefinitionId)
+  properties: {
+    principalId: managedIdentityPrincipalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributorRoleDefinitionId)
+    principalType: 'ServicePrincipal'
   }
 }
 

@@ -35,7 +35,8 @@ public static class AppConfiguration
 public static class AppConfigurationSetting
 {
     public static string UseManagedIdentityResourceAccess { get; } = "UseManagedIdentityResourceAccess";
-    
+    public static string UserAssignedManagedIdentityClientId { get; } = "UserAssignedManagedIdentityClientId";
+
     // CosmosDB
     public static string CosmosDBEndpoint { get; } = "CosmosDBEndpoint";
     public static string CosmosDBConnectionString { get; } = "CosmosDBConnectionString";
@@ -57,5 +58,14 @@ public static class AppConfigurationSetting
     public static string Port { get; } = "PORT";
 
     public static string ApplicationInsightsConnectionString { get; } = "APPLICATIONINSIGHTS_CONNECTION_STRING";
+
+    // On-Behalf-Of (OBO) Flow
+    public static string AzureServicePrincipalClientID { get; } = "AZURE_SP_CLIENT_ID";
+    public static string AzureServicePrincipalClientSecret { get; } = "AZURE_SP_CLIENT_SECRET";
+    public static string AzureTenantID { get; } = "AZURE_TENANT_ID";
+    public static string AzureAuthorityHost { get; } = "AZURE_AUTHORITY_HOST";
+    public static string AzureServicePrincipalOpenAIAudience { get; } = "AZURE_SP_OPENAI_AUDIENCE";
+    public static string OcpApimSubscriptionKey { get; } = "Ocp-Apim-Subscription-Key";
+    public static string XMsTokenAadAccessToken { get; } = "X-MS-TOKEN-AAD-ACCESS-TOKEN";
 
 }
