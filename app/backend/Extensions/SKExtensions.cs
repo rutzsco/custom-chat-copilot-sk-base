@@ -1,4 +1,5 @@
-﻿using Microsoft.SemanticKernel.ChatCompletion;
+﻿using Azure.AI.Inference;
+using Microsoft.SemanticKernel.ChatCompletion;
 using MinimalApi.Services.Profile;
 using MinimalApi.Services.Search;
 using TiktokenSharp;
@@ -111,7 +112,7 @@ public static class SKExtensions
     {
         return options.ContainsKey("IMAGECONTENT");
     }
-    public static ApproachResponse BuildResoponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
+    public static ApproachResponse BuildResponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
     {
         var result = context[ContextVariableOptions.ChatResult] as SKResult;
         var knowledgeSourceSummary = context[ContextVariableOptions.KnowledgeSummary] as KnowledgeSourceSummary;
@@ -171,7 +172,7 @@ public static class SKExtensions
             contextData);
     }
 
-    public static ApproachResponse BuildChatSimpleResoponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
+    public static ApproachResponse BuildChatSimpleResponse(this KernelArguments context, ProfileDefinition profile, ChatRequest request, int requestTokenCount, string answer, IConfiguration configuration, string modelDeploymentName, long workflowDurationMilliseconds)
     {
         var completionTokens = GetTokenCount(answer);
         var totalTokens = completionTokens + requestTokenCount;

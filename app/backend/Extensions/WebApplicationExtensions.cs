@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System;
+using Azure.Core;
 using ClientApp.Pages;
 using Microsoft.AspNetCore.Antiforgery;
 using MinimalApi.Services;
@@ -48,7 +49,25 @@ internal static class WebApplicationExtensions
         api.MapGet("status", OnGetStatus);
 
         api.MapPost("ingestion/trigger", OnPostTriggerIngestionPipelineAsync);
+        api.MapGet("headers", OnGetHeadersAsync);
         return app;
+    }
+
+    private static IResult OnGetHeadersAsync(HttpContext context)
+    {
+        var headers = new Dictionary<string, string>();
+        foreach (var header in context.Request.Headers)
+        {
+            if (headers.Keys.Contains(header.Key))
+            {
+                headers[header.Key] = header.Value.FirstOrDefault() ?? "";
+            }
+            else
+            {
+                headers.Add(header.Key, header.Value.FirstOrDefault() ?? "");
+            }
+        }
+        return Results.Ok(headers);
     }
 
     private static IResult OnGetStatus()

@@ -37,7 +37,7 @@ docker build . -t custom-chat-copilot-sk-base/chat-app
 
 **NOTE**: You can specify the following command if you want to use an existing vNet and secure all services behind private endpoints. You will need a vNet with a /24 CIDR range in order to use this option.
 
-```bash
+```shell
 azd env set AZURE_VNET_NAME <vnet-name>
 azd env set AZURE_VNET_RESOURCE_GROUP_NAME <vnet-resource-group-name>
 azd env set AZURE_CONTAINER_APP_SUBNET_NAME <azure-container-app-subnet-name>
@@ -47,6 +47,38 @@ azd env set AZURE_PRIVATE_ENDPOINT_SUBNET_ADDRESS_PREFIX <azure-private-endpoint
 azd env set AZURE_MONITOR_PRIVATE_LINK_SCOPE_NAME <azure-monitor-private-link-scope-name>
 azd env set AZURE_MONITOR_PRIVATE_LINK_SCOPE_RESOURCE_GROUP_NAME <azure-monitor-private-link-scope-resource-group-name>
 ```
+
+**NOTE**: If you want to use an OpenAI service that already exists somewhere else, you can disable the IaC from deploying the OpenAI service.
+
+```shell
+azd env set SHOULD_DEPLOY_AZURE_OPENAI_SERVICE false
+```
+
+**NOTE**: If you want to use a Entra ID service principal to authorize requests to the OpenAI Service (using the On-Behalf-Of flow) behind API Management, you can specify the following commands to indicate the Entra ID values. The authority is the FQDN of the Entra ID tenant in either Azure Commercial or one of the sovereign clouds.
+
+```shell
+azd env set AZURE_SP_CLIENT_ID <client-id>
+azd env set AZURE_SP_CLIENT_SECRET <client-secret>
+azd env set AZURE_TENANT_ID <tenant-id>
+azd env set AZURE_SP_OPENAI_AUDIENCE <audience-of-the-OpenAI-service-principal>
+azd env set AZURE_AUTHORITY_HOST https://login.microsoftonline.com/
+azd env set AZURE_SP_CLIENT_ID_SCOPE api://<client-id>/user_impersonation
+azd end set AZURE_OPENAI_ENDPOINT <apim-endpoint>
+```
+
+**NOTE**: If you need to specify an API Management subscription key for the OpenAI service, you can specify the following command.
+
+```shell
+azd env set OCP_APIM_SUBSCRIPTION_KEY <apim-subscription-key>
+```
+
+**NOTE**: If you want to use managed identities to access the various Azure services instead of keys, you can specify the following command.
+
+```shell
+azd env set USE_MANAGED_IDENTITY_RESOURCE_ACCESS true
+```
+
+Run the following command to build, provision & deploy the application.
 
 ```bash
 azd up

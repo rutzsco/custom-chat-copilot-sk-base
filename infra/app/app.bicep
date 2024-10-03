@@ -1,7 +1,6 @@
 param name string
 param location string = resourceGroup().location
 param tags object = {}
-
 param containerRegistryName string
 param containerAppsEnvironmentName string
 param containerAppsEnvironmentWorkloadProfileName string
@@ -10,6 +9,10 @@ param exists bool
 @secure()
 param appDefinition object
 param identityName string
+param clientId string
+param clientIdScope string
+param clientSecretSecretName string
+param tokenStoreSasSecretName string
 
 var appSettingsArray = filter(array(appDefinition.settings), i => i.name != '')
 var secrets = map(filter(appSettingsArray, i => i.?secret != null), i => {
@@ -133,6 +136,17 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
       }
     }
     workloadProfileName: containerAppsEnvironmentWorkloadProfileName
+  }
+}
+
+module appAuthorization './app-authorization.bicep' = if (clientId != '') {
+  name: 'app-authorization'
+  params: {
+    appName: app.name
+    clientId: clientId
+    clientIdScope: clientIdScope
+    clientSecretSecretName: clientSecretSecretName
+    tokenStoreSasSecretName: tokenStoreSasSecretName
   }
 }
 

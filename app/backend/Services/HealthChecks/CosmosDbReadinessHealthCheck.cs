@@ -49,12 +49,12 @@ public class CosmosDbReadinessHealthCheck(CosmosClient cosmosClient) : IHealthCh
 #pragma warning disable CA1031 // Do not catch general exception types
             try
             {
-                await database.GetContainer(DefaultSettings.CosmosDBUserDocumentsCollectionName).ReadContainerAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-                data.Add("Container", $"CosmosDB container is accessible: {DefaultSettings.CosmosDBUserDocumentsCollectionName}");
+                await database.GetContainer(DefaultSettings.CosmosDBCollectionName).ReadContainerAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                data.Add("Container", $"CosmosDB container is accessible: {DefaultSettings.CosmosDBCollectionName}");
             }
             catch (Exception ex)
             {
-                data.Add("Container", $"CosmosDB container is not accessible: {DefaultSettings.CosmosDBUserDocumentsCollectionName}");
+                data.Add("Container", $"CosmosDB container is not accessible: {DefaultSettings.CosmosDBCollectionName}");
                 return new HealthCheckResult(HealthStatus.Unhealthy, description: "CosmosDB is not accessible", exception: ex, data: data);
             }
 #pragma warning restore CA1031 // Do not catch general exception types

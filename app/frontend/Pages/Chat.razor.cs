@@ -157,6 +157,8 @@ public sealed partial class Chat
                 Approach.ReadRetrieveRead,
                 null);
 
+
+
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming")
             {
                 Headers = { { "Accept", "application/json" } },

@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using OpenAI.Embeddings;
 using TiktokenSharp;
 
 namespace MinimalApi.Services.Search;
@@ -7,13 +8,13 @@ namespace MinimalApi.Services.Search;
 public class SearchLogic<T> where T : IKnowledgeSource
 {
     private readonly SearchClient _searchClient;
-    private readonly OpenAIClient _openAIClient;
+    private readonly AzureOpenAIClient _openAIClient;
     private readonly string _embeddingModelName;
     private readonly string _embeddingFieldName;
     private readonly List<string> _selectFields;
     private readonly int _documentFilesCount;
 
-    public SearchLogic(OpenAIClient openAIClient, SearchClientFactory factory, string indexName, string embeddingModelName, string embeddingFieldName, List<string> selectFields, int documentFilesCount)
+    public SearchLogic(AzureOpenAIClient openAIClient, SearchClientFactory factory, string indexName, string embeddingModelName, string embeddingFieldName, List<string> selectFields, int documentFilesCount)
     {
         _searchClient = factory.GetOrCreateClient(indexName);
         _openAIClient = openAIClient;
@@ -101,9 +102,9 @@ public class SearchLogic<T> where T : IKnowledgeSource
         return new KnowledgeSourceSummary(sb.ToString(), documents);
     }
 
-    private async Task<ReadOnlyMemory<float>> GenerateEmbeddingsAsync(string text, OpenAIClient openAIClient)
+    private async Task<ReadOnlyMemory<float>> GenerateEmbeddingsAsync(string text, AzureOpenAIClient openAIClient)
     {
-        var response = await openAIClient.GetEmbeddingsAsync(new EmbeddingsOptions(_embeddingModelName, new[] { text }));
-        return response.Value.Data[0].Embedding;
+        var response = await openAIClient.GetEmbeddingClient(_embeddingModelName).GenerateEmbeddingsAsync(new List<string>{ text });
+        return response.Value[0].Vector;
     }
 }
