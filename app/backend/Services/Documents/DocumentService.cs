@@ -1,17 +1,10 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System.Net.Http;
-using System.Threading;
-using Azure;
 using Microsoft.Azure.Cosmos;
-using Microsoft.Identity.Client;
 using MinimalApi.Services.Documents;
-using Newtonsoft.Json;
 using Shared.Json;
-using Shared.Models;
 
 namespace MinimalApi.Services.ChatHistory;
-
 
 public class DocumentService : IDocumentService
 {
