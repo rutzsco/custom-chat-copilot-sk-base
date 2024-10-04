@@ -1,27 +1,19 @@
 ﻿
 // Copyright (c) Microsoft. All rights reserved.
 
-using System.Security.Policy;
 using Azure;
 using Azure.Storage;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MinimalApi.Services.ChatHistory;
 using MinimalApi.Services.HealthChecks;
 using MinimalApi.Services.Documents;
 using MinimalApi.Services.Search;
 using MinimalApi.Services.Skills;
-using Microsoft.Azure.Cosmos.Linq;
-using Azure.AI.OpenAI;
-using Azure.Core.Pipeline;
-using System.Net.Http;
 using System.ClientModel.Primitives;
-using Microsoft.Extensions.Azure;
-using Microsoft.AspNetCore.Http;
+
 
 namespace MinimalApi.Extensions;
 
@@ -54,18 +46,16 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<OpenAIClientFacade>(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
-            var deployedModelName3 = config["AOAIStandardChatGptDeployment"];
-            var azureOpenAiServiceEndpoint3 = config["AOAIStandardServiceEndpoint"];
-            var azureOpenAiServiceKey3 = config["AOAIStandardServiceKey"];
+            var standardChatGptDeployment = config["AOAIStandardChatGptDeployment"];
+            var standardServiceEndpoint = config["AOAIStandardServiceEndpoint"];
+            var standardServiceKey = config["AOAIStandardServiceKey"];
 
-            ArgumentNullException.ThrowIfNullOrEmpty(deployedModelName3);
-            ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceEndpoint3);
+            ArgumentNullException.ThrowIfNullOrEmpty(standardChatGptDeployment);
+            ArgumentNullException.ThrowIfNullOrEmpty(standardServiceEndpoint);
 
-            var deployedModelName4 = config["AOAIPremiumChatGptDeployment"];
-            var azureOpenAiServiceEndpoint4 = config["AOAIPremiumServiceEndpoint"];
-            var azureOpenAiServiceKey4 = config["AOAIPremiumServiceKey"];
-            ArgumentNullException.ThrowIfNullOrEmpty(deployedModelName4);
-            ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceEndpoint4);
+            var premiumChatGptDeployment = config["AOAIPremiumChatGptDeployment"];
+            var premiumServiceEndpoint = config["AOAIPremiumServiceEndpoint"];
+            var premiumServiceKey = config["AOAIPremiumServiceKey"];
 
             // Build Plugins
             var searchClientFactory = sp.GetRequiredService<SearchClientFactory>();
@@ -73,24 +63,20 @@ internal static class ServiceCollectionExtensions
             AzureOpenAIClient? openAIClient3 = null;
             AzureOpenAIClient? openAIClient4 = null;
 
-            if (config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalClientID) != null
-                && config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalClientSecret) != null
-                && config.GetValue<string>(AppConfigurationSetting.AzureTenantID) != null
-                && config.GetValue<string>(AppConfigurationSetting.AzureAuthorityHost) != null)
+            if (UseAPIMAIGatewayOBO(config))
             {
-                SetupOpenAIClientsUsingOnBehalfOfOthersFlowAndSubscriptionKey(sp, httpContextAccessor, config, azureOpenAiServiceEndpoint3, out openAIClient3, out openAIClient4);
+                SetupOpenAIClientsUsingOnBehalfOfOthersFlowAndSubscriptionKey(sp, httpContextAccessor, config, standardServiceEndpoint, out openAIClient3, out openAIClient4);
             }
             else
             {
-                ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceKey3);
-                ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceKey4);
+                ArgumentNullException.ThrowIfNullOrEmpty(standardServiceKey);
 
-                openAIClient3 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), new AzureKeyCredential(azureOpenAiServiceKey3));
-                openAIClient4 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint4), new AzureKeyCredential(azureOpenAiServiceKey4));
+                openAIClient3 = new AzureOpenAIClient(new Uri(standardServiceEndpoint), new AzureKeyCredential(standardServiceKey));
+                if (!string.IsNullOrEmpty(premiumServiceEndpoint))
+                    openAIClient4 = new AzureOpenAIClient(new Uri(premiumServiceEndpoint), new AzureKeyCredential(premiumServiceKey));
             }
 
             var retrieveRelatedDocumentPlugin3 = new RetrieveRelatedDocumentSkill(config, searchClientFactory, openAIClient3);
-
             var retrieveRelatedDocumentPlugin4 = new RetrieveRelatedDocumentSkill(config, searchClientFactory, openAIClient4);
 
             var generateSearchQueryPlugin = new GenerateSearchQuerySkill();
@@ -104,27 +90,27 @@ internal static class ServiceCollectionExtensions
             if (openAIClient3 != null)
             {
                 builder3 = Kernel.CreateBuilder();
-                builder3.AddAzureOpenAIChatCompletion(deployedModelName3, openAIClient3);
+                builder3.AddAzureOpenAIChatCompletion(standardChatGptDeployment, openAIClient3);
                 kernel3 = builder3.Build();
             }
             else
             {
                 // Build Kernels
                 kernel3 = Kernel.CreateBuilder()
-                .AddAzureOpenAIChatCompletion(deployedModelName3, azureOpenAiServiceEndpoint3, azureOpenAiServiceKey3)
+                .AddAzureOpenAIChatCompletion(standardChatGptDeployment, standardServiceEndpoint, standardServiceKey)
                 .Build();
             }
 
             if (openAIClient4 != null)
             { 
                 builder4 = Kernel.CreateBuilder();
-                builder4.AddAzureOpenAIChatCompletion(deployedModelName4, openAIClient4);
+                builder4.AddAzureOpenAIChatCompletion(premiumChatGptDeployment, openAIClient4);
                 kernel4 = builder4.Build();
             }
             else
             {
                 kernel4 = Kernel.CreateBuilder()
-                .AddAzureOpenAIChatCompletion(deployedModelName4, azureOpenAiServiceEndpoint4, azureOpenAiServiceKey4)
+                .AddAzureOpenAIChatCompletion(premiumChatGptDeployment, premiumServiceEndpoint, premiumServiceKey)
                 .Build();
             }
 
@@ -132,11 +118,14 @@ internal static class ServiceCollectionExtensions
             kernel3.ImportPluginFromObject(generateSearchQueryPlugin, DefaultSettings.GenerateSearchQueryPluginName);
             kernel3.ImportPluginFromObject(chatPlugin, DefaultSettings.ChatPluginName);
 
-            kernel4.ImportPluginFromObject(retrieveRelatedDocumentPlugin4, DefaultSettings.DocumentRetrievalPluginName);
-            kernel4.ImportPluginFromObject(generateSearchQueryPlugin, DefaultSettings.GenerateSearchQueryPluginName);
-            kernel4.ImportPluginFromObject(chatPlugin, DefaultSettings.ChatPluginName);
+            if (kernel4 != null)
+            {
+                kernel4.ImportPluginFromObject(retrieveRelatedDocumentPlugin4, DefaultSettings.DocumentRetrievalPluginName);
+                kernel4.ImportPluginFromObject(generateSearchQueryPlugin, DefaultSettings.GenerateSearchQueryPluginName);
+                kernel4.ImportPluginFromObject(chatPlugin, DefaultSettings.ChatPluginName);
+            }
 
-            return new OpenAIClientFacade(deployedModelName3, kernel3, deployedModelName4, kernel4);
+            return new OpenAIClientFacade(standardChatGptDeployment, kernel3, premiumChatGptDeployment, kernel4);
         });
 
         services.AddSingleton<SearchClientFactory>(sp =>
@@ -189,33 +178,27 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
-            var deployedModelName3 = config["AOAIStandardChatGptDeployment"];
-            var azureOpenAiServiceEndpoint3 = config["AOAIStandardServiceEndpoint"];
+            var standardChatGptDeployment = config["AOAIStandardChatGptDeployment"];
+            var standardServiceEndpoint = config["AOAIStandardServiceEndpoint"];
 
-            ArgumentNullException.ThrowIfNullOrEmpty(deployedModelName3);
-            ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceEndpoint3);
+            ArgumentNullException.ThrowIfNullOrEmpty(standardChatGptDeployment);
+            ArgumentNullException.ThrowIfNullOrEmpty(standardServiceEndpoint);
 
-            var deployedModelName4 = config["AOAIPremiumChatGptDeployment"];
-            var azureOpenAiServiceEndpoint4 = config["AOAIPremiumServiceEndpoint"];
-
-            ArgumentNullException.ThrowIfNullOrEmpty(deployedModelName4);
-            ArgumentNullException.ThrowIfNullOrEmpty(azureOpenAiServiceEndpoint4);
+            var premiumChatGptDeployment = config["AOAIPremiumChatGptDeployment"];
+            var premiumServiceEndpoint = config["AOAIPremiumServiceEndpoint"];
 
             AzureOpenAIClient? openAIClient3 = null;
             AzureOpenAIClient? openAIClient4 = null;
 
-            if (config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalClientID) != null
-                && config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalClientSecret) != null
-                && config.GetValue<string>(AppConfigurationSetting.AzureTenantID) != null
-                && config.GetValue<string>(AppConfigurationSetting.AzureAuthorityHost) != null
-                && config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalOpenAIAudience) != null)
+            if (UseAPIMAIGatewayOBO(config))
             {
-                SetupOpenAIClientsUsingOnBehalfOfOthersFlowAndSubscriptionKey(sp, httpContextAccessor, config, azureOpenAiServiceEndpoint3, out openAIClient3, out openAIClient4);
+                SetupOpenAIClientsUsingOnBehalfOfOthersFlowAndSubscriptionKey(sp, httpContextAccessor, config, standardChatGptDeployment, out openAIClient3, out openAIClient4);
             }
             else
             {
-                openAIClient3 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), azureCredential);
-                openAIClient4 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), azureCredential);
+                openAIClient3 = new AzureOpenAIClient(new Uri(standardServiceEndpoint), azureCredential);
+                if (!string.IsNullOrEmpty(premiumChatGptDeployment))
+                    openAIClient4 = new AzureOpenAIClient(new Uri(premiumServiceEndpoint), azureCredential);
             }
 
             // Build Plugins
@@ -227,43 +210,47 @@ internal static class ServiceCollectionExtensions
             var generateSearchQueryPlugin = new GenerateSearchQuerySkill();
             var chatPlugin = new ChatSkill();
 
-            Kernel? kernel3 = null;
-            Kernel? kernel4 = null;
+            Kernel? kernelStandard = null;
+            Kernel? kernelPremium = null;
 
             // Build Kernels
-            if (config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalClientID) != null
-                && config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalClientSecret) != null
-                && config.GetValue<string>(AppConfigurationSetting.AzureTenantID) != null
-                && config.GetValue<string>(AppConfigurationSetting.AzureAuthorityHost) != null
-                && config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalOpenAIAudience) != null)
+            if (UseAPIMAIGatewayOBO(config))
             {
-                kernel3 = Kernel.CreateBuilder()
-                    .AddAzureOpenAIChatCompletion(deployedModelName3, openAIClient3)
+                kernelStandard = Kernel.CreateBuilder()
+                    .AddAzureOpenAIChatCompletion(standardChatGptDeployment, openAIClient3)
                     .Build();
-                kernel4 = Kernel.CreateBuilder()
-                    .AddAzureOpenAIChatCompletion(deployedModelName4, openAIClient4)
-                    .Build();
+
+                if (!string.IsNullOrEmpty(premiumChatGptDeployment))
+                {
+                    kernelPremium = Kernel.CreateBuilder()
+                        .AddAzureOpenAIChatCompletion(premiumChatGptDeployment, openAIClient4)
+                        .Build();
+                }
             }
             else
             {
-                kernel3 = Kernel.CreateBuilder()
-                   .AddAzureOpenAIChatCompletion(deployedModelName3, azureOpenAiServiceEndpoint3, azureCredential)
+                kernelStandard = Kernel.CreateBuilder()
+                   .AddAzureOpenAIChatCompletion(standardChatGptDeployment, standardServiceEndpoint, azureCredential)
                    .Build();
-
-                kernel4 = Kernel.CreateBuilder()
-                   .AddAzureOpenAIChatCompletion(deployedModelName4, azureOpenAiServiceEndpoint4, azureCredential)
+                if (!string.IsNullOrEmpty(premiumChatGptDeployment))
+                {
+                    kernelPremium = Kernel.CreateBuilder()
+                   .AddAzureOpenAIChatCompletion(premiumChatGptDeployment, premiumServiceEndpoint, azureCredential)
                    .Build();
+                }
             }
 
-            kernel3.ImportPluginFromObject(retrieveRelatedDocumentPlugin3, DefaultSettings.DocumentRetrievalPluginName);
-            kernel3.ImportPluginFromObject(generateSearchQueryPlugin, DefaultSettings.GenerateSearchQueryPluginName);
-            kernel3.ImportPluginFromObject(chatPlugin, DefaultSettings.ChatPluginName);
+            kernelStandard.ImportPluginFromObject(retrieveRelatedDocumentPlugin3, DefaultSettings.DocumentRetrievalPluginName);
+            kernelStandard.ImportPluginFromObject(generateSearchQueryPlugin, DefaultSettings.GenerateSearchQueryPluginName);
+            kernelStandard.ImportPluginFromObject(chatPlugin, DefaultSettings.ChatPluginName);
 
-            kernel4.ImportPluginFromObject(retrieveRelatedDocumentPlugin4, DefaultSettings.DocumentRetrievalPluginName);
-            kernel4.ImportPluginFromObject(generateSearchQueryPlugin, DefaultSettings.GenerateSearchQueryPluginName);
-            kernel4.ImportPluginFromObject(chatPlugin, DefaultSettings.ChatPluginName);
-
-            return new OpenAIClientFacade(deployedModelName3, kernel3, deployedModelName4, kernel4);
+            if (kernelPremium != null)
+            {
+                kernelPremium.ImportPluginFromObject(retrieveRelatedDocumentPlugin4, DefaultSettings.DocumentRetrievalPluginName);
+                kernelPremium.ImportPluginFromObject(generateSearchQueryPlugin, DefaultSettings.GenerateSearchQueryPluginName);
+                kernelPremium.ImportPluginFromObject(chatPlugin, DefaultSettings.ChatPluginName);
+            }
+            return new OpenAIClientFacade(standardChatGptDeployment, kernelStandard, premiumChatGptDeployment, kernelPremium);
         });
         services.AddSingleton((sp) => {
             var config = sp.GetRequiredService<IConfiguration>();
@@ -437,4 +424,12 @@ internal static class ServiceCollectionExtensions
             Encoding.UTF8.GetString(memoryStream.ToArray()));
     }
 
+    private static bool UseAPIMAIGatewayOBO(IConfiguration config)
+    {
+        return config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalClientID) != null
+                && config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalClientSecret) != null
+                && config.GetValue<string>(AppConfigurationSetting.AzureTenantID) != null
+                && config.GetValue<string>(AppConfigurationSetting.AzureAuthorityHost) != null
+                && config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalOpenAIAudience) != null;
+    }
 }
