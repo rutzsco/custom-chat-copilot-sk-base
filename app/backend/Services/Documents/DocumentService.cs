@@ -37,10 +37,10 @@ public class DocumentService : IDocumentService
         }
 
         // Create database if it doesn't exist
-        //var db = _cosmosClient.CreateDatabaseIfNotExistsAsync(DefaultSettings.CosmosDBDatabaseName).GetAwaiter().GetResult();
+        var db = _cosmosClient.CreateDatabaseIfNotExistsAsync(DefaultSettings.CosmosDBDatabaseName).GetAwaiter().GetResult();
 
         // Create get container if it doenst exist
-        //_cosmosContainer = db.Database.CreateContainerIfNotExistsAsync(DefaultSettings.CosmosDBUserDocumentsCollectionName, "/userId").GetAwaiter().GetResult();
+        _cosmosContainer = db.Database.CreateContainerIfNotExistsAsync(DefaultSettings.CosmosDBUserDocumentsCollectionName, "/userId").GetAwaiter().GetResult();
     }
 
     public async Task<UploadDocumentsResponse> CreateDocumentUploadAsync(UserInformation userInfo, IFormFileCollection files, CancellationToken cancellationToken)
@@ -89,17 +89,17 @@ public class DocumentService : IDocumentService
 
     public async Task<List<DocumentUpload>> GetDocumentUploadsAsync(UserInformation user)
     {
-        //var query = _cosmosContainer.GetItemQueryIterator<DocumentUpload>(
-        //    new QueryDefinition("SELECT TOP 100 * FROM c WHERE  c.userId = @username AND c.sessionId = @sessionId ORDER BY c.sourceName DESC")
-        //    .WithParameter("@username", user.UserId)
-        //    .WithParameter("@sessionId", user.SessionId));
+        var query = _cosmosContainer.GetItemQueryIterator<DocumentUpload>(
+            new QueryDefinition("SELECT TOP 100 * FROM c WHERE  c.userId = @username AND c.sessionId = @sessionId ORDER BY c.sourceName DESC")
+            .WithParameter("@username", user.UserId)
+            .WithParameter("@sessionId", user.SessionId));
 
         var results = new List<DocumentUpload>();
-        //while (query.HasMoreResults)
-        //{
-        //    var response = await query.ReadNextAsync();
-        //    results.AddRange(response.ToList());
-        //}
+        while (query.HasMoreResults)
+        {
+            var response = await query.ReadNextAsync();
+            results.AddRange(response.ToList());
+        }
 
         return results;
     }

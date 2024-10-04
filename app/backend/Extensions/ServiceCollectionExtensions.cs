@@ -22,6 +22,9 @@ using System.Net.Http;
 using System.ClientModel.Primitives;
 using Microsoft.Extensions.Azure;
 using Microsoft.AspNetCore.Http;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
+using Microsoft.SemanticKernel.TextGeneration;
 
 namespace MinimalApi.Extensions;
 
@@ -103,9 +106,13 @@ internal static class ServiceCollectionExtensions
 
             if (openAIClient3 != null)
             {
-                builder3 = Kernel.CreateBuilder();
-                builder3.AddAzureOpenAIChatCompletion(deployedModelName3, openAIClient3);
-                kernel3 = builder3.Build();
+                Func<IServiceProvider, object?, AzureOpenAIChatCompletionService> factory3 = (serviceProvider, _) => new(deployedModelName3, openAIClient3, null, serviceProvider.GetService<ILoggerFactory>());
+
+                var kernel3Builder = Kernel.CreateBuilder();
+                kernel3Builder.Services.AddKeyedScoped<IChatCompletionService>(null, factory3);
+                kernel3Builder.Services.AddKeyedScoped<ITextGenerationService>(null, factory3);
+
+                kernel3 = kernel3Builder.Build();
             }
             else
             {
@@ -116,10 +123,15 @@ internal static class ServiceCollectionExtensions
             }
 
             if (openAIClient4 != null)
-            { 
-                builder4 = Kernel.CreateBuilder();
-                builder4.AddAzureOpenAIChatCompletion(deployedModelName4, openAIClient4);
-                kernel4 = builder4.Build();
+            {
+                Func<IServiceProvider, object?, AzureOpenAIChatCompletionService> factory4 = (serviceProvider, _) => new(deployedModelName3, openAIClient4, null, serviceProvider.GetService<ILoggerFactory>());
+
+                var kernel4Builder = Kernel.CreateBuilder();
+                kernel4Builder.Services.AddKeyedScoped<IChatCompletionService>(null, factory4);
+                kernel4Builder.Services.AddKeyedScoped<ITextGenerationService>(null, factory4);
+
+                kernel4 = kernel4Builder.Build();
+
             }
             else
             {
@@ -237,12 +249,20 @@ internal static class ServiceCollectionExtensions
                 && config.GetValue<string>(AppConfigurationSetting.AzureAuthorityHost) != null
                 && config.GetValue<string>(AppConfigurationSetting.AzureServicePrincipalOpenAIAudience) != null)
             {
-                kernel3 = Kernel.CreateBuilder()
-                    .AddAzureOpenAIChatCompletion(deployedModelName3, openAIClient3)
-                    .Build();
-                kernel4 = Kernel.CreateBuilder()
-                    .AddAzureOpenAIChatCompletion(deployedModelName4, openAIClient4)
-                    .Build();
+                Func<IServiceProvider, object?, AzureOpenAIChatCompletionService> factory3 = (serviceProvider, _) => new(deployedModelName3, openAIClient3, null, serviceProvider.GetService<ILoggerFactory>());
+
+                var kernel3Builder = Kernel.CreateBuilder();
+                kernel3Builder.Services.AddKeyedScoped<IChatCompletionService>(null, factory3);
+                kernel3Builder.Services.AddKeyedScoped<ITextGenerationService>(null, factory3);
+
+                kernel3 = kernel3Builder.Build();
+
+                Func<IServiceProvider, object?, AzureOpenAIChatCompletionService> factory4 = (serviceProvider, _) => new(deployedModelName4, openAIClient4, null, serviceProvider.GetService<ILoggerFactory>());
+
+                var kernel4Builder = Kernel.CreateBuilder();
+                kernel4Builder.Services.AddKeyedScoped<IChatCompletionService>(null, factory4);
+                kernel4Builder.Services.AddKeyedScoped<ITextGenerationService>(null, factory4);
+                kernel4 = kernel4Builder.Build();
             }
             else
             {
@@ -299,22 +319,22 @@ internal static class ServiceCollectionExtensions
         // Add ChatHistory and document upload services if the connection string is provided
         if (string.IsNullOrEmpty(configuration[AppConfigurationSetting.CosmosDBConnectionString]) && string.IsNullOrEmpty(configuration[AppConfigurationSetting.CosmosDBEndpoint]))
         {
-            services.AddSingleton<IChatHistoryService, ChatHistoryServiceStub>();
-            services.AddSingleton<IDocumentService, DocumentServiceSub>();
+            services.AddScoped<IChatHistoryService, ChatHistoryServiceStub>();
+            services.AddScoped<IDocumentService, DocumentServiceSub>();
             services.AddHttpClient();
         }
         else
         {
-            services.AddSingleton<IChatHistoryService, ChatHistoryService>();
-            services.AddSingleton<IDocumentService, DocumentService>();
+            services.AddScoped<IChatHistoryService, ChatHistoryService>();
+            services.AddScoped<IDocumentService, DocumentService>();
             services.AddHttpClient<DocumentService, DocumentService>();
         }
 
-        services.AddSingleton<ChatService>();
-        services.AddSingleton<ReadRetrieveReadChatService>();
-        services.AddSingleton<ReadRetrieveReadStreamingChatService>();
-        services.AddSingleton<EndpointChatService>();
-        services.AddSingleton<AzureBlobStorageService>();
+        services.AddScoped<ChatService>();
+        services.AddScoped<ReadRetrieveReadChatService>();
+        services.AddScoped<ReadRetrieveReadStreamingChatService>();
+        services.AddScoped<EndpointChatService>();
+        services.AddScoped<AzureBlobStorageService>();
         services.AddHttpClient<IngestionService, IngestionService>();
     }
 

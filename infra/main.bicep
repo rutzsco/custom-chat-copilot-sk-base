@@ -177,6 +177,7 @@ module cosmos './app/cosmosdb.bicep' = {
     privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.documentDBDatabaseAccounts}${resourceToken}': ''
     useManagedIdentityResourceAccess: useManagedIdentityResourceAccess
     managedIdentityPrincipalId: managedIdentity.outputs.identityPrincipalId
+    userPrincipalId: principalId
   }
 }
 
@@ -344,7 +345,7 @@ var appDefinition = {
     }
     {
       name: 'EnableDataProtectionBlobKeyStorage'
-      value: string(false)
+      value: string(true)
     }
   ], 
   (shouldDeployAzureOpenAIService) ? [
