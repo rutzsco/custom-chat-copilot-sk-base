@@ -1,3 +1,4 @@
+param existingCogServicesName string
 param name string
 param location string = resourceGroup().location
 param tags object = {}
@@ -12,7 +13,10 @@ param keyVaultName string
 param privateEndpointSubnetId string
 param privateEndpointName string
 
-resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
+resource existingAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = if (existingCogServicesName != '') {
+  name: existingCogServicesName
+}
+resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = if (existingCogServicesName == '') {
   name: name
   location: location
   tags: tags
@@ -28,7 +32,7 @@ resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
 }
 
 @batchSize(1)
-resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [for deployment in deployments: {
+resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [for deployment in deployments: if (existingCogServicesName == '') {
   parent: account
   name: deployment.name
   properties: {
@@ -43,7 +47,7 @@ resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01
 
 var cognitiveServicesKeySecretName = 'cognitive-services-key'
 
-module cognitiveServicesSecret '../shared/keyvault-secret.bicep' = {
+module cognitiveServicesSecret '../shared/keyvault-secret.bicep' = if (existingCogServicesName == '') {
   name: cognitiveServicesKeySecretName
   params: {
     keyVaultName: keyVaultName
@@ -52,7 +56,7 @@ module cognitiveServicesSecret '../shared/keyvault-secret.bicep' = {
   }
 }
 
-module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)){
+module privateEndpoint '../shared/private-endpoint.bicep' = if (existingCogServicesName == '' && !empty(privateEndpointSubnetId)){
   name: '${name}-private-endpoint'
   params: {
     name: privateEndpointName
@@ -62,7 +66,7 @@ module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEnd
   }
 }
 
-output endpoint string = account.properties.endpoint
-output id string = account.id
-output name string = account.name
+output endpoint string = existingCogServicesName != '' ? existingAccount.properties.endpoint : account.properties.endpoint
+output id string = existingCogServicesName != '' ? existingAccount.id : account.id
+output name string = existingCogServicesName != '' ? existingAccount.name : account.name
 output cognitiveServicesKeySecretName string = cognitiveServicesKeySecretName

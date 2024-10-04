@@ -7,7 +7,7 @@ param privateEndpointSubnetName string
 param privateEndpointSubnetAddressPrefix string
 param privateEndpointSubnetNsgName string
 
-resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-01-01' existing = {
+resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-01-01' existing = if(virtualNetworkName != '') {
   name: virtualNetworkName
 }
 
@@ -111,5 +111,5 @@ resource privateEndpointSubnetNsg 'Microsoft.Network/networkSecurityGroups@2024-
   }
 }
 
-output containerAppSubnetId string = containerAppSubnet.id
-output privateEndpointSubnetId string = privateEndpointSubnet.id
+output containerAppSubnetId string = virtualNetworkName != '' ? containerAppSubnet.id : ''
+output privateEndpointSubnetId string = virtualNetworkName != '' ? privateEndpointSubnet.id : ''
