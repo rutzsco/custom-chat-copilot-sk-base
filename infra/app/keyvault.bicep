@@ -1,3 +1,7 @@
+// --------------------------------------------------------------------------------
+// This BICEP file will create a KeyVault
+// FYI: To purge a KV with soft delete enabled: > az keyvault purge --name kvName
+// --------------------------------------------------------------------------------
 param name string
 param location string = resourceGroup().location
 param tags object = {}
