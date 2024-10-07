@@ -43,12 +43,12 @@ param azureChatGptPremiumDeploymentName string = 'chat-gpt4'
 
 @description('Name of an existing Cognitive Services account to use')
 param existingCogServicesName string = ''
-param existingCogServicesResourceGroup string = ''
+param existingCogServicesResourceGroup string = resourceGroup().name
 
 @description('Name of an existing Azure Container Registry account to use')
 param existingContainerRegistryName string = ''
 @description('Name of ResourceGoupd for an existing Azure Container Registry account to use')
-param existingContainerRegistryResourceGroup string = ''
+param existingContainerRegistryResourceGroup string = resourceGroup().name
 
 param runDateTime string = utcNow()
 var deploymentSuffix = '-${runDateTime}'
@@ -215,7 +215,7 @@ var appDefinition = {
   settings : (union(array(backendDefinition.settings), [
     {
       name: 'acrpassword'
-      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/registrySecretName'
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/container-registry-password'
       secretRef: 'acrpassword'
       secret: true
     }

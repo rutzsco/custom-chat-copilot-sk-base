@@ -31,11 +31,3 @@ param useManagedIdentityResourceAccess = true
 param azureChatGptStandardDeploymentName = 'gpt-4o'
 param azureChatGptPremiumDeploymentName = 'gpt-4o'
 param azureEmbeddingDeploymentName = 'text-embedding'
-
-@description('If you have an existing VNET to use, provide the name here')
-param virtualNetworkName = ''
-param virtualNetworkResourceGroupName = ''
-param privateEndpointSubnetName = ''
-param privateEndpointSubnetAddressPrefix = ''
-param containerAppSubnetName = ''
-param containerAppSubnetAddressPrefix = ''

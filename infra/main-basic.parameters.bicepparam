@@ -30,14 +30,6 @@ param useManagedIdentityResourceAccess = true
 param azureChatGptStandardDeploymentName = 'chat'
 param azureChatGptPremiumDeploymentName = 'chat-gpt4'
 param azureEmbeddingDeploymentName = 'text-embedding'
-param azureEmbeddingModelName = 'text-embedding-ada-002'
-param embeddingDeploymentCapacity = 30
-param azureOpenAIChatGptStandardModelName = 'gpt-35-turbo'
-param azureOpenAIChatGptStandardModelVersion = '0613'
-param chatGptStandardDeploymentCapacity = 10
-param azureOpenAIChatGptPremiumModelName = 'gpt-4o'
-param azureOpenAIChatGptPremiumModelVersion = '2024-05-13'
-param chatGptPremiumDeploymentCapacity = 10
 
 @description('If you have an existing VNET to use, provide the name here')
 param virtualNetworkName = ''
