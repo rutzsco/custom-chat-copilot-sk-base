@@ -254,18 +254,6 @@ var appDefinition = {
       value: search.outputs.endpoint
     }
     {
-      name: 'AOAIPremiumServiceEndpoint'
-      value: search.outputs.endpoint
-    }
-    {
-      name: 'AOAIPremiumServiceKey'
-      value: 'aoaipremiumservicekey'
-    }
-    {
-      name: 'AOAIPremiumChatGptDeployment'
-      value: azureChatGptPremiumDeploymentName
-    }
-    {
       name: 'AOAIStandardServiceEndpoint'
       value: azureOpenAi.properties.endpoint
     }
@@ -280,6 +268,10 @@ var appDefinition = {
     {
       name: 'EnableDataProtectionBlobKeyStorage'
       value: string(false)
+    }
+    {
+      name: 'UseManagedIdentityResourceAccess'
+      value: string(true)
     }
   ]))
 }
