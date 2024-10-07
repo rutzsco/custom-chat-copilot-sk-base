@@ -1,4 +1,5 @@
 param existingCogServicesName string
+param existingCogServicesResourceGroup string
 param name string
 param location string = resourceGroup().location
 param tags object = {}
@@ -14,6 +15,7 @@ param privateEndpointSubnetId string
 param privateEndpointName string
 
 resource existingAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = if (existingCogServicesName != '') {
+  scope: resourceGroup(existingCogServicesResourceGroup)
   name: existingCogServicesName
 }
 resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = if (existingCogServicesName == '') {

@@ -2,6 +2,7 @@ param name string
 param location string = resourceGroup().location
 param tags object = {}
 param containerRegistryName string
+param containerRegistryResourceGroup string = resourceGroup().name
 param containerAppsEnvironmentName string
 param containerAppsEnvironmentWorkloadProfileName string
 param applicationInsightsName string
@@ -27,6 +28,7 @@ var env = map(filter(appSettingsArray, i => i.?secret == null), i => {
 var port = 8080
 
 resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existing = {
+  scope: resourceGroup(containerRegistryResourceGroup)
   name: containerRegistryName
 }
 

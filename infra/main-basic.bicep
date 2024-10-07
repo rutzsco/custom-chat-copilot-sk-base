@@ -35,30 +35,20 @@ param privateEndpointSubnetAddressPrefix string= ''
 
 @description('Name of the text embedding model deployment')
 param azureEmbeddingDeploymentName string = 'text-embedding'
-param azureEmbeddingModelName string = 'text-embedding-ada-002'
-param embeddingDeploymentCapacity int = 30
 @description('Name of the chat GPT deployment')
 param azureChatGptStandardDeploymentName string = 'chat'
-@description('Name of the chat GPT model. Default: gpt-35-turbo')
-@allowed([ 'gpt-35-turbo', 'gpt-4', 'gpt-35-turbo-16k', 'gpt-4-16k', 'gpt-4o' ])
-param azureOpenAIChatGptStandardModelName string = 'gpt-35-turbo'
-param azureOpenAIChatGptStandardModelVersion string ='0613'
-@description('Capacity of the chat GPT deployment. Default: 10')
-param chatGptStandardDeploymentCapacity int = 10
 @description('Name of the chat GPT deployment')
 param azureChatGptPremiumDeploymentName string = 'chat-gpt4'
-@description('Name of the chat GPT model. Default: gpt-35-turbo')
-@allowed([ 'gpt-35-turbo', 'gpt-4', 'gpt-35-turbo-16k', 'gpt-4-16k', 'gpt-4o' ])
-param azureOpenAIChatGptPremiumModelName string = 'gpt-4o'
-param azureOpenAIChatGptPremiumModelVersion string ='2024-05-13'
-@description('Capacity of the chat GPT deployment. Default: 10')
-param chatGptPremiumDeploymentCapacity int = 10
+
 
 @description('Name of an existing Cognitive Services account to use')
 param existingCogServicesName string = ''
+param existingCogServicesResourceGroup string = ''
 
 @description('Name of an existing Azure Container Registry account to use')
 param existingContainerRegistryName string = ''
+@description('Name of ResourceGoupd for an existing Azure Container Registry account to use')
+param existingContainerRegistryResourceGroup string = ''
 
 param runDateTime string = utcNow()
 var deploymentSuffix = '-${runDateTime}'
@@ -125,21 +115,10 @@ module virtualNetwork './app/virtual-network.bicep' = if(virtualNetworkName != '
   scope: resourceGroup(virtualNetworkResourceGroupName)
 }
 
-
-module registry './app/registry.bicep' = {
-  name: 'registry${deploymentSuffix}'
-  params: {
-    name: '${abbrs.containerRegistryRegistries}${resourceToken}'
-    existingContainerRegistryName: existingContainerRegistryName
-    location: location
-    tags: tags
-    keyVaultName: keyVault.outputs.name
-    publicNetworkAccess: 'Enabled' // virtualNetworkName != '' 'Disabled' : 'Enabled'
-    privateEndpointSubnetId: '' // virtualNetworkName != '' virtualNetwork.outputs.privateEndpointSubnetId: ''
-    privateEndpointName: '' // virtualNetworkName != '' '${abbrs.networkPrivateLinkServices}${abbrs.containerRegistryRegistries}${resourceToken}': ''
-  }
+resource registry 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existing =  {
+  scope: resourceGroup(existingContainerRegistryResourceGroup)
+  name: existingContainerRegistryName
 }
-
 
 module cosmos './app/cosmosdb.bicep' = {
   name: 'cosmos${deploymentSuffix}'
@@ -227,58 +206,9 @@ module search './app/search-services.bicep' = {
   }
 }
 
-module azureOpenAi './app/cognitive-services.bicep' =  {
-  name: 'openai${deploymentSuffix}'
-  params: {
-    existingCogServicesName: existingCogServicesName
-    name: '${abbrs.cognitiveServicesAccounts}${resourceToken}'
-    location: location
-    tags: tags
-    deployments: concat([      
-      {
-        name: azureEmbeddingDeploymentName
-        model: {
-          format: 'OpenAI'
-          name: azureEmbeddingModelName
-          version: '2'
-        }
-        sku: {
-          name: 'Standard'
-          capacity: embeddingDeploymentCapacity
-        }
-      }
-    ], [
-      {
-        name: azureChatGptStandardDeploymentName
-        model: {
-          format: 'OpenAI'
-          name: azureOpenAIChatGptStandardModelName
-          version: azureOpenAIChatGptStandardModelVersion
-        }
-        sku: {
-          name: 'Standard'
-          capacity: chatGptStandardDeploymentCapacity
-        }
-      }
-    ], [
-      {
-        name: azureChatGptPremiumDeploymentName
-        model: {
-          format: 'OpenAI'
-          name: azureOpenAIChatGptPremiumModelName
-          version: azureOpenAIChatGptPremiumModelVersion
-        }
-        sku: {
-          name: 'Standard'
-          capacity: chatGptPremiumDeploymentCapacity
-        }
-      }
-    ])
-    keyVaultName: keyVault.outputs.name
-    publicNetworkAccess: 'Enabled' // virtualNetworkName != '' 'Disabled' : 'Enabled'
-    privateEndpointSubnetId: '' // virtualNetworkName != '' virtualNetwork.outputs.privateEndpointSubnetId: ''
-    privateEndpointName: '' // virtualNetworkName != '' '${abbrs.networkPrivateLinkServices}${abbrs.cognitiveServicesAccounts}${resourceToken}': ''
-  }
+resource azureOpenAi 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
+  scope: resourceGroup(existingCogServicesResourceGroup)
+  name: existingCogServicesName
 }
 
 var appDefinition = {
@@ -337,7 +267,7 @@ var appDefinition = {
     }
     {
       name: 'AOAIStandardServiceEndpoint'
-      value: azureOpenAi.outputs.endpoint
+      value: azureOpenAi.properties.endpoint
     }
     {
       name: 'AOAIStandardChatGptDeployment'
@@ -363,7 +293,8 @@ module app './app/app.bicep' = {
     applicationInsightsName: monitoring.outputs.applicationInsightsName
     containerAppsEnvironmentName: appsEnv.outputs.name
     containerAppsEnvironmentWorkloadProfileName: appContainerAppEnvironmentWorkloadProfileName
-    containerRegistryName: registry.outputs.name
+    containerRegistryName: registry.name
+    containerRegistryResourceGroup: existingContainerRegistryResourceGroup
     exists: backendExists
     appDefinition: appDefinition
     identityName: managedIdentity.outputs.identityName
