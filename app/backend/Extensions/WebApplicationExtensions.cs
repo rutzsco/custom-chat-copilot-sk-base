@@ -183,7 +183,7 @@ internal static class WebApplicationExtensions
         return Results.BadRequest();
     }
 
-    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, IChatHistoryService chatHistoryService, EndpointChatService endpointChatService, IDocumentService documentService, [EnumeratorCancellation] CancellationToken cancellationToken)
+    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, IChatHistoryService chatHistoryService, EndpointChatService endpointChatService, EndpointChatServiceV2 endpointChatServiceV2, IDocumentService documentService, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var userInfo = context.GetUserInfo();
         var profile = request.OptionFlags.GetChatProfile();
@@ -204,7 +204,7 @@ internal static class WebApplicationExtensions
             profile.RAGSettings.DocumentRetrievalIndexName = document.RetrivalIndexName;
         }
 
-        var chat = ResolveChatService(request, chatService, ragChatService, endpointChatService);
+        var chat = ResolveChatService(request, chatService, ragChatService, endpointChatService, endpointChatServiceV2);
         await foreach (var chunk in chat.ReplyAsync(userInfo, profile, request).WithCancellation(cancellationToken))
         {
             yield return chunk;
@@ -214,13 +214,16 @@ internal static class WebApplicationExtensions
             }
         }
     }
-    private static IChatService ResolveChatService(ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, EndpointChatService endpointChatService)
+    private static IChatService ResolveChatService(ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, EndpointChatService endpointChatService, EndpointChatServiceV2 endpointChatServiceV2)
     {  
         if (request.OptionFlags.IsChatProfile())
             return chatService;
 
         if (request.OptionFlags.IsEndpointAssistantProfile())
             return endpointChatService;
+
+        if (request.OptionFlags.IsEndpointAssistantV2Profile())
+            return endpointChatServiceV2;
 
         return ragChatService;
     }
