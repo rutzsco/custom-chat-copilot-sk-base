@@ -20,7 +20,7 @@ param privateEndpointName string
 var defaultAccessPolicies = [
   {
     objectId: userPrincipalId
-    permissions: { secrets: [ 'get', 'list' ] }
+    permissions: { secrets: [ 'get', 'list', 'set' ] }
     tenantId: subscription().tenantId
   }
   {

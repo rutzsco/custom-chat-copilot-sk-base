@@ -120,6 +120,15 @@ resource registry 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' ex
   name: existingContainerRegistryName
 }
 
+module registrySecret './shared/keyvault-secret.bicep' = {
+  name: 'container-registry-password'
+  params: {
+    keyVaultName: keyVault.outputs.name
+    name: 'container-registry-password'
+    secretValue: registry.listCredentials().passwords[0].value
+  }
+}
+
 module cosmos './app/cosmosdb.bicep' = {
   name: 'cosmos${deploymentSuffix}'
   params: {
@@ -196,6 +205,7 @@ module storageAccount './app/storage-account.bicep' = {
 module search './app/search-services.bicep' = {
   name: 'search${deploymentSuffix}'
   params: {
+    location: location
     keyVaultName: keyVault.outputs.name
     name: '${abbrs.searchSearchServices}${resourceToken}'
     publicNetworkAccess: 'enabled'
