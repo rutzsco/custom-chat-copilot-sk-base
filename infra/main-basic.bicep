@@ -24,22 +24,10 @@ param appContainerAppEnvironmentWorkloadProfileName string
 
 param useManagedIdentityResourceAccess bool = false
 
-param virtualNetworkName string = ''
-param virtualNetworkResourceGroupName string = ''
-param containerAppSubnetName string= ''
-@description('Address prefix for the container app subnet')
-param containerAppSubnetAddressPrefix string= ''
-param privateEndpointSubnetName string= ''
-@description('Address prefix for the private endpoint subnet')
-param privateEndpointSubnetAddressPrefix string= ''
-
 @description('Name of the text embedding model deployment')
 param azureEmbeddingDeploymentName string = 'text-embedding'
 @description('Name of the chat GPT deployment')
 param azureChatGptStandardDeploymentName string = 'chat'
-@description('Name of the chat GPT deployment')
-param azureChatGptPremiumDeploymentName string = 'chat-gpt4'
-
 
 @description('Name of an existing Cognitive Services account to use')
 param existingCogServicesName string = ''
@@ -98,21 +86,6 @@ module managedIdentity './app/identity.bicep' = {
     location: location
     tags: tags
   }
-}
-
-module virtualNetwork './app/virtual-network.bicep' = if(virtualNetworkName != '') {
-  name: 'virtual-network${deploymentSuffix}'
-  params: {
-    virtualNetworkName: virtualNetworkName
-    location: location
-    containerAppSubnetName: containerAppSubnetName
-    containerAppSubnetAddressPrefix: containerAppSubnetAddressPrefix
-    containerAppSubnetNsgName: '${abbrs.networkNetworkSecurityGroups}container-app-${resourceToken}'
-    privateEndpointSubnetName: privateEndpointSubnetName
-    privateEndpointSubnetAddressPrefix: privateEndpointSubnetAddressPrefix
-    privateEndpointSubnetNsgName: '${abbrs.networkNetworkSecurityGroups}private-endpoint-${resourceToken}'
-  }
-  scope: resourceGroup(virtualNetworkResourceGroupName)
 }
 
 resource registry 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existing =  {
@@ -230,28 +203,6 @@ var appDefinition = {
       secret: true
     }
     {
-      name: 'CosmosDBConnectionString'
-      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${cosmos.outputs.connectionStringSecretName}'
-      secretRef: 'cosmosdbconnectionstring'
-      secret: true
-    }
-    {
-      name: 'AzureStorageAccountConnectionString'
-      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${storageAccount.outputs.storageAccountConnectionStringSecretName}'
-      secretRef: 'azurestorageconnectionstring'
-      secret: true
-    }    
-    {
-      name: 'AzureSearchServiceKey'
-      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${search.outputs.searchKeySecretName}'
-      secretRef: 'azuresearchservicekey'
-      secret: true
-    }
-    {
-      name: 'CosmosDBEndpoint'
-      value: cosmos.outputs.endpoint
-    }
-    {
       name: 'AzureStorageAccountEndpoint'
       value: storageAccount.outputs.primaryEndpoints.blob
     }
@@ -281,9 +232,40 @@ var appDefinition = {
     }
     {
       name: 'UseManagedIdentityResourceAccess'
-      value: string(true)
+      value: string(useManagedIdentityResourceAccess)
     }
-  ]))
+  ],
+  (useManagedIdentityResourceAccess) ? [
+    {
+      name: 'CosmosDBEndpoint'
+      value: cosmos.outputs.endpoint
+    }] : [
+      {
+        name: 'CosmosDBConnectionString'
+        value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${cosmos.outputs.connectionStringSecretName}'
+        secretRef: 'cosmosdbconnectionstring'
+        secret: true
+      }
+      {
+        name: 'AzureStorageAccountConnectionString'
+        value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${storageAccount.outputs.storageAccountConnectionStringSecretName}'
+        secretRef: 'azurestorageconnectionstring'
+        secret: true
+      }    
+      {
+        name: 'AzureSearchServiceKey'
+        value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${search.outputs.searchKeySecretName}'
+        secretRef: 'azuresearchservicekey'
+        secret: true
+      }
+      {
+        name: 'AOAIStandardServiceKey'
+        value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/cognitive-services-key'
+        secretRef: 'aoaistandardservicekey'
+        secret: true
+      }
+    ]
+  ))
 }
 
 module app './app/app.bicep' = {
