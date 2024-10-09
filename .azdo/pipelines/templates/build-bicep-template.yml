@@ -1,0 +1,21 @@
+# ----------------------------------------------------------------------------------------------------
+# Template to build bicep artifacts
+# ----------------------------------------------------------------------------------------------------
+parameters: 
+- name: targetPath
+  default: 'infra'
+- name: artifact
+  default: 'Infrastructure'
+
+# ----------------------------------------------------------------------------------------------------
+stages:
+  - stage: Build
+    displayName: Build
+    jobs:
+    - job: Build
+      displayName: Build
+      steps:
+      - task: PublishPipelineArtifact@1
+        inputs:
+          targetPath: ${{ parameters.targetPath }}
+          artifact: ${{ parameters.artifact }}

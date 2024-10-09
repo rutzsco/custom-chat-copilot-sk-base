@@ -1,0 +1,44 @@
+# ----------------------------------------------------------------------------------------------------
+# Template to build application
+# ----------------------------------------------------------------------------------------------------
+parameters: 
+- name: ContainerRegistryPassword
+  default: ''
+- name: ContainerRegistryUrl
+  default: ''
+- name: ContainerRegistryUsername
+  default: ''
+- name: imageName
+  default: ''
+- name: rootDirectory
+  default: 'app'
+
+# ----------------------------------------------------------------------------------------------------
+stages:
+  - stage: Build
+    displayName: Build
+    jobs:
+    - job: Build
+      displayName: Build
+
+      variables:
+      - name: workingDirectory
+        value: '/home/vsts/work/1/s/${{ parameters.rootDirectory }}/'
+
+      steps:
+      - task: CmdLine@2
+        displayName: 'Docker Build'
+        inputs:
+          script: |
+            docker build . -t ${{ parameters.imageName }}
+            docker images
+          workingDirectory: $(workingDirectory)
+
+      - task: CmdLine@2
+        displayName: 'Docker Push'
+        inputs:
+          script: |
+            echo ${{ parameters.ContainerRegistryPassword }} | docker login ${{ parameters.ContainerRegistryUrl }} -u ${{ parameters.ContainerRegistryUsername }} --password-stdin
+            docker tag ${{ parameters.imageName }} ${{ parameters.ContainerRegistryUrl }}/${{ parameters.imageName }}
+            docker push ${{ parameters.ContainerRegistryUrl }}/${{ parameters.imageName }}
+          workingDirectory:  $(workingDirectory)

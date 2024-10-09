@@ -8,6 +8,7 @@ param apimSubscriptionKey string
 param apimSubscriptionKeySecretName string
 param tokenStoreContainerName string
 param tokenStoreSasSecretName string
+param deploymentSuffix string = '-kv'
 
 var expiry = dateTimeAdd(utcValue, 'P1Y', 'yyyy-MM-ddTHH:mm:ssZ')
 

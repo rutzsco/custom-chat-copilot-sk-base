@@ -25,6 +25,7 @@ param privateEndpointSubnetId string
 param privateEndpointName string
 param useManagedIdentityResourceAccess bool
 param managedIdentityPrincipalId string
+param deploymentSuffix string = '-kv'
 
 var storageAccountConnectionStringSecretName = 'storage-account-connection-string'
 
@@ -55,7 +56,7 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
 }
 
 module storageAccountConnectionStringSecret '../shared/keyvault-secret.bicep' = {
-  name: storageAccountConnectionStringSecretName
+  name: '${storageAccountConnectionStringSecretName}${deploymentSuffix}'
   params: {
     keyVaultName: keyVaultName
     name: storageAccountConnectionStringSecretName
