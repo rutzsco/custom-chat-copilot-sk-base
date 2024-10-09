@@ -13,6 +13,10 @@ param keyVaultName string
 
 param privateEndpointSubnetId string
 param privateEndpointName string
+param deploymentSuffix string = '-kv'
+
+var resourceGroupName = resourceGroup().name
+var cognitiveServicesKeySecretName = 'cognitive-services-key'
 
 resource existingAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = if (existingCogServicesName != '') {
   scope: resourceGroup(existingCogServicesResourceGroup)
@@ -47,17 +51,6 @@ resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01
   }
 }]
 
-var cognitiveServicesKeySecretName = 'cognitive-services-key'
-
-module cognitiveServicesSecret '../shared/keyvault-secret.bicep' = if (existingCogServicesName == '') {
-  name: cognitiveServicesKeySecretName
-  params: {
-    keyVaultName: keyVaultName
-    name: cognitiveServicesKeySecretName
-    secretValue: account.listKeys().key1
-  }
-}
-
 module privateEndpoint '../shared/private-endpoint.bicep' = if (existingCogServicesName == '' && !empty(privateEndpointSubnetId)){
   name: '${name}-private-endpoint'
   params: {
@@ -71,4 +64,5 @@ module privateEndpoint '../shared/private-endpoint.bicep' = if (existingCogServi
 output endpoint string = existingCogServicesName != '' ? existingAccount.properties.endpoint : account.properties.endpoint
 output id string = existingCogServicesName != '' ? existingAccount.id : account.id
 output name string = existingCogServicesName != '' ? existingAccount.name : account.name
+output resourceGroupName string = existingCogServicesName != '' ? existingCogServicesResourceGroup : resourceGroupName
 output cognitiveServicesKeySecretName string = cognitiveServicesKeySecretName

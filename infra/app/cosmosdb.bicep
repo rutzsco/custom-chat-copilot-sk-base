@@ -16,6 +16,7 @@ param privateEndpointSubnetId string
 param privateEndpointName string
 param managedIdentityPrincipalId string
 param useManagedIdentityResourceAccess bool
+param deploymentSuffix string = '-kv'
 
 resource account 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
   name: toLower(accountName)
@@ -111,7 +112,7 @@ resource chatTurn  'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
 }
 
 module cosmosConnectionStringSecret '../shared/keyvault-secret.bicep' = {
-  name: connectionStringSecretName
+  name: '${connectionStringSecretName}${deploymentSuffix}'
   params: {
     keyVaultName: keyVaultName
     name: connectionStringSecretName

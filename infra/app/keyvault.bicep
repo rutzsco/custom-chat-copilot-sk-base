@@ -17,18 +17,21 @@ param publicNetworkAccess string
 param privateEndpointSubnetId string
 param privateEndpointName string
 
-var defaultAccessPolicies = [
+// split this off in case a id's are not supplied...
+var ownerAccessPolicy = userPrincipalId == '' ? [] : [
   {
     objectId: userPrincipalId
     permissions: { secrets: [ 'get', 'list', 'set' ] }
     tenantId: subscription().tenantId
   }
-  {
+]
+var managedIdentityPolicies = managedIdentityPrincipalId == '' ? [] : [{
     objectId: managedIdentityPrincipalId
     permissions: { secrets: [ 'get', 'list' ] }
     tenantId: subscription().tenantId
   }
 ]
+var defaultAccessPolicies = union(ownerAccessPolicy, managedIdentityPolicies)
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   name: name

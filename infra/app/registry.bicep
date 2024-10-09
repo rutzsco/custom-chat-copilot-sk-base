@@ -18,6 +18,8 @@ param privateEndpointName string
 
 var registrySecretName = 'acr-registry-secret'
 
+var resourceGroupName = resourceGroup().name
+
 resource existingContainerRegistry 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existing = if (existingContainerRegistryName != '') {
   scope: resourceGroup(existingContainerRegistryResourceGroup)
   name: existingContainerRegistryName
@@ -38,15 +40,6 @@ resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-01-01-pr
   }
 }
 
-module registrySecret '../shared/keyvault-secret.bicep' = if (existingContainerRegistryName == '') {
-  name: registrySecretName
-  params: {
-    keyVaultName: keyVaultName
-    name: registrySecretName
-    secretValue: containerRegistry.listCredentials().passwords[0].value
-  }
-}
-
 module privateEndpoint '../shared/private-endpoint.bicep' = if (existingContainerRegistryName == '' && !empty(privateEndpointSubnetId)){
   name: '${name}-private-endpoint'
   params: {
@@ -60,4 +53,5 @@ module privateEndpoint '../shared/private-endpoint.bicep' = if (existingContaine
 output loginServer string = existingContainerRegistryName != '' ? existingContainerRegistry.properties.loginServer : containerRegistry.properties.loginServer
 output id string = existingContainerRegistryName != '' ? existingContainerRegistry.id : containerRegistry.id
 output name string = existingContainerRegistryName != '' ? existingContainerRegistry.name : containerRegistry.name
+output resourceGroupName string = existingContainerRegistryName != '' ? existingContainerRegistryResourceGroup : resourceGroupName
 output registrySecretName string = registrySecretName

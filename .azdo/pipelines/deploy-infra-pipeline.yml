@@ -1,0 +1,42 @@
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - infra/*
+
+pool:
+      vmImage: 'ubuntu-latest'
+
+parameters:
+  - name: environmentName
+    displayName: 'Environment'
+    type: string
+    default: 'CI'
+    values:
+      - 'CI'
+      - 'QA'
+      - 'PROD'
+  - name: region
+    displayName: 'Azure Region'
+    type: string
+    default: 'eastus2'
+
+variables:
+  serviceConnectionName: 'DEMO_ACCOUNT'
+  resourceGroupName: 'rg-copilot-demo-${{ parameters.environmentName }}'
+  region: "${{ parameters.region }}"
+
+stages:
+- template: templates/build-bicep-template.yml
+  parameters:
+    targetPath: 'infra'
+    artifact: 'Infrastructure'
+
+- template: templates/deploy-bicep-template.yml
+  parameters:
+    environmentName: ${{ parameters.environmentName }}
+    templateFolderName: 'Infrastructure'
+    templateFileName: 'main-basic.bicep'
+    parameterFileName: 'main-basic.parameters.bicepparam'
