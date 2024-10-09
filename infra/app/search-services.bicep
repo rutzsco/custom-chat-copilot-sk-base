@@ -38,6 +38,11 @@ resource search 'Microsoft.Search/searchServices@2023-11-01' = {
     partitionCount: partitionCount
     publicNetworkAccess: publicNetworkAccess
     replicaCount: replicaCount
+    authOptions: {
+      aadOrApiKey: {
+        aadAuthFailureMode: 'http401WithBearerChallenge'
+      }
+    }
   }
   sku: sku
 }
@@ -68,6 +73,17 @@ resource managedIdentitySearchIndexDataContributorRoleAssignment 'Microsoft.Auth
   properties: {
     principalId: managedIdentityPrincipalId
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', searchIndexDataContributorRoleDefinitionId)
+    principalType: 'ServicePrincipal'
+  }
+}
+
+var searchServiceContributorRoleDefinitionId = '7ca78c08-252a-4471-8644-bb5ff32d4ba0'
+
+resource managedIdentitySearchServiceContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(useManagedIdentityResourceAccess) {
+  name: guid(subscription().id, managedIdentityPrincipalId, searchServiceContributorRoleDefinitionId)
+  properties: {
+    principalId: managedIdentityPrincipalId
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', searchServiceContributorRoleDefinitionId)
     principalType: 'ServicePrincipal'
   }
 }
