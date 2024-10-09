@@ -30,7 +30,7 @@ public sealed class ApiClient(HttpClient httpClient)
         return await response.Content.ReadFromJsonAsync<List<DocumentSummary>>();
     }
 
-    public async Task<UploadDocumentsResponse> UploadDocumentsAsync(IReadOnlyList<IBrowserFile> files, long maxAllowedSize)
+    public async Task<UploadDocumentsResponse> UploadDocumentsAsync(IReadOnlyList<IBrowserFile> files, long maxAllowedSize, IDictionary<string, string>? metadata = null)
     {
         try
         {
@@ -56,16 +56,19 @@ public sealed class ApiClient(HttpClient httpClient)
             content.Headers.Add("X-CSRF-TOKEN-FORM", token);
             content.Headers.Add("X-CSRF-TOKEN-HEADER", token);
 
-            var response = await httpClient.PostAsync("api/documents", content);
+            if (metadata != null)
+            {
+                // Serialize the dictionary to a JSON string
+                string serializedHeaders = JsonSerializer.Serialize(metadata);
 
+                // Add the serialized dictionary as a single header value
+                content.Headers.Add("X-FILE-METADATA", serializedHeaders);
+            }
+            var response = await httpClient.PostAsync("api/documents", content);
             response.EnsureSuccessStatusCode();
 
-            var result =
-                await response.Content.ReadFromJsonAsync<UploadDocumentsResponse>();
-
-            return result
-                ?? UploadDocumentsResponse.FromError(
-                    "Unable to upload files, unknown error.");
+            var result = await response.Content.ReadFromJsonAsync<UploadDocumentsResponse>();
+            return result ?? UploadDocumentsResponse.FromError("Unable to upload files, unknown error.");
         }
         catch (Exception ex)
         {

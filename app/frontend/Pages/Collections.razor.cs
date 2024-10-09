@@ -14,7 +14,7 @@ public sealed partial class Collections : IDisposable
     private bool _isLoadingDocuments = false;
     private string _filter = "";
     private string _companyName = "";
-    private string _vertical = "";
+    private string _industry = "";
 
     // Store a cancelation token that will be used to cancel if the user disposes of this component.
     private readonly CancellationTokenSource _cancellationTokenSource = new();
@@ -72,7 +72,7 @@ public sealed partial class Collections : IDisposable
         if (_fileUploads.Any())
         {
             //var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
-            var result = await Client.UploadDocumentsAsync(_fileUploads.ToArray(), MaxIndividualFileSize);
+            var result = await Client.UploadDocumentsAsync(_fileUploads.ToArray(), MaxIndividualFileSize, new Dictionary<string, string> { { "CompanyName", _companyName}, { "Industry", _industry }, });
 
             Logger.LogInformation("Result: {x}", result);
 
