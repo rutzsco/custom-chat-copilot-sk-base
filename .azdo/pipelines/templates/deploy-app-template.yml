@@ -1,0 +1,44 @@
+# ----------------------------------------------------------------------------------------------------
+# Template to deploy application
+# ----------------------------------------------------------------------------------------------------
+parameters: 
+- name: environmentName
+  default: ''
+- name: serviceConnectionName
+  default: ''
+- name: resourceGroupName
+  default: ''
+- name: region
+  default: ''
+- name: appName
+  default: ''  
+- name: imageName
+  default: ''  
+
+stages:
+  - stage: DeployApp${{ parameters.environmentName }}
+    displayName: Deploy App ${{ parameters.environmentName }}
+
+    jobs:
+    - deployment: DeployApp
+      displayName: Deploy App
+      environment: ${{ parameters.environmentName }}
+
+    - job: DeployAppJob
+      displayName: Deploy App Job
+      steps:
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          targetPath: '$(Pipeline.Workspace)/build'
+
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: ${{ parameters.serviceConnectionName }}
+          scriptType: 'bash'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            az containerapp update \
+              --name ${{ parameters.appName }} \
+              --resource-group ${{ parameters.resourceGroupName }} \
+              --image ${{ parameters.imageName }}

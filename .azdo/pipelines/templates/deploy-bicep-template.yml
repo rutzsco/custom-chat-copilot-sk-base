@@ -1,0 +1,86 @@
+# ----------------------------------------------------------------------------------------------------
+# Template to deploy Azure Resources in a bicep file in one environment
+# ----------------------------------------------------------------------------------------------------
+parameters: 
+- name: environmentName
+  default: ''
+- name: templateFolderName
+  default: 'Infrastructure'
+- name: templateFileName
+  default: 'main.bicep'
+- name: parameterFileName
+  default: 'main.bicepparam'
+
+# ----------------------------------------------------------------------------------------------------
+stages:
+  - stage: DeployInfraStage${{ parameters.environmentName }}
+    displayName: Deploy Infra ${{ parameters.environmentName }}
+    jobs:
+    - deployment: CreateInfra
+      displayName: Create Infra
+      environment: ${{ parameters.environmentName }}
+
+    - job: CreateInfraJob
+      displayName: Create Infrastructure Job
+      
+      variables:
+      - name: downloadFolder
+        value: '$(Pipeline.Workspace)/build'
+      - name: templateFilePath
+        value: '$(downloadFolder)/${{ parameters.templateFolderName }}/${{ parameters.templateFileName }}'
+      - name: parameterFilePath
+        value: '$(downloadFolder)/${{ parameters.templateFolderName }}/${{ parameters.parameterFileName }}'
+
+      steps:
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: 'current'
+          targetPath: '$(downloadFolder)'
+
+      - bash: |
+          echo "environment=${{ parameters.environmentName }}"
+          
+          echo "downloadFolder=$(downloadFolder)"
+          echo "templateFolderName=${{ parameters.templateFolderName }}"
+          echo "templateFileName=${{ parameters.templateFileName }}"
+          echo "templateFilePath=$(templateFilePath)"
+          echo "parameterFileName=${{ parameters.parameterFileName }}"
+          echo "parameterFilePath=$(parameterFilePath)"
+
+          echo "resourceGroupName=$(resourceGroupName)"
+          echo "region=$(region)"
+          echo "serviceConnectionName=$(serviceConnectionName)"
+          echo "az group create --name $(resourceGroupName) --location $(region)"
+          echo "az deployment group create --resource-group $(resourceGroupName) --template-file $(templateFile) --parameters $(parameterFile)"
+
+          echo "##[group]Display All Environment Variables:"
+          printenv | sort
+          echo "##[endgroup]"
+
+          echo "----------------------------------------"
+          echo "##[group]Directory of pipeline workspace:"
+          tree -L 4 $(Pipeline.Workspace)
+          echo "##[endgroup]"
+        displayName: 'Display Variables and Files'
+        continueOnError: true
+
+      - task: AzureCLI@2
+        displayName: 'Create Resource Group'
+        inputs:
+          azureSubscription: $(serviceConnectionName)
+          scriptType: bash
+          scriptLocation: inlineScript
+          inlineScript: az group create --name $(resourceGroupName) --location $(region)
+
+      - task: AzureResourceManagerTemplateDeployment@3
+        displayName: 'Publish Bicep Resources'
+        inputs:
+          csmFile: $(templateFilePath)
+          csmParametersFile: $(parameterFilePath)
+          deploymentScope: 'Resource Group'
+          azureResourceManagerConnection: $(serviceConnectionName)
+          action: 'Create Or Update Resource Group'
+          resourceGroupName: $(resourceGroupName)
+          location: $(region)
+          templateLocation: 'Linked artifact'
+          deploymentMode: 'Incremental'

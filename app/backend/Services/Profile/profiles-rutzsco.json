@@ -96,5 +96,19 @@
       "APIEndpointSetting": "WeatherAssistantAPIEndpoint",
       "APIEndpointKeySetting": "WeatherAssistantAPIEndpointKey"
     }
+  },
+  {
+    "Name": "Advanced Analytics (Assistants API)",
+    "Id": "AssistantApi",
+    "Approach": "ENDPOINTASSISTANTV2",
+    "SecurityModel": "None",
+    "SecurityModelGroupMembership": [ "LocalDevUser" ],
+    "SampleQuestions": [
+      "Generate a plot with a sine wave repeating 20 times"
+    ],
+    "AssistantEndpointSettings": {
+      "APIEndpointSetting": "AssistantApiEndpoint",
+      "APIEndpointKeySetting": "AssistantApiKey"
+    }
   }
 ]

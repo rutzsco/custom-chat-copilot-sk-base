@@ -14,5 +14,6 @@ public enum ProfileApproach
     Chat,
     UserDocumentChat,
     RAG,
-    EndpointAssistant
+    EndpointAssistant,
+    EndpointAssistantV2
 };

@@ -1,0 +1,54 @@
+# Required Variables:
+# - ContainerRegistryUrl
+# - ContainerRegistryUsername
+# - ContainerRegistryPassword (secret)
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - app/*
+
+pool:
+      vmImage: 'ubuntu-latest'
+
+parameters:
+  - name: environmentName
+    displayName: 'Environment'
+    type: string
+    default: 'CI'
+    values:
+      - 'CI'
+      - 'QA'
+      - 'PROD'
+  - name: region
+    displayName: 'Azure Region'
+    type: string
+    default: 'eastus2'
+
+variables:
+  rootDirectory: 'app'
+  serviceConnectionName: 'DEMO_ACCOUNT'
+  resourceGroupName: 'rg-copilot-demo-${{ parameters.environmentName }}'
+  appName: 'chat-app'
+  imageName: custom-chat-copilot/$(appName):$(Build.BuildId)
+  fullImageName: $(ContainerRegistryUrl)/$(imageName)
+
+stages:
+- template: templates/build-app-template.yml
+  parameters:
+    ContainerRegistryPassword: $(ContainerRegistryPassword)
+    ContainerRegistryUrl: $(ContainerRegistryUrl)
+    ContainerRegistryUsername: $(ContainerRegistryUsername)
+    imageName: $(imageName)
+    rootDirectory: $(rootDirectory)
+
+- template: templates/deploy-app-template.yml
+  parameters:
+    environmentName: ${{ parameters.environmentName }}
+    serviceConnectionName: ${{ variables.serviceConnectionName }}
+    resourceGroupName:  $(resourceGroupName)
+    region: ${{ parameters.region }}
+    appName: $(appName)
+    imageName: $(fullImageName)

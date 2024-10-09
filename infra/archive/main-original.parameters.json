@@ -19,18 +19,6 @@
     "principalId": {
       "value": "${AZURE_PRINCIPAL_ID}"
     },
-    "existingCogServicesName": {
-      "value": "${EXISTING_COG_SERVICE}"
-    },
-    "existingCogServicesResourceGroup": {
-      "value": "${EXISTING_COG_SERVICE_RG}"
-    },
-    "existingContainerRegistryName": {
-      "value": "${EXISTING_CONTAINER_REGISTRY}"
-    },
-    "existingContainerRegistryResourceGroup": {
-      "value": "${EXISTING_CONTAINER_REGISTRY_RG}"
-    },
     "virtualNetworkName": {
       "value": "${AZURE_VNET_NAME}"
     },
@@ -109,19 +97,6 @@
     },
     "useManagedIdentityResourceAccess": {
       "value": "${USE_MANAGED_IDENTITY_RESOURCE_ACCESS}"
-    },
-    "azureEmbeddingDeploymentName": { "value": "text-embedding" },
-    "azureEmbeddingModelName": { "value": "text-embedding-ada-002" },
-    "embeddingDeploymentCapacity": { "value": 30    },
-
-    "azureChatGptStandardDeploymentName": { "value": "chat" },
-    "chatGptStandardDeploymentCapacity": { "value": 10 },
-    "azureOpenAIChatGptStandardModelName": { "value": "gpt-4o" },
-    "azureOpenAIChatGptStandardModelVersion": { "value": "2024-05-13" },
-
-    "azureChatGptPremiumDeploymentName": { "value": "chat-gpt4" },
-    "chatGptPremiumDeploymentCapacity": { "value": 10 },
-    "azureOpenAIChatGptPremiumModelName": { "value": "gpt-4o" },
-    "azureOpenAIChatGptPremiumModelVersion": { "value": "2024-05-13" }
+    }
   }
 }

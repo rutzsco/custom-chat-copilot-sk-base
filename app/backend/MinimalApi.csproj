@@ -35,6 +35,15 @@
     <None Remove="Services\Profile\Prompts\RAGChatUserPrompt.txt" />
     <None Remove="Services\Profile\Prompts\RAGSearchQuerySystemPrompt.txt" />
     <None Remove="Services\Profile\Prompts\RAGSearchUserPrompt.txt" />
+    <None Remove="userSecrets.Template.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="userSecrets.Template.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

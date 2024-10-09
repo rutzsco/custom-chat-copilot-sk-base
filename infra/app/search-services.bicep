@@ -23,6 +23,7 @@ param privateEndpointSubnetId string
 param privateEndpointName string
 param managedIdentityPrincipalId string
 param useManagedIdentityResourceAccess bool
+param deploymentSuffix string = '-kv'
 
 var searchKeySecretName = 'search-key'
 
@@ -48,7 +49,7 @@ resource search 'Microsoft.Search/searchServices@2023-11-01' = {
 }
 
 module searchSecret '../shared/keyvault-secret.bicep' = {
-  name: searchKeySecretName
+  name: '${searchKeySecretName}${deploymentSuffix}'
   params: {
     keyVaultName: keyVaultName
     name: searchKeySecretName

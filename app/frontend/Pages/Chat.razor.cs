@@ -91,7 +91,7 @@ public sealed partial class Chat
     {
         _selectedProfile = selection;
         _selectedProfileSummary = _profiles.FirstOrDefault(x => x.Name == selection);
-        _supportsFileUpload = _selectedProfileSummary.Approach == ProfileApproach.Chat;
+        _supportsFileUpload = _selectedProfileSummary.Approach == ProfileApproach.Chat || _selectedProfileSummary.Approach == ProfileApproach.EndpointAssistantV2;
         OnClearChat();
     }
     private void OnFileUpload(FileSummary fileSummary)

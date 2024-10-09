@@ -408,3 +408,4 @@ app/backend/Services/Profile/profiles-local.json
 app/backend/Services/Profile/profiles.local.json
 infra/rutzsco.d.parameters.json
 app/backend/Properties/launchSettings.json
+infra/main-basic.parameters-rutzsco.json

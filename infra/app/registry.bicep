@@ -1,3 +1,5 @@
+param existingContainerRegistryName string
+param existingContainerRegistryResourceGroup string
 param name string
 param location string = resourceGroup().location
 param tags object = {}
@@ -16,8 +18,15 @@ param privateEndpointName string
 
 var registrySecretName = 'acr-registry-secret'
 
+var resourceGroupName = resourceGroup().name
+
+resource existingContainerRegistry 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existing = if (existingContainerRegistryName != '') {
+  scope: resourceGroup(existingContainerRegistryResourceGroup)
+  name: existingContainerRegistryName
+}
+
 // 2023-01-01-preview needed for anonymousPullEnabled
-resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' = {
+resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' = if (existingContainerRegistryName == '') {
   name: name
   location: location
   tags: tags
@@ -31,16 +40,7 @@ resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-01-01-pr
   }
 }
 
-module registrySecret '../shared/keyvault-secret.bicep' = {
-  name: registrySecretName
-  params: {
-    keyVaultName: keyVaultName
-    name: registrySecretName
-    secretValue: containerRegistry.listCredentials().passwords[0].value
-  }
-}
-
-module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)){
+module privateEndpoint '../shared/private-endpoint.bicep' = if (existingContainerRegistryName == '' && !empty(privateEndpointSubnetId)){
   name: '${name}-private-endpoint'
   params: {
     name: privateEndpointName
@@ -50,6 +50,8 @@ module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEnd
   }
 }
 
-output loginServer string = containerRegistry.properties.loginServer
-output name string = containerRegistry.name
+output loginServer string = existingContainerRegistryName != '' ? existingContainerRegistry.properties.loginServer : containerRegistry.properties.loginServer
+output id string = existingContainerRegistryName != '' ? existingContainerRegistry.id : containerRegistry.id
+output name string = existingContainerRegistryName != '' ? existingContainerRegistry.name : containerRegistry.name
+output resourceGroupName string = existingContainerRegistryName != '' ? existingContainerRegistryResourceGroup : resourceGroupName
 output registrySecretName string = registrySecretName
