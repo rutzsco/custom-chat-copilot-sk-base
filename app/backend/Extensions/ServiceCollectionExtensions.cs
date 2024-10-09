@@ -293,8 +293,18 @@ internal static class ServiceCollectionExtensions
         else
         {
             services.AddSingleton<IChatHistoryService, ChatHistoryService>();
-            services.AddSingleton<IDocumentService, DocumentService>();
-            services.AddHttpClient<DocumentService, DocumentService>();
+
+            var documentUploadStrategy = configuration[AppConfigurationSetting.DocumentUploadStrategy] as string;
+            if (documentUploadStrategy == "AzureNative")
+            {
+                services.AddSingleton<IDocumentService, DocumentServiceAzureNative>();
+                services.AddHttpClient<DocumentServiceAzureNative, DocumentServiceAzureNative>();
+            }
+            else
+            {
+                services.AddSingleton<IDocumentService, DocumentService>();
+                services.AddHttpClient<DocumentService, DocumentService>();
+            }
         }
 
         services.AddSingleton<ChatService>();
