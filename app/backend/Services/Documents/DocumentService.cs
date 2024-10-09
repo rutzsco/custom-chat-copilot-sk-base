@@ -37,7 +37,7 @@ public class DocumentService : IDocumentService
         _cosmosContainer = db.Database.CreateContainerIfNotExistsAsync(DefaultSettings.CosmosDBUserDocumentsCollectionName, "/userId").GetAwaiter().GetResult();
     }
 
-    public async Task<UploadDocumentsResponse> CreateDocumentUploadAsync(UserInformation userInfo, IFormFileCollection files, CancellationToken cancellationToken)
+    public async Task<UploadDocumentsResponse> CreateDocumentUploadAsync(UserInformation userInfo, IFormFileCollection files, Dictionary<string, string>? fileMetadata, CancellationToken cancellationToken)
     {
         var response = await _blobStorageService.UploadFilesAsync(userInfo, files, cancellationToken, new Dictionary<string, string>());
         foreach (var file in response.UploadedFiles)

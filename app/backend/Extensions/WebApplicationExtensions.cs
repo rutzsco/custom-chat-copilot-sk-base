@@ -139,7 +139,13 @@ internal static class WebApplicationExtensions
     {
         logger.LogInformation("Upload documents");
         var userInfo = context.GetUserInfo();
-        var response = await documentService.CreateDocumentUploadAsync(userInfo, files, cancellationToken);
+        var fileMetadataContent = context.Request.Headers["X-FILE-METADATA"];
+        Dictionary<string, string>? fileMetadata = null;
+        if (!string.IsNullOrEmpty(fileMetadataContent))
+            fileMetadata = JsonSerializer.Deserialize<Dictionary<string,string>>(fileMetadataContent);
+        
+
+        var response = await documentService.CreateDocumentUploadAsync(userInfo, files, fileMetadata, cancellationToken);
         logger.LogInformation("Upload documents: {x}", response);
 
         return TypedResults.Ok(response);
