@@ -98,7 +98,7 @@
     }
   },
   {
-    "Name": "AssistantApi",
+    "Name": "Advanced Analytics (Assistants API)",
     "Id": "AssistantApi",
     "Approach": "ENDPOINTASSISTANTV2",
     "SecurityModel": "None",

@@ -20,5 +20,19 @@
       "What is the brand and model of this vehicle?",
       "Classify this vehicle into 'Motorbike', 'SUV', 'Sedan', 'Truck', 'Convertible'"
     ]
+  },
+  {
+    "Name": "AssistantApi",
+    "Id": "AssistantApi",
+    "Approach": "ENDPOINTASSISTANTV2",
+    "SecurityModel": "None",
+    "SecurityModelGroupMembership": [ "LocalDevUser" ],
+    "SampleQuestions": [
+      "Generate a plot with a sine wave repeating 20 times"
+    ],
+    "AssistantEndpointSettings": {
+      "APIEndpointSetting": "AssistantApiEndpoint",
+      "APIEndpointKeySetting": "AssistantApiKey"
+    }
   }
 ]
