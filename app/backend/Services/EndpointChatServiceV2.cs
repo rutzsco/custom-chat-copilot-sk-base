@@ -54,15 +54,14 @@ internal sealed class EndpointChatServiceV2 : IChatService
         var response = await _httpClient.SendAsync(apiRequest, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
         using (Stream stream = await response.Content.ReadAsStreamAsync())
-        using (StreamReader reader = new StreamReader(stream))
+        using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
         {
             string line;
             while ((line = await reader.ReadLineAsync()) != null)
             {
                 // Process each line or chunk as it streams in
-                Console.WriteLine(line);
-                sb.Append(line);
-                yield return new ChatChunkResponse(line);
+                sb.Append(line + "\n");
+                yield return new ChatChunkResponse(line + "\n");
                 await Task.Yield();
             }
         }
@@ -83,8 +82,8 @@ internal sealed class EndpointChatServiceV2 : IChatService
         if (request.FileUploads.Any())
         {
             var file = request.FileUploads.First();
-            var payload = new { file_name = file.FileName, file_data = file.DataUrl.Replace("data:text/csv;base64,","") };
-            var url = $"{_configuration[profile.AssistantEndpointSettings.APIEndpointSetting]}/upload_file_and_create_thread/";
+            var payload = new { file_name = file.FileName, file_data = file.DataUrl.Replace("data:text/csv;base64,","").Replace("data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,", "") };
+            var url = $"{_configuration[profile.AssistantEndpointSettings.APIEndpointSetting]}/upload_file_and_create_thread";
             var apiRequest = new HttpRequestMessage(HttpMethod.Post, url);
             apiRequest.Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
             var response = await _httpClient.SendAsync(apiRequest);

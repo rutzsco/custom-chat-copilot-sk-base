@@ -19,6 +19,11 @@
                     {
                         <MudChip T="string" Icon="@Icons.Material.Filled.InsertDriveFile" IconColor="Color.Primary">@file.FileName</MudChip>
                     }
+
+                    @if(file.ContentType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || file.ContentType == "application/vnd.ms-excel")
+                    {
+                        <MudChip T="string" Icon="@Icons.Material.Filled.TableChart" IconColor="Color.Primary">@file.FileName</MudChip>
+                    }
                 }
             </MudStack>
         }
