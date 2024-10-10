@@ -98,21 +98,17 @@
     "azureOpenAiEndpoint": {
       "value": "${AZURE_OPENAI_ENDPOINT}"
     },
-    "azureChatGptStandardDeploymentName": {
-      "value": "${AZURE_CHAT_GPT_STANDARD_DEPLOYMENT_NAME}"
-    },
-    "azureEmbeddingDeploymentName": {
-      "value": "${AZURE_EMBEDDING_DEPLOYMENT_NAME}"
-    },
     "azureSpClientIdScope": {
       "value": "${AZURE_SP_CLIENT_ID_SCOPE}"
     },
     "useManagedIdentityResourceAccess": {
       "value": "${USE_MANAGED_IDENTITY_RESOURCE_ACCESS}"
     },
+    "azureEmbeddingDeploymentName": { "value": "text-embedding" },
     "azureEmbeddingModelName": { "value": "text-embedding-ada-002" },
     "embeddingDeploymentCapacity": { "value": 30    },
 
+    "azureChatGptStandardDeploymentName": { "value": "chat" },
     "chatGptStandardDeploymentCapacity": { "value": 10 },
     "azureOpenAIChatGptStandardModelName": { "value": "gpt-4o" },
     "azureOpenAIChatGptStandardModelVersion": { "value": "2024-05-13" },

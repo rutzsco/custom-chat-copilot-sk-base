@@ -64,41 +64,11 @@ module storageAccountConnectionStringSecret '../shared/keyvault-secret.bicep' = 
   }
 }
 
-module privateEndpointBlob '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)){
-  name: '${name}-blob-private-endpoint'
+module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)){
+  name: '${name}-private-endpoint'
   params: {
-    name: '${privateEndpointName}-blob'
+    name: privateEndpointName
     groupIds: ['blob']
-    privateLinkServiceId: storage.id
-    subnetId: privateEndpointSubnetId
-  }
-}
-
-module privateEndpointFile '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)){
-  name: '${name}-file-private-endpoint'
-  params: {
-    name: '${privateEndpointName}-file'
-    groupIds: ['file']
-    privateLinkServiceId: storage.id
-    subnetId: privateEndpointSubnetId
-  }
-}
-
-module privateEndpointQueue '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)){
-  name: '${name}-queue-private-endpoint'
-  params: {
-    name: '${privateEndpointName}-queue'
-    groupIds: ['queue']
-    privateLinkServiceId: storage.id
-    subnetId: privateEndpointSubnetId
-  }
-}
-
-module privateEndpointTable '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)){
-  name: '${name}-table-private-endpoint'
-  params: {
-    name: '${privateEndpointName}-table'
-    groupIds: ['table']
     privateLinkServiceId: storage.id
     subnetId: privateEndpointSubnetId
   }
