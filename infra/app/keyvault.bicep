@@ -18,19 +18,24 @@ param privateEndpointSubnetId string
 param privateEndpointName string
 
 // split this off in case a id's are not supplied...
-var ownerAccessPolicy = userPrincipalId == '' ? [] : [
-  {
-    objectId: userPrincipalId
-    permissions: { secrets: [ 'get', 'list', 'set' ] }
-    tenantId: subscription().tenantId
-  }
-]
-var managedIdentityPolicies = managedIdentityPrincipalId == '' ? [] : [{
-    objectId: managedIdentityPrincipalId
-    permissions: { secrets: [ 'get', 'list' ] }
-    tenantId: subscription().tenantId
-  }
-]
+var ownerAccessPolicy = empty(userPrincipalId)
+  ? []
+  : [
+      {
+        objectId: userPrincipalId
+        permissions: { secrets: ['get', 'list', 'set'] }
+        tenantId: subscription().tenantId
+      }
+    ]
+var managedIdentityPolicies = empty(managedIdentityPrincipalId)
+  ? []
+  : [
+      {
+        objectId: managedIdentityPrincipalId
+        permissions: { secrets: ['get', 'list'] }
+        tenantId: subscription().tenantId
+      }
+    ]
 var defaultAccessPolicies = union(ownerAccessPolicy, managedIdentityPolicies)
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
@@ -42,21 +47,25 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
     sku: { family: 'A', name: 'standard' }
     enabledForTemplateDeployment: true
     publicNetworkAccess: publicNetworkAccess
-    accessPolicies: union(defaultAccessPolicies, [
-      // define access policies here
-    ])
+    accessPolicies: union(
+      defaultAccessPolicies,
+      [
+        // define access policies here
+      ]
+    )
   }
 }
 
-module privateEndpoint '../shared/private-endpoint.bicep' = if(privateEndpointSubnetId != ''){
-  name: '${name}-private-endpoint'
-  params: {
-    name: privateEndpointName
-    groupIds: ['vault']
-    privateLinkServiceId: keyVault.id
-    subnetId: privateEndpointSubnetId
+module privateEndpoint '../shared/private-endpoint.bicep' =
+  if (!empty(privateEndpointSubnetId)) {
+    name: '${name}-private-endpoint'
+    params: {
+      name: privateEndpointName
+      groupIds: ['vault']
+      privateLinkServiceId: keyVault.id
+      subnetId: privateEndpointSubnetId
+    }
   }
-}
 
 output endpoint string = keyVault.properties.vaultUri
 output name string = keyVault.name

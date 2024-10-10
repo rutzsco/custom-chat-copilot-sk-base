@@ -12,7 +12,7 @@ param enabled bool = true
 param exp int = 0
 param nbf int = 0
 
-resource existingResource 'Microsoft.ContainerRegistry/registries@2023-11-01-preview' existing =  {
+resource existingResource 'Microsoft.ContainerRegistry/registries@2023-11-01-preview' existing = {
   scope: resourceGroup(registryResourceGroup)
   name: registryName
 }

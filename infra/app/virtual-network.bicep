@@ -7,9 +7,10 @@ param privateEndpointSubnetName string
 param privateEndpointSubnetAddressPrefix string
 param privateEndpointSubnetNsgName string
 
-resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-01-01' existing = if(virtualNetworkName != '') {
-  name: virtualNetworkName
-}
+resource virtualNetwork 'Microsoft.Network/virtualNetworks@2024-01-01' existing =
+  if (!empty(virtualNetworkName)) {
+    name: virtualNetworkName
+  }
 
 resource containerAppSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-01-01' = {
   name: containerAppSubnetName
@@ -19,7 +20,7 @@ resource containerAppSubnet 'Microsoft.Network/virtualNetworks/subnets@2024-01-0
     networkSecurityGroup: {
       id: containerAppSubnetNsg.id
     }
-    delegations:[
+    delegations: [
       {
         name: 'Microsoft.App/environments'
         properties: {
@@ -111,5 +112,5 @@ resource privateEndpointSubnetNsg 'Microsoft.Network/networkSecurityGroups@2024-
   }
 }
 
-output containerAppSubnetId string = virtualNetworkName != '' ? containerAppSubnet.id : ''
-output privateEndpointSubnetId string = virtualNetworkName != '' ? privateEndpointSubnet.id : ''
+output containerAppSubnetId string = !empty(virtualNetworkName) ? containerAppSubnet.id : ''
+output privateEndpointSubnetId string = !empty(virtualNetworkName) ? privateEndpointSubnet.id : ''

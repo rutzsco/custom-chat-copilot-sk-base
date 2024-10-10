@@ -15,7 +15,7 @@ public sealed partial class Chat
 
     // User input and selections
     private string _userQuestion = "";
-    private List<FileSummary> _files = new ();
+    private List<FileSummary> _files = new();
     private List<DocumentSummary> _userDocuments = new();
     private string _selectedDocument = "";
     private UserQuestion _currentQuestion;
@@ -30,7 +30,7 @@ public sealed partial class Chat
     private string _lastReferenceQuestion = "";
     private bool _isReceivingResponse = false;
     private bool _supportsFileUpload = false;
-    
+
     private readonly Dictionary<UserQuestion, ApproachResponse?> _questionAndAnswerMap = [];
 
     private bool _gPT4ON = false;
@@ -59,7 +59,7 @@ public sealed partial class Chat
         set
         {
             _selectedDocuments = value;
-            OnSelectedDocumentsChanged();    
+            OnSelectedDocumentsChanged();
         }
     }
 
@@ -81,7 +81,7 @@ public sealed partial class Chat
 
         if (!string.IsNullOrEmpty(ArchivedChatId))
         {
-            await LoadArchivedChatAsync(_cancellationTokenSource.Token,ArchivedChatId);
+            await LoadArchivedChatAsync(_cancellationTokenSource.Token, ArchivedChatId);
         }
         EvaluateOptions();
     }
@@ -100,9 +100,9 @@ public sealed partial class Chat
     }
     private void OnModelSelection(bool isPremium)
     {
-       _gPT4ON = isPremium;
+        _gPT4ON = isPremium;
     }
-    
+
     private Task OnAskQuestionAsync(string userInput)
     {
         _userQuestion = userInput;
@@ -157,11 +157,28 @@ public sealed partial class Chat
                 Approach.ReadRetrieveRead,
                 null);
 
+            //check access token expiration to see if access token refresh is needed
+            string? accessTokenExpiration = await GetAuthMeFieldAsync("expires_on");
 
+            var expiresOnDateTime = DateTimeOffset.Parse(accessTokenExpiration);
+            if (expiresOnDateTime < DateTimeOffset.UtcNow.AddMinutes(5))
+            {
+                await HttpClient.GetAsync(".auth/refresh");
+            }
+
+            // get access token
+            var accessToken = await GetAuthMeFieldAsync("access_token");
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming")
             {
-                Headers = { { "Accept", "application/json" } },
+                Headers = {
+                    {
+                        "Accept", "application/json"
+                    },
+                    {
+                        "X-MS-TOKEN-AAD-ACCESS-TOKEN", accessToken
+                    }
+                },
                 Content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
             };
             httpRequest.SetBrowserResponseStreamingEnabled(true);
@@ -198,11 +215,11 @@ public sealed partial class Chat
                 StateHasChanged();
             }
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
             _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(string.Empty, null, null, "Error: Unable to get a response from the server.");
         }
-        catch (JsonException)
+        catch (JsonException ex)
         {
             _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(string.Empty, null, null, "Error: Failed to parse the server response.");
         }
@@ -218,6 +235,16 @@ public sealed partial class Chat
         }
     }
 
+    private async Task<string?> GetAuthMeFieldAsync(string field)
+    {
+        var httpResponse = await HttpClient.GetAsync(".auth/me");
+        httpResponse.EnsureSuccessStatusCode();
+
+        var httpResponseContent = await httpResponse.Content.ReadAsStringAsync();
+        var httpResponseContentJson = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(httpResponseContent);
+        var httpResponseField = httpResponseContentJson?.FirstOrDefault()?[field]?.ToString();
+        return httpResponseField;
+    }
 
     private void OnSelectedDocumentsChanged()
     {
@@ -303,7 +330,7 @@ public sealed partial class Chat
 
         foreach (var chatMessage in chatMessages.OrderBy(x => x.Timestamp))
         {
-            var ar = new ApproachResponse(chatMessage.Answer, chatMessage.ProfileId, new ResponseContext(chatMessage.Profile,chatMessage.DataPoints, Array.Empty<ThoughtRecord>(), Guid.Empty, Guid.Empty, null));
+            var ar = new ApproachResponse(chatMessage.Answer, chatMessage.ProfileId, new ResponseContext(chatMessage.Profile, chatMessage.DataPoints, Array.Empty<ThoughtRecord>(), Guid.Empty, Guid.Empty, null));
             _questionAndAnswerMap[new UserQuestion(chatMessage.Prompt, chatMessage.Timestamp.UtcDateTime)] = ar;
         }
         Navigation.NavigateTo(string.Empty, forceLoad: false);

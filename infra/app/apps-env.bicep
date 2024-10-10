@@ -21,7 +21,7 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2024-03-01'
     }
     daprAIConnectionString: applicationInsights.properties.ConnectionString
     vnetConfiguration: {
-       infrastructureSubnetId: !empty(containerAppSubnetId) ? containerAppSubnetId : null
+      infrastructureSubnetId: !empty(containerAppSubnetId) ? containerAppSubnetId : null
     }
     workloadProfiles: containerAppEnvironmentWorkloadProfiles
   }
