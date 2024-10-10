@@ -12,8 +12,17 @@ using MinimalApi.Services.HealthChecks;
 using MinimalApi.Services.Documents;
 using MinimalApi.Services.Search;
 using MinimalApi.Services.Skills;
+using Microsoft.Azure.Cosmos.Linq;
+using Azure.AI.OpenAI;
+using Azure.Core.Pipeline;
+using System.Net.Http;
 using System.ClientModel.Primitives;
-
+using Microsoft.Extensions.Azure;
+using Microsoft.AspNetCore.Http;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
+using Microsoft.SemanticKernel.TextGeneration;
+using System.ClientModel.Primitives;
 
 namespace MinimalApi.Extensions;
 
@@ -89,9 +98,15 @@ internal static class ServiceCollectionExtensions
 
             if (openAIClient3 != null)
             {
-                builder3 = Kernel.CreateBuilder();
-                builder3.AddAzureOpenAIChatCompletion(standardChatGptDeployment, openAIClient3);
-                kernel3 = builder3.Build();
+#pragma warning disable IDE0039 // Use local function
+                Func<IServiceProvider, object?, AzureOpenAIChatCompletionService> factory3 = (serviceProvider, _) => new(standardChatGptDeployment, openAIClient3, null, serviceProvider.GetService<ILoggerFactory>());
+#pragma warning restore IDE0039 // Use local function
+
+                var kernel3Builder = Kernel.CreateBuilder();
+                kernel3Builder.Services.AddKeyedScoped<IChatCompletionService>(null, factory3);
+                kernel3Builder.Services.AddKeyedScoped<ITextGenerationService>(null, factory3);
+
+                kernel3 = kernel3Builder.Build();
             }
             else
             {
@@ -102,10 +117,17 @@ internal static class ServiceCollectionExtensions
             }
 
             if (openAIClient4 != null)
-            { 
-                builder4 = Kernel.CreateBuilder();
-                builder4.AddAzureOpenAIChatCompletion(premiumChatGptDeployment, openAIClient4);
-                kernel4 = builder4.Build();
+            {
+#pragma warning disable IDE0039 // Use local function
+                Func<IServiceProvider, object?, AzureOpenAIChatCompletionService> factory4 = (serviceProvider, _) => new(standardChatGptDeployment, openAIClient4, null, serviceProvider.GetService<ILoggerFactory>());
+#pragma warning restore IDE0039 // Use local function
+
+                var kernel4Builder = Kernel.CreateBuilder();
+                kernel4Builder.Services.AddKeyedScoped<IChatCompletionService>(null, factory4);
+                kernel4Builder.Services.AddKeyedScoped<ITextGenerationService>(null, factory4);
+
+                kernel4 = kernel4Builder.Build();
+
             }
             else
             {
@@ -286,8 +308,8 @@ internal static class ServiceCollectionExtensions
         // Add ChatHistory and document upload services if the connection string is provided
         if (string.IsNullOrEmpty(configuration[AppConfigurationSetting.CosmosDBConnectionString]) && string.IsNullOrEmpty(configuration[AppConfigurationSetting.CosmosDBEndpoint]))
         {
-            services.AddSingleton<IChatHistoryService, ChatHistoryServiceStub>();
-            services.AddSingleton<IDocumentService, DocumentServiceSub>();
+            services.AddScoped<IChatHistoryService, ChatHistoryServiceStub>();
+            services.AddScoped<IDocumentService, DocumentServiceSub>();
             services.AddHttpClient();
         }
         else
@@ -316,7 +338,7 @@ internal static class ServiceCollectionExtensions
         services.AddHttpClient<IngestionService, IngestionService>();
     }
 
-    private static void SetupOpenAIClientsUsingOnBehalfOfOthersFlowAndSubscriptionKey(IServiceProvider sp, IHttpContextAccessor httpContextAccessor, IConfiguration config, string? azureOpenAiServiceEndpoint3, out AzureOpenAIClient? openAIClient3, out AzureOpenAIClient? openAIClient4)
+    private static void SetupOpenAIClientsUsingOnBehalfOfOthersFlowAndSubscriptionKey(IServiceProvider sp, IHttpContextAccessor httpContextAccessor, IConfiguration config, string? standardServiceEndpoint, out AzureOpenAIClient? openAIClient3, out AzureOpenAIClient? openAIClient4)
     {
         var credential = new OnBehalfOfCredential(
                             tenantId: config[AppConfigurationSetting.AzureTenantID],
@@ -336,13 +358,13 @@ internal static class ServiceCollectionExtensions
             httpClient.DefaultRequestHeaders.Add(AppConfigurationSetting.OcpApimSubscriptionKey, config[AppConfigurationSetting.OcpApimSubscriptionKey]);
         }
 
-        openAIClient3 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), credential, new AzureOpenAIClientOptions
+        openAIClient3 = new AzureOpenAIClient(new Uri(standardServiceEndpoint), credential, new AzureOpenAIClientOptions
         {
             Audience = config[AppConfigurationSetting.AzureServicePrincipalOpenAIAudience],
             Transport = new HttpClientPipelineTransport(httpClient)
         });
         
-        openAIClient4 = new AzureOpenAIClient(new Uri(azureOpenAiServiceEndpoint3), credential, new AzureOpenAIClientOptions
+        openAIClient4 = new AzureOpenAIClient(new Uri(standardServiceEndpoint), credential, new AzureOpenAIClientOptions
         {
             Audience = config[AppConfigurationSetting.AzureServicePrincipalOpenAIAudience],
             Transport = new HttpClientPipelineTransport(httpClient)

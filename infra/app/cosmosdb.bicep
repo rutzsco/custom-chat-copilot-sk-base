@@ -16,6 +16,7 @@ param privateEndpointSubnetId string
 param privateEndpointName string
 param managedIdentityPrincipalId string
 param useManagedIdentityResourceAccess bool
+param userPrincipalId string
 param deploymentSuffix string = '-kv'
 
 resource account 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
@@ -137,6 +138,16 @@ resource cosmosDbDataContributorRoleAssignment 'Microsoft.DocumentDB/databaseAcc
   parent: account
   properties: {
     principalId: managedIdentityPrincipalId
+    roleDefinitionId: '/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${database.name}/sqlRoleDefinitions/${cosmosDbDataContributorRoleDefinitionId}'
+    scope: account.id
+  }
+}
+
+resource cosmosDbUserAccessRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-05-15' = if(useManagedIdentityResourceAccess) {
+  name: guid(subscription().id, userPrincipalId, cosmosDbDataContributorRoleDefinitionId, account.id)
+  parent: account
+  properties: {
+    principalId: userPrincipalId
     roleDefinitionId: '/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${database.name}/sqlRoleDefinitions/${cosmosDbDataContributorRoleDefinitionId}'
     scope: account.id
   }

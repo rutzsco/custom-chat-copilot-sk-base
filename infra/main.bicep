@@ -22,6 +22,19 @@ param containerAppEnvironmentWorkloadProfiles array = []
 @description('Name of the Container Apps Environment workload profile to use for the app')
 param appContainerAppEnvironmentWorkloadProfileName string
 
+@description('Should deploy Azure OpenAI service')
+param shouldDeployAzureOpenAIService bool = true
+
+param azureSpClientId string = ''
+@secure()
+param azureSpClientSecret string = ''
+param azureTenantId string = ''
+param azureAuthorityHost string = ''
+param ocpApimSubscriptionKey string = ''
+param azureSpOpenAiAudience string = ''
+param azureOpenAiEndpoint string = ''
+param azureSpClientIdScope string = ''
+
 param useManagedIdentityResourceAccess bool = false
 
 param virtualNetworkName string = ''
@@ -65,6 +78,12 @@ param existingContainerRegistryName string = ''
 @description('Name of ResourceGroup for an existing Azure Container Registry to use')
 param existingContainerRegistryResourceGroup string = resourceGroup().name
 
+@description('Name of the Azure Monitor private link scope')
+param azureMonitorPrivateLinkScopeName string
+
+@description('Resource group name of the Azure Monitor private link scope')
+param azureMonitorPrivateLinkScopeResourceGroupName string
+
 param runDateTime string = utcNow()
 var deploymentSuffix = '-${runDateTime}'
 
@@ -87,12 +106,12 @@ module monitoring './app/monitoring.bicep' = {
     tags: tags
     logAnalyticsName: '${abbrs.operationalInsightsWorkspaces}${resourceToken}'
     applicationInsightsName: '${abbrs.insightsComponents}${resourceToken}'
-    azureMonitorPrivateLinkScopeName: ''
-    azureMonitorPrivateLinkScopeResourceGroupName: ''
-    privateEndpointSubnetId: ''
-    privateEndpointName: ''
-    publicNetworkAccessForIngestion: 'Enabled'
-    publicNetworkAccessForQuery: 'Enabled'
+    azureMonitorPrivateLinkScopeName: !empty(virtualNetworkName) ? azureMonitorPrivateLinkScopeName : ''
+    azureMonitorPrivateLinkScopeResourceGroupName: !empty(virtualNetworkName) ? azureMonitorPrivateLinkScopeResourceGroupName : ''
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}azureMonitorPrivateLinkService-${resourceToken}': ''
+    publicNetworkAccessForIngestion: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
+    publicNetworkAccessForQuery: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
   }
 }
 
@@ -130,6 +149,37 @@ module virtualNetwork './app/virtual-network.bicep' = if(virtualNetworkName != '
   scope: resourceGroup(virtualNetworkResourceGroupName)
 }
 
+module registry './app/registry.bicep' = {
+  name: 'registry'
+  params: {
+    location: location
+    tags: tags
+    name: '${abbrs.containerRegistryRegistries}${resourceToken}'
+    keyVaultName: keyVault.outputs.name
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    publicNetworkAccess: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.containerRegistryRegistries}${resourceToken}': ''
+    existingContainerRegistryName: existingContainerRegistryName
+    existingContainerRegistryResourceGroup: existingContainerRegistryResourceGroup
+  }
+}
+
+module cosmos './app/cosmosdb.bicep' = {
+  name: 'cosmos'
+  params: {
+    accountName: '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
+    databaseName: 'ChatHistory' 
+    location: location
+    tags: tags
+    keyVaultName: keyVault.outputs.name
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.documentDBDatabaseAccounts}${resourceToken}': ''
+    useManagedIdentityResourceAccess: useManagedIdentityResourceAccess
+    managedIdentityPrincipalId: managedIdentity.outputs.identityPrincipalId
+    userPrincipalId: principalId
+  }
+}
+
 module keyVault './app/keyvault.bicep' = {
   name: 'keyvault${deploymentSuffix}'
   params: {
@@ -138,24 +188,9 @@ module keyVault './app/keyvault.bicep' = {
     name: '${abbrs.keyVaultVaults}${resourceToken}'
     userPrincipalId: principalId
     managedIdentityPrincipalId: managedIdentity.outputs.identityPrincipalId
-    publicNetworkAccess: 'Enabled'
-    privateEndpointSubnetId: ''
-    privateEndpointName: ''
-  }
-}
-
-module registry './app/registry.bicep' = {
-  name: 'registry${deploymentSuffix}'
-  params: {
-    existingContainerRegistryName: existingContainerRegistryName
-    existingContainerRegistryResourceGroup: existingContainerRegistryResourceGroup
-    name: '${abbrs.containerRegistryRegistries}${resourceToken}'
-    location: location
-    tags: tags
-    keyVaultName: keyVault.outputs.name
-    publicNetworkAccess: 'Enabled' // virtualNetworkName != '' 'Disabled' : 'Enabled'
-    privateEndpointSubnetId: '' // virtualNetworkName != '' virtualNetwork.outputs.privateEndpointSubnetId: ''
-    privateEndpointName: '' // virtualNetworkName != '' '${abbrs.networkPrivateLinkServices}${abbrs.containerRegistryRegistries}${resourceToken}': ''
+    publicNetworkAccess: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.keyVaultVaults}${resourceToken}': ''
   }
 }
 
@@ -169,22 +204,6 @@ module registrySecret './shared/keyvault-registry-secret.bicep' = if (existingCo
   }
 }
 
-module cosmos './app/cosmosdb.bicep' = {
-  name: 'cosmos${deploymentSuffix}'
-  params: {
-    accountName: '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
-    databaseName: 'ChatHistory' 
-    location: location
-    tags: tags
-    deploymentSuffix: deploymentSuffix
-    keyVaultName: keyVault.outputs.name
-    privateEndpointSubnetId: ''
-    privateEndpointName:  ''
-    useManagedIdentityResourceAccess: useManagedIdentityResourceAccess
-    managedIdentityPrincipalId: managedIdentity.outputs.identityPrincipalId
-  }
-}
-
 module appsEnv './app/apps-env.bicep' = {
   name: 'apps-env${deploymentSuffix}'
   params: {
@@ -193,7 +212,7 @@ module appsEnv './app/apps-env.bicep' = {
     tags: tags
     applicationInsightsName: monitoring.outputs.applicationInsightsName
     logAnalyticsWorkspaceName: monitoring.outputs.logAnalyticsWorkspaceName
-    containerAppSubnetId: ''
+    containerAppSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.containerAppSubnetId : ''
     containerAppEnvironmentWorkloadProfiles: containerAppEnvironmentWorkloadProfiles
   }
 }
@@ -217,13 +236,13 @@ module storageAccount './app/storage-account.bicep' = {
         name: dataProtectionKeysContainerName
       }
     ]
-    publicNetworkAccess: 'Enabled'
-    allowBlobPublicAccess: true
-    privateEndpointSubnetId: ''
-    privateEndpointName: ''
+    publicNetworkAccess: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
+    allowBlobPublicAccess: !empty(virtualNetworkName) ? false : true
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.storageStorageAccounts}${resourceToken}': ''
     networkAcls: {
       bypass: 'AzureServices'
-      defaultAction: 'Allow'
+      defaultAction: !empty(virtualNetworkName) ? 'Deny' : 'Allow'
     }
     useManagedIdentityResourceAccess: useManagedIdentityResourceAccess
     managedIdentityPrincipalId: managedIdentity.outputs.identityPrincipalId
@@ -236,17 +255,188 @@ module search './app/search-services.bicep' = {
     location: location
     keyVaultName: keyVault.outputs.name
     name: '${abbrs.searchSearchServices}${resourceToken}'
-    deploymentSuffix: deploymentSuffix
-    publicNetworkAccess: 'enabled'
-    privateEndpointSubnetId: ''
-    privateEndpointName: ''
+    publicNetworkAccess: !empty(virtualNetworkName) ? 'disabled' : 'enabled'
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.searchSearchServices}${resourceToken}': ''
     useManagedIdentityResourceAccess: useManagedIdentityResourceAccess
     managedIdentityPrincipalId: managedIdentity.outputs.identityPrincipalId
   }
 }
 
-module azureOpenAi './app/cognitive-services.bicep' =  {
-  name: 'openai${deploymentSuffix}'
+var tokenStoreSasSecretName = 'token-store-sas'
+var clientSecretSecretName = 'microsoft-provider-authentication-secret'
+var apimSubscriptionKeySecretName = 'apim-subscription-key'
+var tokenStoreContainerName = 'token-store'
+
+module appAuthorizationSecrets './app/app-authorization-secrets.bicep' = if(azureSpClientId != '') {
+  name: 'app-authorization-secrets'
+  params: {
+    keyVaultName: keyVault.outputs.name
+    storageAccountName: storageAccount.outputs.storageAccountName
+    tokenStoreContainerName: tokenStoreContainerName
+    tokenStoreSasSecretName: tokenStoreSasSecretName
+    clientSecretSecretName: clientSecretSecretName
+    clientSecret: azureSpClientSecret
+    apimSubscriptionKey: ocpApimSubscriptionKey
+    apimSubscriptionKeySecretName: apimSubscriptionKeySecretName
+  }
+}
+
+var appDefinition = {
+  settings : (union(array(backendDefinition.settings), [
+    {
+      name: 'acrpassword'
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${registry.outputs.registrySecretName}'
+      secretRef: 'acrpassword'
+      secret: true
+    }
+    {
+      name: 'CosmosDBConnectionString'
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${cosmos.outputs.connectionStringSecretName}'
+      secretRef: 'cosmosdbconnectionstring'
+      secret: true
+    }
+    {
+      name: 'AzureStorageAccountConnectionString'
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${storageAccount.outputs.storageAccountConnectionStringSecretName}'
+      secretRef: 'azurestorageconnectionstring'
+      secret: true
+    }    
+    {
+      name: 'AzureSearchServiceKey'
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${search.outputs.searchKeySecretName}'
+      secretRef: 'azuresearchservicekey'
+      secret: true
+    }
+    {
+      name: clientSecretSecretName
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${clientSecretSecretName}'
+      secretRef: clientSecretSecretName
+      secret: true
+    }
+    {
+      name: 'CosmosDBEndpoint'
+      value: cosmos.outputs.endpoint
+    }
+    {
+      name: 'AzureStorageAccountEndpoint'
+      value: storageAccount.outputs.primaryEndpoints.blob
+    }
+    {
+      name: 'AzureStorageContainer'
+      value: storageAccountContainerName
+    }
+    {
+      name: 'AzureSearchServiceEndpoint'
+      value: search.outputs.endpoint
+    }
+    {
+      name: 'AOAIPremiumServiceEndpoint'
+      value: search.outputs.endpoint
+    }
+    {
+      name: 'AOAIPremiumServiceKey'
+      value: 'aoaipremiumservicekey'
+    }
+    {
+      name: 'AOAIPremiumChatGptDeployment'
+      value: azureChatGptPremiumDeploymentName
+    }
+    {
+      name: 'AOAIStandardServiceEndpoint'
+      value: (shouldDeployAzureOpenAIService) ? azureOpenAi.outputs.endpoint : azureOpenAiEndpoint
+    }
+    {
+      name: 'AOAIStandardChatGptDeployment'
+      value: azureChatGptStandardDeploymentName
+    }
+    {
+      name: 'AOAIEmbeddingsDeployment'
+      value: azureEmbeddingDeploymentName
+    }
+    {
+      name: 'EnableDataProtectionBlobKeyStorage'
+      value: string(true)
+    }
+  ], 
+  (shouldDeployAzureOpenAIService) ? [
+      {
+        name: 'AOAIStandardServiceKey'
+        value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${azureOpenAi.outputs.cognitiveServicesKeySecretName}'
+        secretRef: 'aoaistandardservicekey'
+        secret: true
+      }
+  ] : [],
+  (azureSpClientId != '') ? [
+    {
+      name: 'AZURE_SP_CLIENT_ID'
+      value: azureSpClientId
+    }
+    {
+      name: 'AZURE_SP_CLIENT_SECRET'
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${clientSecretSecretName}'
+      secretRef: clientSecretSecretName
+      secret: true
+    }
+    {
+      name: 'AZURE_TENANT_ID'
+      value: azureTenantId
+    }
+    {
+      name: 'AZURE_AUTHORITY_HOST'
+      value: azureAuthorityHost
+    }
+    {
+      name: 'Ocp-Apim-Subscription-Key'
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${apimSubscriptionKeySecretName}'
+      secretRef: apimSubscriptionKeySecretName
+      secret: true
+    }
+    {
+      name: 'AZURE_SP_OPENAI_AUDIENCE'
+      value: azureSpOpenAiAudience
+    }
+    {
+      name: tokenStoreSasSecretName
+      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${tokenStoreSasSecretName}'
+      secretRef: tokenStoreSasSecretName
+      secret: true
+    }
+  ] : [],
+  (useManagedIdentityResourceAccess) ? [
+    {
+      name: 'UseManagedIdentityResourceAccess'
+      value: string(useManagedIdentityResourceAccess)
+    }
+    {
+      name: 'UserAssignedManagedIdentityClientId'
+      value: managedIdentity.outputs.identityClientId
+    }
+  ]: []))
+}
+
+module app './app/app.bicep' = {
+  name: 'app'
+  params: {
+    name: '${abbrs.appContainerApps}backend-${resourceToken}'
+    location: location
+    tags: tags
+    applicationInsightsName: monitoring.outputs.applicationInsightsName
+    containerAppsEnvironmentName: appsEnv.outputs.name
+    containerAppsEnvironmentWorkloadProfileName: appContainerAppEnvironmentWorkloadProfileName
+    containerRegistryName: registry.outputs.name
+    exists: backendExists
+    appDefinition: appDefinition
+    identityName: managedIdentity.outputs.identityName
+    clientId: azureSpClientId
+    clientIdScope: azureSpClientIdScope
+    clientSecretSecretName: clientSecretSecretName
+    tokenStoreSasSecretName: tokenStoreSasSecretName
+  }
+}
+
+module azureOpenAi './app/cognitive-services.bicep' = if(shouldDeployAzureOpenAIService) {
+  name: 'openai'
   params: {
     existingCogServicesName: existingCogServicesName
     existingCogServicesResourceGroup: existingCogServicesResourceGroup
@@ -295,9 +485,9 @@ module azureOpenAi './app/cognitive-services.bicep' =  {
       }
     ])
     keyVaultName: keyVault.outputs.name
-    publicNetworkAccess: 'Enabled' // virtualNetworkName != '' 'Disabled' : 'Enabled'
-    privateEndpointSubnetId: '' // virtualNetworkName != '' virtualNetwork.outputs.privateEndpointSubnetId: ''
-    privateEndpointName: '' // virtualNetworkName != '' '${abbrs.networkPrivateLinkServices}${abbrs.cognitiveServicesAccounts}${resourceToken}': ''
+    publicNetworkAccess: !empty(virtualNetworkName) ? 'Disabled' : 'Enabled'
+    privateEndpointSubnetId: !empty(virtualNetworkName) ? virtualNetwork.outputs.privateEndpointSubnetId: ''
+    privateEndpointName: !empty(virtualNetworkName) ? '${abbrs.networkPrivateLinkServices}${abbrs.cognitiveServicesAccounts}${resourceToken}': ''
   }
 }
 
@@ -308,100 +498,5 @@ module cognitiveSecret './shared/keyvault-cognitive-secret.bicep' = {
     cognitiveServiceResourceGroup: azureOpenAi.outputs.resourceGroupName
     keyVaultName: keyVault.outputs.name
     name: azureOpenAi.outputs.cognitiveServicesKeySecretName
-  }
-}
-
-var appDefinition = {
-  settings : (union(array(backendDefinition.settings), [
-    {
-      name: 'acrpassword'
-      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${cognitiveSecret.outputs.secretName}'
-      secretRef: 'acrpassword'
-      secret: true
-    }
-    {
-      name: 'AzureStorageAccountEndpoint'
-      value: storageAccount.outputs.primaryEndpoints.blob
-    }
-    {
-      name: 'AzureStorageContainer'
-      value: storageAccountContainerName
-    }
-    {
-      name: 'AzureSearchServiceEndpoint'
-      value: search.outputs.endpoint
-    }
-    {
-      name: 'AOAIStandardServiceEndpoint'
-      value: azureOpenAi.outputs.endpoint
-    }
-    {
-      name: 'AOAIStandardChatGptDeployment'
-      value: azureChatGptStandardDeploymentName
-    }
-    {
-      name: 'AOAIEmbeddingsDeployment'
-      value: azureEmbeddingDeploymentName
-    }
-    {
-      name: 'EnableDataProtectionBlobKeyStorage'
-      value: string(false)
-    }
-    {
-      name: 'UseManagedIdentityResourceAccess'
-      value: string(useManagedIdentityResourceAccess)
-    }
-  ],
-(useManagedIdentityResourceAccess) ? [
-    {
-      name: 'CosmosDBEndpoint'
-      value: cosmos.outputs.endpoint
-    }] : [
-    {
-      name: 'CosmosDBConnectionString'
-      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${cosmos.outputs.connectionStringSecretName}'
-      secretRef: 'cosmosdbconnectionstring'
-      secret: true
-    }
-    {
-      name: 'AzureStorageAccountConnectionString'
-      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${storageAccount.outputs.storageAccountConnectionStringSecretName}'
-      secretRef: 'azurestorageconnectionstring'
-      secret: true
-    }    
-    {
-      name: 'AzureSearchServiceKey'
-      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${search.outputs.searchKeySecretName}'
-      secretRef: 'azuresearchservicekey'
-      secret: true
-    }
-      {
-        name: 'AOAIStandardServiceKey'
-        value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${azureOpenAi.outputs.cognitiveServicesKeySecretName}'
-        secretRef: 'aoaistandardservicekey'
-        secret: true
-      }
-    ]
-))
-}
-
-module app './app/app.bicep' = {
-  name: 'app${deploymentSuffix}'
-  params: {
-    name: '${abbrs.appContainerApps}backend-${resourceToken}'
-    location: location
-    tags: tags
-    applicationInsightsName: monitoring.outputs.applicationInsightsName
-    containerAppsEnvironmentName: appsEnv.outputs.name
-    containerAppsEnvironmentWorkloadProfileName: appContainerAppEnvironmentWorkloadProfileName
-    containerRegistryName: registry.outputs.name
-    containerRegistryResourceGroup: registry.outputs.resourceGroupName
-    exists: backendExists
-    appDefinition: appDefinition
-    identityName: managedIdentity.outputs.identityName
-    clientId: ''
-    clientIdScope: ''
-    clientSecretSecretName: ''
-    tokenStoreSasSecretName: ''
   }
 }
