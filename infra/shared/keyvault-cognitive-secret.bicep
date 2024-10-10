@@ -9,14 +9,13 @@ param cognitiveServiceResourceGroup string
 param tags object = {}
 param contentType string = 'string'
 @description('The value of the secret. Provide only derived values like blob storage access, but do not hard code any secrets in your templates')
-
 param enabled bool = true
 param exp int = 0
 param nbf int = 0
 
-resource existingResource 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = { 
+resource existingResource 'Microsoft.CognitiveServices/accounts@2023-05-01' existing = {
   scope: resourceGroup(cognitiveServiceResourceGroup)
-  name: cognitiveServiceName 
+  name: cognitiveServiceName
 }
 var secretValue = existingResource.listKeys().key1
 

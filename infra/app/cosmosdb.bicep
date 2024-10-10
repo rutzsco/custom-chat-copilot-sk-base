@@ -53,26 +53,24 @@ resource account 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
     capabilities: [
       {
         name: 'EnableServerless'
-        
       }
     ]
   }
 }
 
-resource database  'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2020-06-01-preview' = {
+resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2020-06-01-preview' = {
   parent: account
   name: databaseName
   tags: tags
   properties: {
     resource: {
-      id: databaseName      
+      id: databaseName
     }
-    options: {
-    }
+    options: {}
   }
 }
 
-resource chatTurn  'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2020-06-01-preview' = {
+resource chatTurn 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2020-06-01-preview' = {
   parent: database
   name: 'ChatTurn'
   tags: tags
@@ -107,8 +105,7 @@ resource chatTurn  'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
         conflictResolutionPath: '/_ts'
       }
     }
-    options: {
-    }
+    options: {}
   }
 }
 
@@ -121,37 +118,40 @@ module cosmosConnectionStringSecret '../shared/keyvault-secret.bicep' = {
   }
 }
 
-module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)){
-  name: '${accountName}-private-endpoint'
-  params: {
-    name: privateEndpointName
-    groupIds: ['Sql']
-    privateLinkServiceId: account.id
-    subnetId: privateEndpointSubnetId
+module privateEndpoint '../shared/private-endpoint.bicep' =
+  if (!empty(privateEndpointSubnetId)) {
+    name: '${accountName}-private-endpoint'
+    params: {
+      name: privateEndpointName
+      groupIds: ['Sql']
+      privateLinkServiceId: account.id
+      subnetId: privateEndpointSubnetId
+    }
   }
-}
 
 var cosmosDbDataContributorRoleDefinitionId = '00000000-0000-0000-0000-000000000002'
 
-resource cosmosDbDataContributorRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-05-15' = if(useManagedIdentityResourceAccess) {
-  name: guid(subscription().id, managedIdentityPrincipalId, cosmosDbDataContributorRoleDefinitionId, account.id)
-  parent: account
-  properties: {
-    principalId: managedIdentityPrincipalId
-    roleDefinitionId: '/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${database.name}/sqlRoleDefinitions/${cosmosDbDataContributorRoleDefinitionId}'
-    scope: account.id
+resource cosmosDbDataContributorRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-05-15' =
+  if (useManagedIdentityResourceAccess) {
+    name: guid(subscription().id, managedIdentityPrincipalId, cosmosDbDataContributorRoleDefinitionId, account.id)
+    parent: account
+    properties: {
+      principalId: managedIdentityPrincipalId
+      roleDefinitionId: '/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${database.name}/sqlRoleDefinitions/${cosmosDbDataContributorRoleDefinitionId}'
+      scope: account.id
+    }
   }
-}
 
-resource cosmosDbUserAccessRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-05-15' = if(useManagedIdentityResourceAccess) {
-  name: guid(subscription().id, userPrincipalId, cosmosDbDataContributorRoleDefinitionId, account.id)
-  parent: account
-  properties: {
-    principalId: userPrincipalId
-    roleDefinitionId: '/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${database.name}/sqlRoleDefinitions/${cosmosDbDataContributorRoleDefinitionId}'
-    scope: account.id
+resource cosmosDbUserAccessRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-05-15' =
+  if (useManagedIdentityResourceAccess) {
+    name: guid(subscription().id, userPrincipalId, cosmosDbDataContributorRoleDefinitionId, account.id)
+    parent: account
+    properties: {
+      principalId: userPrincipalId
+      roleDefinitionId: '/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${database.name}/sqlRoleDefinitions/${cosmosDbDataContributorRoleDefinitionId}'
+      scope: account.id
+    }
   }
-}
 
 output connectionStringSecretName string = connectionStringSecretName
 output endpoint string = account.properties.documentEndpoint

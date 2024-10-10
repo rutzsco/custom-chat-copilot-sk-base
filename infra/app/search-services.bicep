@@ -57,37 +57,46 @@ module searchSecret '../shared/keyvault-secret.bicep' = {
   }
 }
 
-module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)){
-  name: '${name}-private-endpoint'
-  params: {
-    name: privateEndpointName
-    groupIds: ['searchService']
-    privateLinkServiceId: search.id
-    subnetId: privateEndpointSubnetId
+module privateEndpoint '../shared/private-endpoint.bicep' =
+  if (!empty(privateEndpointSubnetId)) {
+    name: '${name}-private-endpoint'
+    params: {
+      name: privateEndpointName
+      groupIds: ['searchService']
+      privateLinkServiceId: search.id
+      subnetId: privateEndpointSubnetId
+    }
   }
-}
 
 var searchIndexDataContributorRoleDefinitionId = '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
 
-resource managedIdentitySearchIndexDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(useManagedIdentityResourceAccess) {
-  name: guid(subscription().id, managedIdentityPrincipalId, searchIndexDataContributorRoleDefinitionId)
-  properties: {
-    principalId: managedIdentityPrincipalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', searchIndexDataContributorRoleDefinitionId)
-    principalType: 'ServicePrincipal'
+resource managedIdentitySearchIndexDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' =
+  if (useManagedIdentityResourceAccess) {
+    name: guid(subscription().id, managedIdentityPrincipalId, searchIndexDataContributorRoleDefinitionId)
+    properties: {
+      principalId: managedIdentityPrincipalId
+      roleDefinitionId: subscriptionResourceId(
+        'Microsoft.Authorization/roleDefinitions',
+        searchIndexDataContributorRoleDefinitionId
+      )
+      principalType: 'ServicePrincipal'
+    }
   }
-}
 
 var searchServiceContributorRoleDefinitionId = '7ca78c08-252a-4471-8644-bb5ff32d4ba0'
 
-resource managedIdentitySearchServiceContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(useManagedIdentityResourceAccess) {
-  name: guid(subscription().id, managedIdentityPrincipalId, searchServiceContributorRoleDefinitionId)
-  properties: {
-    principalId: managedIdentityPrincipalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', searchServiceContributorRoleDefinitionId)
-    principalType: 'ServicePrincipal'
+resource managedIdentitySearchServiceContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' =
+  if (useManagedIdentityResourceAccess) {
+    name: guid(subscription().id, managedIdentityPrincipalId, searchServiceContributorRoleDefinitionId)
+    properties: {
+      principalId: managedIdentityPrincipalId
+      roleDefinitionId: subscriptionResourceId(
+        'Microsoft.Authorization/roleDefinitions',
+        searchServiceContributorRoleDefinitionId
+      )
+      principalType: 'ServicePrincipal'
+    }
   }
-}
 
 output id string = search.id
 output endpoint string = 'https://${name}.search.windows.net/'

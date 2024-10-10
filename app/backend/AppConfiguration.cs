@@ -69,5 +69,9 @@ public static class AppConfigurationSetting
     public static string AzureServicePrincipalOpenAIAudience { get; } = "AZURE_SP_OPENAI_AUDIENCE";
     public static string OcpApimSubscriptionKey { get; } = "Ocp-Apim-Subscription-Key";
     public static string XMsTokenAadAccessToken { get; } = "X-MS-TOKEN-AAD-ACCESS-TOKEN";
+    public static string AOAIStandardChatGptDeployment { get; } = "AOAIStandardChatGptDeployment";
+    public static string AOAIStandardServiceEndpoint { get; } = "AOAIStandardServiceEndpoint";
+    public static string AOAIPremiumChatGptDeployment { get; } = "AOAIPremiumChatGptDeployment";
+    public static string AOAIPremiumServiceEndpoint { get; } = "AOAIPremiumServiceEndpoint";
 
 }
