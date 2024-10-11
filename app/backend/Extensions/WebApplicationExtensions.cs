@@ -11,6 +11,7 @@ using MinimalApi.Services.Search;
 using MinimalApi.Services.Security;
 using Shared.Models;
 
+
 namespace MinimalApi.Extensions;
 
 internal static class WebApplicationExtensions
@@ -43,6 +44,9 @@ internal static class WebApplicationExtensions
         // User document
         api.MapPost("documents", OnPostDocumentAsync);
         api.MapGet("user/documents", OnGetUserDocumentsAsync);
+
+        // Profile Selections
+        api.MapGet("profile/selections", OnGetProfileUserSelectionOptionsAsync);
 
         api.MapGet("token/csrf", OnGetAntiforgeryTokenAsync);
 
@@ -80,7 +84,35 @@ internal static class WebApplicationExtensions
         var tokens = antiforgery.GetAndStoreTokens(context);
         return TypedResults.Ok(tokens?.RequestToken ?? string.Empty);
     }
-        
+
+    private static async Task<IResult> OnGetProfileUserSelectionOptionsAsync(HttpContext context, string profileId, SearchClientFactory searchClientFactory)
+    {
+        var profileDefinition = ProfileDefinition.All.FirstOrDefault(x => x.Id == profileId);
+        if (profileDefinition == null)
+            return Results.BadRequest("Profile does not found.");
+
+        if (profileDefinition.RAGSettings == null)
+            return Results.BadRequest("Profile does not support user selection");
+
+        var searchClient = searchClientFactory.GetOrCreateClient(profileDefinition.RAGSettings.DocumentRetrievalIndexName);
+        var selectionOptions = new List<UserSelectionOption>();
+        foreach (var selectionOption in profileDefinition.RAGSettings.ProfileUserSelectionOptions)
+        {
+            var searchOptions = new SearchOptions { Size = 0, Facets = { selectionOption.IndexFieldName }};
+            SearchResults<SearchDocument> results = await searchClient.SearchAsync<SearchDocument>("*", searchOptions);
+            if (results.Facets != null && results.Facets.ContainsKey(selectionOption.IndexFieldName))
+            { 
+                var selectionValues = new List<string>();             
+                foreach (FacetResult facet in results.Facets[selectionOption.IndexFieldName])
+                    selectionValues.Add(facet.Value.ToString());
+                selectionOptions.Add(new UserSelectionOption(selectionOption.DisplayName, selectionValues));
+            }
+        }
+
+        var result = new UserSelectionModel(selectionOptions);
+        return Results.Ok(result);
+    }
+    
     private static async Task<IResult> OnGetSourceFileAsync(HttpContext context, string fileName, BlobServiceClient blobServiceClient, IConfiguration configuration)
     {
         try

@@ -14,6 +14,22 @@
             {
                 <div class="d-flex align-content-center flex-wrap flex-grow-1 full-height">
                     <Examples Profile=@_selectedProfileSummary Message="@AppConfiguration.HelloText" OnExampleClicked="@OnAskQuestionAsync" />
+                    <MudStack Row="true" StretchItems="StretchItems.None" Justify="Justify.Center" Style="width: 100%;">
+                        @if (_selectedProfileSummary != null && _userSelectionModel != null)
+                        {
+                            @foreach (var option in _userSelectionModel.Options)
+                            {
+                                   <MudPaper Class="pa-3" Elevation="0">
+                                        <MudSelect T="string" Variant="Variant.Outlined" Label="@option.Name" @bind-Value="option.SelectedValue" Style="width: 250px;">
+                                            @foreach (var option in option.Values)
+                                            {
+                                                <MudSelectItem Value="@option">@option</MudSelectItem>
+                                            }
+                                        </MudSelect>
+                                    </MudPaper>
+                             }
+                        }
+                    </MudStack>
                 </div>
             }
             else
@@ -76,7 +92,7 @@
                                 <ChildContent>
                                     @foreach (var profile in _profiles)
                                     {
-                                        <MudMenuItem OnClick="@(e => OnProfileClick(@profile.Name))">@profile.Name</MudMenuItem>
+                                        <MudMenuItem OnClick="@(e => OnProfileClickAsync(@profile.Name))">@profile.Name</MudMenuItem>
                                     }
                                 </ChildContent>
                             </MudMenu>

@@ -104,6 +104,14 @@ public class RAGSettingsSummary
     public required int KNearestNeighborsCount { get; set; } = 3;
     public required bool Exhaustive { get; set; } = false;
 
+    public required IEnumerable<ProfileUserSelectionOption> ProfileUserSelectionOptions { get; set; }
+
+}
+
+public class ProfileUserSelectionOption
+{
+    public required string DisplayName { get; set; }
+    public required string IndexFieldName { get; set; }
 }
 
 public class DocumentCollectionRAGSettings

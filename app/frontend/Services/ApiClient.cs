@@ -29,7 +29,13 @@ public sealed class ApiClient(HttpClient httpClient)
 
         return await response.Content.ReadFromJsonAsync<List<DocumentSummary>>();
     }
+    public async Task<UserSelectionModel> GetProfileUserSelectionModelAsync(string profileId)
+    {
+        var response = await httpClient.GetAsync($"api/profile/selections?profileId={profileId}");
+        response.EnsureSuccessStatusCode();
 
+        return await response.Content.ReadFromJsonAsync<UserSelectionModel>();
+    }
     public async Task<UploadDocumentsResponse> UploadDocumentsAsync(IReadOnlyList<IBrowserFile> files, long maxAllowedSize, IDictionary<string, string>? metadata = null)
     {
         try
