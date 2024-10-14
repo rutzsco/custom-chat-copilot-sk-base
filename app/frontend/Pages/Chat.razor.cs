@@ -168,31 +168,38 @@ public sealed partial class Chat
                 Approach.ReadRetrieveRead,
                 null);
 
-            //check access token expiration to see if access token refresh is needed
-            string? accessTokenExpiration = await GetAuthMeFieldAsync("expires_on");
-
-            var expiresOnDateTime = DateTimeOffset.Parse(accessTokenExpiration);
-            if (expiresOnDateTime < DateTimeOffset.UtcNow.AddMinutes(5))
-            {
-                await HttpClient.GetAsync(".auth/refresh");
-            }
-
-            // get access token
-            var accessToken = await GetAuthMeFieldAsync("access_token");
-
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming")
             {
-                Headers = {
-                    {
-                        "Accept", "application/json"
-                    },
-                    {
-                        "X-MS-TOKEN-AAD-ACCESS-TOKEN", accessToken
-                    }
-                },
+                Headers = { { "Accept", "application/json" } },
                 Content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
             };
             httpRequest.SetBrowserResponseStreamingEnabled(true);
+
+            //check access token expiration to see if access token refresh is needed
+            //string? accessTokenExpiration = await GetAuthMeFieldAsync("expires_on");
+
+            //var expiresOnDateTime = DateTimeOffset.Parse(accessTokenExpiration);
+            //if (expiresOnDateTime < DateTimeOffset.UtcNow.AddMinutes(5))
+            //{
+            //    await HttpClient.GetAsync(".auth/refresh");
+            //}
+
+            //// get access token
+            //var accessToken = await GetAuthMeFieldAsync("access_token");
+
+            //using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming")
+            //{
+            //    Headers = {
+            //        {
+            //            "Accept", "application/json"
+            //        },
+            //        {
+            //            "X-MS-TOKEN-AAD-ACCESS-TOKEN", accessToken
+            //        }
+            //    },
+            //    Content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json")
+            //};
+            //httpRequest.SetBrowserResponseStreamingEnabled(true);
 
             using HttpResponseMessage response = await HttpClient.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
