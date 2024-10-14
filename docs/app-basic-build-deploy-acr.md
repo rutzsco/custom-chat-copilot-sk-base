@@ -42,18 +42,18 @@ az acr build --registry <ACR> --image <IMAGE_NAME> --file Dockerfile .
 
 ```bash
 cd app
-az acr build --registry rutzscolabcr --image chat-copilot/chatapp:v1 --file Dockerfile .
+az acr build --registry rutzscolabcr --image custom-chat-copilot/chat-app:v1 --file Dockerfile .
 ```
 
 ## Step 4: Deploy app to Azure Container Apps(ACA)
 
 
 ```bash
-az containerapp update --name <NAME> --resource-group <RG> --image chat-copilot/chatapp:v1
+az containerapp update --name <NAME> --resource-group <RG> --image <IMAGE>
 ```
 
 **Example**
 
 ```bash
-az containerapp update --name chatApp --resource-group rutzsco-chat-copilot-demo --image chat-copilot/chatapp:v1
+az containerapp update --name chatApp --resource-group rutzsco-chat-copilot-demo --image custom-chat-copilot/chat-app:v1
 ```
