@@ -23,7 +23,7 @@ resource existingAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' exist
   }
 
 resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' =
-  if (!empty(existingCogServicesName)) {
+  if (empty(existingCogServicesName)) {
     name: name
     location: location
     tags: tags
