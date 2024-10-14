@@ -35,6 +35,14 @@ stages:
           workingDirectory: $(workingDirectory)
 
       - task: CmdLine@2
+        displayName: 'Echo Command'
+        inputs:
+          script: |
+            echo "docker login ${{ parameters.ContainerRegistryUrl }} -u ${{ parameters.ContainerRegistryUsername }} -p ***"
+            echo "docker tag ${{ parameters.imageName }} ${{ parameters.ContainerRegistryUrl }}/${{ parameters.imageName }}"
+            echo "docker push ${{ parameters.ContainerRegistryUrl }}/${{ parameters.imageName }}"
+
+      - task: CmdLine@2
         displayName: 'Docker Push'
         inputs:
           script: |

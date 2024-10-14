@@ -1,7 +1,9 @@
-# Required Variables:
+# Required Variables to be defined on the pipeline:
 # - ContainerRegistryUrl
 # - ContainerRegistryUsername
 # - ContainerRegistryPassword (secret)
+# NOTE: The service principal used to run this pipeline must have the "acrpush" role on the Container registry.
+
 trigger:
   branches:
     include:
