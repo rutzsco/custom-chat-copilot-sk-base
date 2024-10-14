@@ -104,6 +104,8 @@ public class RAGSettingsSummary
     public required int KNearestNeighborsCount { get; set; } = 3;
     public required bool Exhaustive { get; set; } = false;
 
+    public required bool AllowFileUpload { get; set; }
+
     public required IEnumerable<ProfileUserSelectionOption> ProfileUserSelectionOptions { get; set; }
 
 }

@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Shared.Models;
-public record ProfileSummary(string Id, string Name, string Description, ProfileApproach Approach, List<string> SampleQuestions, bool SupportsUserSelectionOptions);
+public record ProfileSummary(string Id, string Name, string Description, ProfileApproach Approach, List<string> SampleQuestions, bool SupportsUserSelectionOptions, bool SupportsFileUpload);
 
 public enum ProfileApproach
 {

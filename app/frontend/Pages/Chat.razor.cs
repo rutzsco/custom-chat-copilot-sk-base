@@ -98,7 +98,7 @@ public sealed partial class Chat
     {
         _selectedProfile = profile.Name;
         _selectedProfileSummary = profile;
-        _supportsFileUpload = _selectedProfileSummary.Approach == ProfileApproach.Chat || _selectedProfileSummary.Approach == ProfileApproach.EndpointAssistantV2;
+        _supportsFileUpload = _selectedProfileSummary.Approach == ProfileApproach.Chat || _selectedProfileSummary.Approach == ProfileApproach.EndpointAssistantV2 || _selectedProfileSummary.SupportsFileUpload;
         if (profile.SupportsUserSelectionOptions)
         {
             _userSelectionModel = await ApiClient.GetProfileUserSelectionModelAsync(profile.Id);

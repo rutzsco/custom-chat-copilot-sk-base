@@ -26,7 +26,7 @@ internal static class UserExtensions
 
         var enableLogout = !string.IsNullOrEmpty(id);
 
-        var profiles = ProfileDefinition.All.GetAuthorizedProfiles(userGroups).Select(x => new ProfileSummary(x.Id, x.Name, string.Empty, (ProfileApproach)Enum.Parse(typeof(ProfileApproach), x.Approach, true), x.SampleQuestions, SupportsUserSelections(x)));
+        var profiles = ProfileDefinition.All.GetAuthorizedProfiles(userGroups).Select(x => new ProfileSummary(x.Id, x.Name, string.Empty, (ProfileApproach)Enum.Parse(typeof(ProfileApproach), x.Approach, true), x.SampleQuestions, SupportsUserSelections(x), SupportsFileUpload(x)));
         var user = new UserInformation(enableLogout, name, id, session, profiles, userGroups);
 
         return user;
@@ -35,5 +35,10 @@ internal static class UserExtensions
     public static bool SupportsUserSelections(ProfileDefinition p)
     {
         return p.RAGSettings != null && p.RAGSettings.ProfileUserSelectionOptions != null && p.RAGSettings.ProfileUserSelectionOptions.Any();
+    }
+
+    public static bool SupportsFileUpload(ProfileDefinition p)
+    {
+        return p.RAGSettings != null && p.RAGSettings.AllowFileUpload;
     }
 }
