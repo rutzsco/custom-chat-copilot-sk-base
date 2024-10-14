@@ -33,7 +33,7 @@ internal sealed class ReadRetrieveReadChatService
             var documentLookupFunction = kernel.Plugins.GetFunction(profile.RAGSettings.DocumentRetrievalPluginName, profile.RAGSettings.DocumentRetrievalPluginQueryFunctionName);
             var chatFunction = kernel.Plugins.GetFunction(DefaultSettings.ChatPluginName, DefaultSettings.ChatPluginFunctionName);
 
-            var context = new KernelArguments().AddUserParameters(request.History, profile, user);
+            var context = new KernelArguments().AddUserParameters(request, profile, user);
 
             await kernel.InvokeAsync(generateSearchQueryFunction, context);
             await kernel.InvokeAsync(documentLookupFunction, context);

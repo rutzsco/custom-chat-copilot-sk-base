@@ -36,7 +36,7 @@ internal sealed class ChatService : IChatService
         var sw = Stopwatch.StartNew();
 
         var kernel = _openAIClientFacade.GetKernel(request.OptionFlags.IsChatGpt4Enabled());
-        var context = new KernelArguments().AddUserParameters(request.History, profile, user);
+        var context = new KernelArguments().AddUserParameters(request, profile, user);
 
         // Chat Step
         var chatGpt = kernel.Services.GetService<IChatCompletionService>();

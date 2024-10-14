@@ -142,9 +142,7 @@ public sealed partial class Chat
 
         try
         {
-            var history = _questionAndAnswerMap.Where(x => x.Value is not null)
-                .Select(x => new ChatTurn(x.Key.Question, x.Value.Answer))
-                .ToList();
+            var history = _questionAndAnswerMap.Where(x => x.Value is not null).Select(x => new ChatTurn(x.Key.Question, x.Value.Answer)).ToList();
             history.Add(new ChatTurn(_userQuestion.Trim()));
 
             var options = new Dictionary<string, string>
@@ -166,6 +164,7 @@ public sealed partial class Chat
                 _files,
                 options,
                 Approach.ReadRetrieveRead,
+                _userSelectionModel,
                 null);
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat/streaming")

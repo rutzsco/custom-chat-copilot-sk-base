@@ -19,18 +19,18 @@ public static class SKExtensions
         return new SKResult(answer, usage, sw.ElapsedMilliseconds);
     }
 
-    public static KernelArguments AddUserParameters(this KernelArguments arguments, ChatTurn[] history, ProfileDefinition profile, UserInformation user, IEnumerable<string>? selectedDocuments = null)
+    public static KernelArguments AddUserParameters(this KernelArguments arguments, ChatRequest request, ProfileDefinition profile, UserInformation user)
     {
         arguments[ContextVariableOptions.Profile] = profile;
         arguments[ContextVariableOptions.UserId] = user.UserId;
         arguments[ContextVariableOptions.SessionId] = user.SessionId;
 
-        if (selectedDocuments != null)
+        if (request.SelectedUserCollectionFiles != null && request.SelectedUserCollectionFiles.Any())
         {
-            arguments[ContextVariableOptions.SelectedDocuments] = selectedDocuments;
+            arguments[ContextVariableOptions.SelectedDocuments] = request.SelectedUserCollectionFiles;
         }
 
-        if (history.LastOrDefault()?.User is { } userQuestion)
+        if (request.History.LastOrDefault()?.User is { } userQuestion)
         {
             arguments[ContextVariableOptions.Question] = $"{userQuestion}";
         }
@@ -39,9 +39,19 @@ public static class SKExtensions
             throw new InvalidOperationException("User question is null");
         }
 
-        arguments[ContextVariableOptions.ChatTurns] = history;
+        if (request.UserSelectionModel != null && request.SelectedUserCollectionFiles.Any())
+        {
+            foreach (var item in request.UserSelectionModel.Options)
+            {
+                arguments[item.Name] = item.SelectedValue;
+            }
+        }
+
+
+        arguments[ContextVariableOptions.ChatTurns] = request.History;
         return arguments;
     }
+
     public static ProfileDefinition GetProfileDefinition(this KernelArguments arguments)
     {
         var profile = arguments[ContextVariableOptions.Profile] as ProfileDefinition;

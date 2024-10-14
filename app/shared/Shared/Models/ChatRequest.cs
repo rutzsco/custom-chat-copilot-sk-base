@@ -10,6 +10,7 @@ public record class ChatRequest(
     IEnumerable<FileSummary> FileUploads,
     Dictionary<string, string> OptionFlags,
     Approach Approach,
+    UserSelectionModel? UserSelectionModel,
     RequestOverrides? Overrides = null) : ApproachRequest(Approach)
 {
     public string? LastUserQuestion => History?.LastOrDefault()?.User;
