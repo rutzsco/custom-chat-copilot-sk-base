@@ -1,4 +1,4 @@
-# Basic Build and Deploy using ACR Tasks
+# App Build and Deploy using ACR Tasks
 
 ## Step 1: Clone Repository
 
