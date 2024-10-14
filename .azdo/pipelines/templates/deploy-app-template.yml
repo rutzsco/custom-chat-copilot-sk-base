@@ -32,6 +32,12 @@ stages:
           buildType: 'current'
           targetPath: '$(Pipeline.Workspace)/build'
 
+      - task: CmdLine@2
+        displayName: 'Echo Command'
+        inputs:
+          script: |
+            echo "az containerapp update --name ${{ parameters.appName }} --resource-group ${{ parameters.resourceGroupName }} --image ${{ parameters.imageName }}"
+
       - task: AzureCLI@2
         inputs:
           azureSubscription: ${{ parameters.serviceConnectionName }}

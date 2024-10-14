@@ -183,7 +183,7 @@ module cosmos './app/cosmosdb.bicep' = {
     privateEndpointName: ''
     useManagedIdentityResourceAccess: useManagedIdentityResourceAccess
     managedIdentityPrincipalId: managedIdentity.outputs.identityPrincipalId
-    userPrincipalId: ''
+    userPrincipalId: principalId
   }
 }
 
@@ -249,6 +249,7 @@ module search './app/search-services.bicep' = {
 
 module azureOpenAi './app/cognitive-services.bicep' = {
   name: 'openai${deploymentSuffix}'
+  dependsOn: [search]
   params: {
     existingCogServicesName: existingCogServicesName
     existingCogServicesResourceGroup: existingCogServicesResourceGroup
@@ -322,7 +323,7 @@ var appDefinition = {
     [
       {
         name: 'acrpassword'
-        value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${cognitiveSecret.outputs.secretName}'
+        value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${registry.outputs.registrySecretName}'
         secretRef: 'acrpassword'
         secret: true
       }
