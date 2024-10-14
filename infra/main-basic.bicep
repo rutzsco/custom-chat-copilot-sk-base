@@ -323,7 +323,7 @@ var appDefinition = {
     [
       {
         name: 'acrpassword'
-        value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${cognitiveSecret.outputs.secretName}'
+        value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${registry.outputs.registrySecretName}'
         secretRef: 'acrpassword'
         secret: true
       }
