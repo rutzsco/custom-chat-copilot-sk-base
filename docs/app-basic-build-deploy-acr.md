@@ -1,5 +1,11 @@
 # App Build and Deploy using ACR Tasks
 
+## Prerequisites
+
+ Infra Deployment
+
+## App Build and Deploy
+
 ## Step 1: Clone Repository
 
 ```bash
@@ -26,10 +32,28 @@ code appsettings.json
 }
 ```
 
-## Step 3: ACR build and push
-
+## Step 3: Build and push image to ACR
 
 ```bash
 cd app
-az acr build --registry rutzscolabcr --image dhr/chat-copilot:v1 --file Dockerfile .
+az acr build --registry <ACR> --image <IMAGE_NAME> --file Dockerfile .
+```
+**Example**
+
+```bash
+cd app
+az acr build --registry rutzscolabcr --image chat-copilot/chatapp:v1 --file Dockerfile .
+```
+
+## Step 4: Deploy app to Azure Container Apps(ACA)
+
+
+```bash
+az containerapp update --name <NAME> --resource-group <RG> --image chat-copilot/chatapp:v1
+```
+
+**Example**
+
+```bash
+az containerapp update --name chatApp --resource-group rutzsco-chat-copilot-demo --image chat-copilot/chatapp:v1
 ```
