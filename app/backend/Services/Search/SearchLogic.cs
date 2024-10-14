@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using OpenAI.Embeddings;
 using TiktokenSharp;
 
 namespace MinimalApi.Services.Search;
@@ -65,6 +64,11 @@ public class SearchLogic<T> where T : IKnowledgeSource
                 var sourcefilesString = string.Join(",", sourcefiles);
                 searchOptions.Filter = $"entra_id eq '{userId}' and session_id eq '{sessionId}' and search.in(sourcefile, '{sourcefilesString}')";
             }
+        }
+
+        if (arguments.ContainsName(ContextVariableOptions.SelectedFilters))
+        {
+            searchOptions.Filter = arguments[ContextVariableOptions.SelectedFilters] as string;
         }
 
         // Perform the search and build the results

@@ -32,7 +32,21 @@ public sealed class RetrieveRelatedDocumentSkill
 
         searchQuery = searchQuery.Replace("\"", string.Empty);
         arguments[ContextVariableOptions.Intent] = searchQuery;
+        if (profile.RAGSettings.ProfileUserSelectionOptions.Any())
+        {
+            var sb = new StringBuilder();
+            int count = 0;
+            foreach(var o in profile.RAGSettings.ProfileUserSelectionOptions)
+            {
+                if (count > 0)
+                    sb.Append(" and ");
 
+                var filter = $"{o.IndexFieldName} eq '{arguments[o.DisplayName]}'";
+                sb.Append(filter);
+                count++;
+            }
+            arguments[ContextVariableOptions.SelectedFilters] = sb.ToString();
+        }
 
         var searchLogic = ResolveRetrievalLogic(_openAIClient, _searchClientFactory, profile.RAGSettings, _config["AOAIEmbeddingsDeployment"], profile.RAGSettings.DocumentRetrievalPluginQueryFunctionName);
         var result = await searchLogic(searchQuery, arguments);

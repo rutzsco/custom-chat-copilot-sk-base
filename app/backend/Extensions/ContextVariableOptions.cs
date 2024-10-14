@@ -22,6 +22,7 @@ public class ContextVariableOptions
     public static string UserId = "UserId";
     public static string SessionId = "SessionId";
     public static string SelectedDocuments = "SelectedDocuments";
+    public static string SelectedFilters = "SelectedFilters";
 
     public static string ResponsibleAIPolicyViolation = "ResponsibleAIPolicyViolation";
 
