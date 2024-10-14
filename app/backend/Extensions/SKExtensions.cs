@@ -39,7 +39,7 @@ public static class SKExtensions
             throw new InvalidOperationException("User question is null");
         }
 
-        if (request.UserSelectionModel != null && request.SelectedUserCollectionFiles.Any())
+        if (request.UserSelectionModel != null && request.UserSelectionModel.Options.Any())
         {
             foreach (var item in request.UserSelectionModel.Options)
             {
