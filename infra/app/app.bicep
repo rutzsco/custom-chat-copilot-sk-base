@@ -16,15 +16,21 @@ param clientSecretSecretName string
 param tokenStoreSasSecretName string
 
 var appSettingsArray = filter(array(appDefinition.settings), i => i.name != '')
-var secrets = map(filter(appSettingsArray, i => i.?secret != null), i => {
-  name: i.name
-  value: i.value
-  secretRef: i.?secretRef ?? take(replace(replace(toLower(i.name), '_', '-'), '.', '-'), 32)
-})
-var env = map(filter(appSettingsArray, i => i.?secret == null), i => {
-  name: i.name
-  value: i.value
-})
+var secrets = map(
+  filter(appSettingsArray, i => i.?secret != null),
+  i => {
+    name: i.name
+    value: i.value
+    secretRef: i.?secretRef ?? take(replace(replace(toLower(i.name), '_', '-'), '.', '-'), 32)
+  }
+)
+var env = map(
+  filter(appSettingsArray, i => i.?secret == null),
+  i => {
+    name: i.name
+    value: i.value
+  }
+)
 var port = 8080
 
 resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existing = {
@@ -55,15 +61,15 @@ module fetchLatestImage '../shared/fetch-container-image.bicep' = {
 resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
   name: name
   location: location
-  tags: union(tags, {'azd-service-name':  'web' })
+  tags: union(tags, { 'azd-service-name': 'web' })
   identity: {
     type: 'UserAssigned'
-    userAssignedIdentities:  { '${userIdentity.id}': {} }
+    userAssignedIdentities: { '${userIdentity.id}': {} }
   }
   properties: {
     managedEnvironmentId: containerAppsEnvironment.id
     configuration: {
-      ingress:  {
+      ingress: {
         external: true
         targetPort: port
         transport: 'auto'
@@ -75,34 +81,43 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
           passwordSecretRef: 'acrpassword'
         }
       ]
-      secrets: union([
-      ],
-      map(secrets, secret => {
-        name: secret.secretRef
-        keyVaultUrl: secret.value
-        identity: userIdentity.id
-      }))
+      secrets: union(
+        [],
+        map(
+          secrets,
+          secret => {
+            name: secret.secretRef
+            keyVaultUrl: secret.value
+            identity: userIdentity.id
+          }
+        )
+      )
     }
     template: {
       containers: [
         {
           image: fetchLatestImage.outputs.?containers[?0].?image ?? 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
           name: 'main'
-          env: union([
-            {
-              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-              value: applicationInsights.properties.ConnectionString
-            }
-            {
-              name: 'PORT'
-              value: '${port}'
-            }
-          ],
-          env,
-          map(secrets, secret => {
-            name: secret.name
-            secretRef: secret.secretRef
-          }))
+          env: union(
+            [
+              {
+                name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+                value: applicationInsights.properties.ConnectionString
+              }
+              {
+                name: 'PORT'
+                value: '${port}'
+              }
+            ],
+            env,
+            map(
+              secrets,
+              secret => {
+                name: secret.name
+                secretRef: secret.secretRef
+              }
+            )
+          )
           resources: {
             cpu: json('1.0')
             memory: '2.0Gi'
@@ -141,16 +156,17 @@ resource app 'Microsoft.App/containerApps@2023-05-02-preview' = {
   }
 }
 
-module appAuthorization './app-authorization.bicep' = if (clientId != '') {
-  name: 'app-authorization'
-  params: {
-    appName: app.name
-    clientId: clientId
-    clientIdScope: clientIdScope
-    clientSecretSecretName: clientSecretSecretName
-    tokenStoreSasSecretName: tokenStoreSasSecretName
+module appAuthorization './app-authorization.bicep' =
+  if (!empty(clientId)) {
+    name: 'app-authorization'
+    params: {
+      appName: app.name
+      clientId: clientId
+      clientIdScope: clientIdScope
+      clientSecretSecretName: clientSecretSecretName
+      tokenStoreSasSecretName: tokenStoreSasSecretName
+    }
   }
-}
 
 output defaultDomain string = containerAppsEnvironment.properties.defaultDomain
 output name string = app.name

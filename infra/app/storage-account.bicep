@@ -5,7 +5,8 @@ param tags object = {}
 @allowed([
   'Cool'
   'Hot'
-  'Premium' ])
+  'Premium'
+])
 param accessTier string = 'Hot'
 param allowBlobPublicAccess bool
 param allowSharedKeyAccess bool = true
@@ -16,7 +17,7 @@ param networkAcls object = {
   bypass: 'AzureServices'
   defaultAction: 'Allow'
 }
-@allowed([ 'Enabled', 'Disabled' ])
+@allowed(['Enabled', 'Disabled'])
 param publicNetworkAccess string
 param sku object = { name: 'Standard_LRS' }
 param keyVaultName string
@@ -44,15 +45,18 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
     publicNetworkAccess: publicNetworkAccess
   }
 
-  resource blobServices 'blobServices' = if (!empty(containers)) {
-    name: 'default'
-    resource container 'containers' = [for container in containers: {
-      name: container.name
-      properties: {
-        publicAccess: contains(container, 'publicAccess') ? container.publicAccess : 'None'
-      }
-    }]
-  }
+  resource blobServices 'blobServices' =
+    if (!empty(containers)) {
+      name: 'default'
+      resource container 'containers' = [
+        for container in containers: {
+          name: container.name
+          properties: {
+            publicAccess: contains(container, 'publicAccess') ? container.publicAccess : 'None'
+          }
+        }
+      ]
+    }
 }
 
 module storageAccountConnectionStringSecret '../shared/keyvault-secret.bicep' = {
@@ -64,26 +68,64 @@ module storageAccountConnectionStringSecret '../shared/keyvault-secret.bicep' = 
   }
 }
 
-module privateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)){
-  name: '${name}-private-endpoint'
-  params: {
-    name: privateEndpointName
-    groupIds: ['blob']
-    privateLinkServiceId: storage.id
-    subnetId: privateEndpointSubnetId
+module privateEndpointBlob '../shared/private-endpoint.bicep' =
+  if (!empty(privateEndpointSubnetId)) {
+    name: '${name}-blob-private-endpoint'
+    params: {
+      name: '${privateEndpointName}-blob'
+      groupIds: ['blob']
+      privateLinkServiceId: storage.id
+      subnetId: privateEndpointSubnetId
+    }
   }
-}
+
+module privateEndpointFile '../shared/private-endpoint.bicep' =
+  if (!empty(privateEndpointSubnetId)) {
+    name: '${name}-file-private-endpoint'
+    params: {
+      name: '${privateEndpointName}-file'
+      groupIds: ['file']
+      privateLinkServiceId: storage.id
+      subnetId: privateEndpointSubnetId
+    }
+  }
+
+module privateEndpointQueue '../shared/private-endpoint.bicep' =
+  if (!empty(privateEndpointSubnetId)) {
+    name: '${name}-queue-private-endpoint'
+    params: {
+      name: '${privateEndpointName}-queue'
+      groupIds: ['queue']
+      privateLinkServiceId: storage.id
+      subnetId: privateEndpointSubnetId
+    }
+  }
+
+module privateEndpointTable '../shared/private-endpoint.bicep' =
+  if (!empty(privateEndpointSubnetId)) {
+    name: '${name}-table-private-endpoint'
+    params: {
+      name: '${privateEndpointName}-table'
+      groupIds: ['table']
+      privateLinkServiceId: storage.id
+      subnetId: privateEndpointSubnetId
+    }
+  }
 
 var storageBlobDataContributorRoleDefinitionId = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 
-resource managedIdentityStorageBlobDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if(useManagedIdentityResourceAccess) {
-  name: guid(subscription().id, managedIdentityPrincipalId, storageBlobDataContributorRoleDefinitionId)
-  properties: {
-    principalId: managedIdentityPrincipalId
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributorRoleDefinitionId)
-    principalType: 'ServicePrincipal'
+resource managedIdentityStorageBlobDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' =
+  if (useManagedIdentityResourceAccess) {
+    name: guid(subscription().id, managedIdentityPrincipalId, storageBlobDataContributorRoleDefinitionId)
+    properties: {
+      principalId: managedIdentityPrincipalId
+      roleDefinitionId: subscriptionResourceId(
+        'Microsoft.Authorization/roleDefinitions',
+        storageBlobDataContributorRoleDefinitionId
+      )
+      principalType: 'ServicePrincipal'
+    }
   }
-}
 
 output primaryEndpoints object = storage.properties.primaryEndpoints
 output storageAccountName string = storage.name

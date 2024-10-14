@@ -26,12 +26,12 @@ param useManagedIdentityResourceAccess bool = false
 
 param virtualNetworkName string = ''
 param virtualNetworkResourceGroupName string = ''
-param containerAppSubnetName string= ''
+param containerAppSubnetName string = ''
 @description('Address prefix for the container app subnet')
-param containerAppSubnetAddressPrefix string= ''
-param privateEndpointSubnetName string= ''
+param containerAppSubnetAddressPrefix string = ''
+param privateEndpointSubnetName string = ''
 @description('Address prefix for the private endpoint subnet')
-param privateEndpointSubnetAddressPrefix string= ''
+param privateEndpointSubnetAddressPrefix string = ''
 
 @description('Name of the text embedding model deployment')
 param azureEmbeddingDeploymentName string = 'text-embedding'
@@ -40,20 +40,19 @@ param embeddingDeploymentCapacity int = 30
 @description('Name of the chat GPT deployment')
 param azureChatGptStandardDeploymentName string = 'chat'
 @description('Name of the chat GPT model. Default: gpt-35-turbo')
-@allowed([ 'gpt-35-turbo', 'gpt-4', 'gpt-35-turbo-16k', 'gpt-4-16k', 'gpt-4o' ])
+@allowed(['gpt-35-turbo', 'gpt-4', 'gpt-35-turbo-16k', 'gpt-4-16k', 'gpt-4o'])
 param azureOpenAIChatGptStandardModelName string = 'gpt-35-turbo'
-param azureOpenAIChatGptStandardModelVersion string ='0613'
+param azureOpenAIChatGptStandardModelVersion string = '0613'
 @description('Capacity of the chat GPT deployment. Default: 10')
 param chatGptStandardDeploymentCapacity int = 10
 @description('Name of the chat GPT deployment')
 param azureChatGptPremiumDeploymentName string = 'chat-gpt4'
 @description('Name of the chat GPT model. Default: gpt-35-turbo')
-@allowed([ 'gpt-35-turbo', 'gpt-4', 'gpt-35-turbo-16k', 'gpt-4-16k', 'gpt-4o' ])
+@allowed(['gpt-35-turbo', 'gpt-4', 'gpt-35-turbo-16k', 'gpt-4-16k', 'gpt-4o'])
 param azureOpenAIChatGptPremiumModelName string = 'gpt-4o'
-param azureOpenAIChatGptPremiumModelVersion string ='2024-05-13'
+param azureOpenAIChatGptPremiumModelVersion string = '2024-05-13'
 @description('Capacity of the chat GPT deployment. Default: 10')
 param chatGptPremiumDeploymentCapacity int = 10
-
 
 @description('Name of an existing Cognitive Services account to use')
 param existingCogServicesName string = ''
@@ -115,20 +114,21 @@ module managedIdentity './app/identity.bicep' = {
   }
 }
 
-module virtualNetwork './app/virtual-network.bicep' = if(virtualNetworkName != '') {
-  name: 'virtual-network${deploymentSuffix}'
-  params: {
-    virtualNetworkName: virtualNetworkName
-    location: location
-    containerAppSubnetName: containerAppSubnetName
-    containerAppSubnetAddressPrefix: containerAppSubnetAddressPrefix
-    containerAppSubnetNsgName: '${abbrs.networkNetworkSecurityGroups}container-app-${resourceToken}'
-    privateEndpointSubnetName: privateEndpointSubnetName
-    privateEndpointSubnetAddressPrefix: privateEndpointSubnetAddressPrefix
-    privateEndpointSubnetNsgName: '${abbrs.networkNetworkSecurityGroups}private-endpoint-${resourceToken}'
+module virtualNetwork './app/virtual-network.bicep' =
+  if (virtualNetworkName != '') {
+    name: 'virtual-network${deploymentSuffix}'
+    params: {
+      virtualNetworkName: virtualNetworkName
+      location: location
+      containerAppSubnetName: containerAppSubnetName
+      containerAppSubnetAddressPrefix: containerAppSubnetAddressPrefix
+      containerAppSubnetNsgName: '${abbrs.networkNetworkSecurityGroups}container-app-${resourceToken}'
+      privateEndpointSubnetName: privateEndpointSubnetName
+      privateEndpointSubnetAddressPrefix: privateEndpointSubnetAddressPrefix
+      privateEndpointSubnetNsgName: '${abbrs.networkNetworkSecurityGroups}private-endpoint-${resourceToken}'
+    }
+    scope: resourceGroup(virtualNetworkResourceGroupName)
   }
-  scope: resourceGroup(virtualNetworkResourceGroupName)
-}
 
 module keyVault './app/keyvault.bicep' = {
   name: 'keyvault${deploymentSuffix}'
@@ -159,29 +159,31 @@ module registry './app/registry.bicep' = {
   }
 }
 
-module registrySecret './shared/keyvault-registry-secret.bicep' = if (existingContainerRegistryName == '') {
-  name: 'registry-secret${deploymentSuffix}'
-  params: {
-    registryName: registry.outputs.name
-    registryResourceGroup: registry.outputs.resourceGroupName
-    keyVaultName: keyVault.outputs.name
-    name: registry.outputs.registrySecretName
+module registrySecret './shared/keyvault-registry-secret.bicep' =
+  if (existingContainerRegistryName == '') {
+    name: 'registry-secret${deploymentSuffix}'
+    params: {
+      registryName: registry.outputs.name
+      registryResourceGroup: registry.outputs.resourceGroupName
+      keyVaultName: keyVault.outputs.name
+      name: registry.outputs.registrySecretName
+    }
   }
-}
 
 module cosmos './app/cosmosdb.bicep' = {
   name: 'cosmos${deploymentSuffix}'
   params: {
     accountName: '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
-    databaseName: 'ChatHistory' 
+    databaseName: 'ChatHistory'
     location: location
     tags: tags
     deploymentSuffix: deploymentSuffix
     keyVaultName: keyVault.outputs.name
     privateEndpointSubnetId: ''
-    privateEndpointName:  ''
+    privateEndpointName: ''
     useManagedIdentityResourceAccess: useManagedIdentityResourceAccess
     managedIdentityPrincipalId: managedIdentity.outputs.identityPrincipalId
+    userPrincipalId: ''
   }
 }
 
@@ -245,7 +247,7 @@ module search './app/search-services.bicep' = {
   }
 }
 
-module azureOpenAi './app/cognitive-services.bicep' =  {
+module azureOpenAi './app/cognitive-services.bicep' = {
   name: 'openai${deploymentSuffix}'
   params: {
     existingCogServicesName: existingCogServicesName
@@ -254,47 +256,50 @@ module azureOpenAi './app/cognitive-services.bicep' =  {
     location: location
     tags: tags
     deploymentSuffix: deploymentSuffix
-    deployments: concat([      
-      {
-        name: azureEmbeddingDeploymentName
-        model: {
-          format: 'OpenAI'
-          name: azureEmbeddingModelName
-          version: '2'
+    deployments: concat(
+      [
+        {
+          name: azureEmbeddingDeploymentName
+          model: {
+            format: 'OpenAI'
+            name: azureEmbeddingModelName
+            version: '2'
+          }
+          sku: {
+            name: 'Standard'
+            capacity: embeddingDeploymentCapacity
+          }
         }
-        sku: {
-          name: 'Standard'
-          capacity: embeddingDeploymentCapacity
+      ],
+      [
+        {
+          name: azureChatGptStandardDeploymentName
+          model: {
+            format: 'OpenAI'
+            name: azureOpenAIChatGptStandardModelName
+            version: azureOpenAIChatGptStandardModelVersion
+          }
+          sku: {
+            name: 'Standard'
+            capacity: chatGptStandardDeploymentCapacity
+          }
         }
-      }
-    ], [
-      {
-        name: azureChatGptStandardDeploymentName
-        model: {
-          format: 'OpenAI'
-          name: azureOpenAIChatGptStandardModelName
-          version: azureOpenAIChatGptStandardModelVersion
+      ],
+      [
+        {
+          name: azureChatGptPremiumDeploymentName
+          model: {
+            format: 'OpenAI'
+            name: azureOpenAIChatGptPremiumModelName
+            version: azureOpenAIChatGptPremiumModelVersion
+          }
+          sku: {
+            name: 'Standard'
+            capacity: chatGptPremiumDeploymentCapacity
+          }
         }
-        sku: {
-          name: 'Standard'
-          capacity: chatGptStandardDeploymentCapacity
-        }
-      }
-    ], [
-      {
-        name: azureChatGptPremiumDeploymentName
-        model: {
-          format: 'OpenAI'
-          name: azureOpenAIChatGptPremiumModelName
-          version: azureOpenAIChatGptPremiumModelVersion
-        }
-        sku: {
-          name: 'Standard'
-          capacity: chatGptPremiumDeploymentCapacity
-        }
-      }
-    ])
-    keyVaultName: keyVault.outputs.name
+      ]
+    )
     publicNetworkAccess: 'Enabled' // virtualNetworkName != '' 'Disabled' : 'Enabled'
     privateEndpointSubnetId: '' // virtualNetworkName != '' virtualNetwork.outputs.privateEndpointSubnetId: ''
     privateEndpointName: '' // virtualNetworkName != '' '${abbrs.networkPrivateLinkServices}${abbrs.cognitiveServicesAccounts}${resourceToken}': ''
@@ -304,7 +309,7 @@ module azureOpenAi './app/cognitive-services.bicep' =  {
 module cognitiveSecret './shared/keyvault-cognitive-secret.bicep' = {
   name: 'openai-secret${deploymentSuffix}'
   params: {
-   cognitiveServiceName: azureOpenAi.outputs.name
+    cognitiveServiceName: azureOpenAi.outputs.name
     cognitiveServiceResourceGroup: azureOpenAi.outputs.resourceGroupName
     keyVaultName: keyVault.outputs.name
     name: azureOpenAi.outputs.cognitiveServicesKeySecretName
@@ -312,77 +317,82 @@ module cognitiveSecret './shared/keyvault-cognitive-secret.bicep' = {
 }
 
 var appDefinition = {
-  settings : (union(array(backendDefinition.settings), [
-    {
-      name: 'acrpassword'
-      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${cognitiveSecret.outputs.secretName}'
-      secretRef: 'acrpassword'
-      secret: true
-    }
-    {
-      name: 'AzureStorageAccountEndpoint'
-      value: storageAccount.outputs.primaryEndpoints.blob
-    }
-    {
-      name: 'AzureStorageContainer'
-      value: storageAccountContainerName
-    }
-    {
-      name: 'AzureSearchServiceEndpoint'
-      value: search.outputs.endpoint
-    }
-    {
-      name: 'AOAIStandardServiceEndpoint'
-      value: azureOpenAi.outputs.endpoint
-    }
-    {
-      name: 'AOAIStandardChatGptDeployment'
-      value: azureChatGptStandardDeploymentName
-    }
-    {
-      name: 'AOAIEmbeddingsDeployment'
-      value: azureEmbeddingDeploymentName
-    }
-    {
-      name: 'EnableDataProtectionBlobKeyStorage'
-      value: string(false)
-    }
-    {
-      name: 'UseManagedIdentityResourceAccess'
-      value: string(useManagedIdentityResourceAccess)
-    }
-  ],
-(useManagedIdentityResourceAccess) ? [
-    {
-      name: 'CosmosDBEndpoint'
-      value: cosmos.outputs.endpoint
-    }] : [
-    {
-      name: 'CosmosDBConnectionString'
-      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${cosmos.outputs.connectionStringSecretName}'
-      secretRef: 'cosmosdbconnectionstring'
-      secret: true
-    }
-    {
-      name: 'AzureStorageAccountConnectionString'
-      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${storageAccount.outputs.storageAccountConnectionStringSecretName}'
-      secretRef: 'azurestorageconnectionstring'
-      secret: true
-    }    
-    {
-      name: 'AzureSearchServiceKey'
-      value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${search.outputs.searchKeySecretName}'
-      secretRef: 'azuresearchservicekey'
-      secret: true
-    }
+  settings: (union(
+    array(backendDefinition.settings),
+    [
       {
-        name: 'AOAIStandardServiceKey'
-        value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${azureOpenAi.outputs.cognitiveServicesKeySecretName}'
-        secretRef: 'aoaistandardservicekey'
+        name: 'acrpassword'
+        value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${cognitiveSecret.outputs.secretName}'
+        secretRef: 'acrpassword'
         secret: true
       }
-    ]
-))
+      {
+        name: 'AzureStorageAccountEndpoint'
+        value: storageAccount.outputs.primaryEndpoints.blob
+      }
+      {
+        name: 'AzureStorageContainer'
+        value: storageAccountContainerName
+      }
+      {
+        name: 'AzureSearchServiceEndpoint'
+        value: search.outputs.endpoint
+      }
+      {
+        name: 'AOAIStandardServiceEndpoint'
+        value: azureOpenAi.outputs.endpoint
+      }
+      {
+        name: 'AOAIStandardChatGptDeployment'
+        value: azureChatGptStandardDeploymentName
+      }
+      {
+        name: 'AOAIEmbeddingsDeployment'
+        value: azureEmbeddingDeploymentName
+      }
+      {
+        name: 'EnableDataProtectionBlobKeyStorage'
+        value: string(false)
+      }
+      {
+        name: 'UseManagedIdentityResourceAccess'
+        value: string(useManagedIdentityResourceAccess)
+      }
+    ],
+    (useManagedIdentityResourceAccess)
+      ? [
+          {
+            name: 'CosmosDBEndpoint'
+            value: cosmos.outputs.endpoint
+          }
+        ]
+      : [
+          {
+            name: 'CosmosDBConnectionString'
+            value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${cosmos.outputs.connectionStringSecretName}'
+            secretRef: 'cosmosdbconnectionstring'
+            secret: true
+          }
+          {
+            name: 'AzureStorageAccountConnectionString'
+            value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${storageAccount.outputs.storageAccountConnectionStringSecretName}'
+            secretRef: 'azurestorageconnectionstring'
+            secret: true
+          }
+          {
+            name: 'AzureSearchServiceKey'
+            value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${search.outputs.searchKeySecretName}'
+            secretRef: 'azuresearchservicekey'
+            secret: true
+          }
+          {
+            name: 'AOAIStandardServiceKey'
+            value: 'https://${keyVault.outputs.name}${environment().suffixes.keyvaultDns}/secrets/${azureOpenAi.outputs.cognitiveServicesKeySecretName}'
+            secretRef: 'aoaistandardservicekey'
+            secret: true
+          }
+        ]
+  ))
 }
 
 module app './app/app.bicep' = {

@@ -39,20 +39,22 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-resource azureMonitorPrivateLinkScope 'Microsoft.Insights/privateLinkScopes@2021-07-01-preview' existing = if(!empty(azureMonitorPrivateLinkScopeName)) {
-  name: azureMonitorPrivateLinkScopeName
-  scope: resourceGroup(azureMonitorPrivateLinkScopeResourceGroupName)
-}
-
-module azureMonitorPrivateLinkScopePrivateEndpoint '../shared/private-endpoint.bicep' = if(!empty(privateEndpointSubnetId)) {
-  name: 'azure-monitor-private-link-scope-private-endpoint'
-  params: {
-    name: privateEndpointName
-    groupIds: ['azuremonitor']
-    privateLinkServiceId: azureMonitorPrivateLinkScope.id
-    subnetId: privateEndpointSubnetId
+resource azureMonitorPrivateLinkScope 'Microsoft.Insights/privateLinkScopes@2021-07-01-preview' existing =
+  if (!empty(azureMonitorPrivateLinkScopeName)) {
+    name: azureMonitorPrivateLinkScopeName
+    scope: resourceGroup(azureMonitorPrivateLinkScopeResourceGroupName)
   }
-}
+
+module azureMonitorPrivateLinkScopePrivateEndpoint '../shared/private-endpoint.bicep' =
+  if (!empty(privateEndpointSubnetId)) {
+    name: 'azure-monitor-private-link-scope-private-endpoint'
+    params: {
+      name: privateEndpointName
+      groupIds: ['azuremonitor']
+      privateLinkServiceId: azureMonitorPrivateLinkScope.id
+      subnetId: privateEndpointSubnetId
+    }
+  }
 
 output applicationInsightsName string = applicationInsights.name
 output logAnalyticsWorkspaceId string = logAnalytics.id
