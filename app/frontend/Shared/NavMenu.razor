@@ -4,5 +4,9 @@
     {
         <MudNavLink Href="documents" aria-label="View user documents." Icon="@Icons.Material.Filled.FileUpload">Documents</MudNavLink>
     }
+    @if (AppConfiguration.ShowCollectionsSelection)
+    {
+        <MudNavLink Href="collections" aria-label="View user documents." Icon="@Icons.Material.Filled.FileUpload">Collections</MudNavLink>
+    }
     <MudNavLink Href="v2/history" aria-label="View chat history." Icon="@Icons.Material.Filled.List">History</MudNavLink>
 </MudNavMenu>
