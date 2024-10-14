@@ -7,20 +7,19 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Shared.Models;
-public static class Filters
+
+public record UserSelectionModel(IEnumerable<UserSelectionOption> Options);
+
+public class UserSelectionOption
 {
-    public static IEnumerable<string> GetSources()
-    {
-        return new string[] { "S1", "S2"};
-    }
+    public string Name { get; set; }
+    public IEnumerable<string> Values { get; set; }
+    public string? SelectedValue { get; set; }
 
-    public static IEnumerable<string> GetModels()
+    public UserSelectionOption(string name, IEnumerable<string> values, string? selectedValue = null)
     {
-        return new string[] { "Ford Ranger", "TBD" };
-    }
-
-    public static IEnumerable<string> GetYears()
-    {
-        return new string[] { "2019", "TBD" };
+        Name = name;
+        Values = values;
+        SelectedValue = selectedValue;
     }
 }

@@ -4,6 +4,7 @@ using System;
 using System.Data;
 using Blazor.Serialization.Extensions;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ClientApp.Pages;
 
@@ -26,7 +27,8 @@ public sealed partial class Chat
     private List<ProfileSummary> _profiles = new();
     private ProfileSummary? _selectedProfileSummary = null;
     private ProfileSummary? _userUploadProfileSummary = null;
-
+    private UserSelectionModel? _userSelectionModel = null;
+    
     private string _lastReferenceQuestion = "";
     private bool _isReceivingResponse = false;
     private bool _supportsFileUpload = false;
@@ -68,8 +70,8 @@ public sealed partial class Chat
         var user = await ApiClient.GetUserAsync();
         _profiles = user.Profiles.Where(x => x.Approach != ProfileApproach.UserDocumentChat).ToList();
         _userUploadProfileSummary = user.Profiles.FirstOrDefault(x => x.Approach == ProfileApproach.UserDocumentChat);
-        _selectedProfile = _profiles.First().Name;
-        _selectedProfileSummary = _profiles.First();
+
+        await SetSelectedProfileAsync(_profiles.First());
 
         StateHasChanged();
 
@@ -87,12 +89,21 @@ public sealed partial class Chat
     }
 
 
-    private void OnProfileClick(string selection)
+    private async Task OnProfileClickAsync(string selection)
     {
-        _selectedProfile = selection;
-        _selectedProfileSummary = _profiles.FirstOrDefault(x => x.Name == selection);
-        _supportsFileUpload = _selectedProfileSummary.Approach == ProfileApproach.Chat || _selectedProfileSummary.Approach == ProfileApproach.EndpointAssistantV2;
+        await SetSelectedProfileAsync(_profiles.FirstOrDefault(x => x.Name == selection));
         OnClearChat();
+    }
+    private async Task SetSelectedProfileAsync(ProfileSummary profile)
+    {
+        _selectedProfile = profile.Name;
+        _selectedProfileSummary = profile;
+        _supportsFileUpload = _selectedProfileSummary.Approach == ProfileApproach.Chat || _selectedProfileSummary.Approach == ProfileApproach.EndpointAssistantV2;
+        if (profile.SupportsUserSelectionOptions)
+        {
+            _userSelectionModel = await ApiClient.GetProfileUserSelectionModelAsync(profile.Id);
+        }
+
     }
     private void OnFileUpload(FileSummary fileSummary)
     {

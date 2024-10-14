@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Collections.Generic;
 using System.IO;
 
 namespace MinimalApi.Services;
@@ -22,7 +23,7 @@ public sealed class AzureBlobStorageService(BlobServiceClient blobServiceClient,
         return blobClient.Uri.AbsoluteUri;
     }
 
-    internal async Task<UploadDocumentsResponse> UploadFilesAsync(UserInformation userInfo, IEnumerable<IFormFile> files, CancellationToken cancellationToken)
+    internal async Task<UploadDocumentsResponse> UploadFilesAsync(UserInformation userInfo, IEnumerable<IFormFile> files, CancellationToken cancellationToken, IDictionary<string,string> metadata)
     {
         try
         {
@@ -53,7 +54,7 @@ public sealed class AzureBlobStorageService(BlobServiceClient blobServiceClient,
                 await blobClient.UploadAsync(fileStream, new BlobHttpHeaders
                 {
                     ContentType = "image"
-                }, cancellationToken: cancellationToken);
+                }, metadata, cancellationToken: cancellationToken);
                 uploadedFiles.Add(new UploadDocumentFileSummary(blobName, file.Length));           
             }
 

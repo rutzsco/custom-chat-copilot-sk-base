@@ -8,7 +8,7 @@ namespace MinimalApi.Services.Documents;
 
 public class DocumentServiceSub : IDocumentService
 {
-    public Task<UploadDocumentsResponse> CreateDocumentUploadAsync(UserInformation userInfo, IFormFileCollection files, CancellationToken cancellationToken)
+    public Task<UploadDocumentsResponse> CreateDocumentUploadAsync(UserInformation userInfo, IFormFileCollection files, Dictionary<string, string>? fileMetadata, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

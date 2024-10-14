@@ -5,6 +5,6 @@ using MinimalApi.Services.Documents;
 namespace MinimalApi.Services.ChatHistory;
 public interface IDocumentService
 {
-    Task<UploadDocumentsResponse> CreateDocumentUploadAsync(UserInformation userInfo, IFormFileCollection files, CancellationToken cancellationToken);
+    Task<UploadDocumentsResponse> CreateDocumentUploadAsync(UserInformation userInfo, IFormFileCollection files, Dictionary<string, string>? fileMetadata, CancellationToken cancellationToken);
     Task<List<DocumentUpload>> GetDocumentUploadsAsync(UserInformation user);
 }

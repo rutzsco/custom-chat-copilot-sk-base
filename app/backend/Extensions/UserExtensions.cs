@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Linq;
 using MinimalApi.Services.Profile;
 using MinimalApi.Services.Security;
 
@@ -25,9 +26,14 @@ internal static class UserExtensions
 
         var enableLogout = !string.IsNullOrEmpty(id);
 
-        var profiles = ProfileDefinition.All.GetAuthorizedProfiles(userGroups).Select(x => new ProfileSummary(x.Name, string.Empty, (ProfileApproach)Enum.Parse(typeof(ProfileApproach), x.Approach, true), x.SampleQuestions));
+        var profiles = ProfileDefinition.All.GetAuthorizedProfiles(userGroups).Select(x => new ProfileSummary(x.Id, x.Name, string.Empty, (ProfileApproach)Enum.Parse(typeof(ProfileApproach), x.Approach, true), x.SampleQuestions, SupportsUserSelections(x)));
         var user = new UserInformation(enableLogout, name, id, session, profiles, userGroups);
 
         return user;
+    }
+
+    public static bool SupportsUserSelections(ProfileDefinition p)
+    {
+        return p.RAGSettings != null && p.RAGSettings.ProfileUserSelectionOptions != null && p.RAGSettings.ProfileUserSelectionOptions.Any();
     }
 }

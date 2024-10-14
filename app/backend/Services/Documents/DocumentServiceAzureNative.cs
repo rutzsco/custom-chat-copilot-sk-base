@@ -36,9 +36,9 @@ public class DocumentServiceAzureNative : IDocumentService
         _cosmosContainer = db.Database.CreateContainerIfNotExistsAsync(DefaultSettings.CosmosDBUserDocumentsCollectionName, "/userId").GetAwaiter().GetResult();
     }
 
-    public async Task<UploadDocumentsResponse> CreateDocumentUploadAsync(UserInformation userInfo, IFormFileCollection files, CancellationToken cancellationToken)
+    public async Task<UploadDocumentsResponse> CreateDocumentUploadAsync(UserInformation userInfo, IFormFileCollection files, Dictionary<string, string>? fileMetadata, CancellationToken cancellationToken)
     {
-        var response = await _blobStorageService.UploadFilesAsync(userInfo, files, cancellationToken);
+        var response = await _blobStorageService.UploadFilesAsync(userInfo, files, cancellationToken, fileMetadata);
         foreach (var file in response.UploadedFiles)
         {
             await CreateDocumentUploadAsync(userInfo, file);
