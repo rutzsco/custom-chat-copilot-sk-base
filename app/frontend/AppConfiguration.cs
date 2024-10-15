@@ -20,7 +20,7 @@ public static class AppConfiguration
         ShowPremiumAOAIToggleSelection = config.GetValue<bool>("ShowPremiumAOAIToggleSelection", true);
         ShowCollectionsSelection = config.GetValue<bool>("ShowCollectionsSelection", false);
 
-        ShowFileUploadSelection = config.GetValue<bool>("ShowFileUploadSelection", true);
+        ShowFileUploadSelection = config.GetValue<bool>("ShowFileUploadSelection", false);
 
         DisclaimerMessage = config.GetValue<string>("DisclaimerMessage", "DISCMLAIMER MESSAGE?");
     }
