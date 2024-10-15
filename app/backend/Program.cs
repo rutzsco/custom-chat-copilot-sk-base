@@ -58,7 +58,8 @@ else
             await container.CreateAsync();
             Console.WriteLine("Container created.");
         }
-        builder.Services.AddDataProtection().PersistKeysToAzureBlobStorage(AppConfiguration.AzureStorageAccountConnectionString, AppConfiguration.DataProtectionKeyContainer, "keys.xml");
+        var blobClient = container.GetBlobClient("keys.xml");
+        builder.Services.AddDataProtection().PersistKeysToAzureBlobStorage(blobClient);
     } 
 }
 
