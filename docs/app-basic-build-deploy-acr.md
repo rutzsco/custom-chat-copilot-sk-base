@@ -76,7 +76,7 @@ $IMAGE_NAME="custom-chat-copilot/chat-app:v1"
 
 cd custom-chat-copilot-sk-base
 cd app
-az acr build --registry $ACR_NAME --image custom-chat-copilot/chat-app:v1 --file Dockerfile .
+az acr build --registry $ACR_NAME --image $IMAGE_NAME --file Dockerfile .
 ```
 
 ## Step 5: Deploy app to an Azure Container App (ACA)
