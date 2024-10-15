@@ -1,12 +1,23 @@
 ﻿<MudNavMenu Rounded="true" Margin=Margin.Normal Class="pa-2" Color=Color.Primary>
     <MudNavLink Href="" aria-label="Chat navigation option." Icon="@Icons.Material.Filled.QuestionAnswer" Match="NavLinkMatch.All">Chat</MudNavLink>
-    @if (AppConfiguration.ShowFileUploadSelection)
+    @if (_user != null && _user.Profiles.Where(p => p.Approach == ProfileApproach.UserDocumentChat).Any())
     {
         <MudNavLink Href="documents" aria-label="View user documents." Icon="@Icons.Material.Filled.FileUpload">Documents</MudNavLink>
     }
-    @if (AppConfiguration.ShowCollectionsSelection)
+    @if (_user != null && _user.Profiles.Where(p => p.SupportsFileUpload).Any())
     {
         <MudNavLink Href="collections" aria-label="View user documents." Icon="@Icons.Material.Filled.FileUpload">Collections</MudNavLink>
     }
     <MudNavLink Href="v2/history" aria-label="View chat history." Icon="@Icons.Material.Filled.List">History</MudNavLink>
 </MudNavMenu>
+
+@code {
+    private UserInformation _user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _user = await ApiClient.GetUserAsync();
+    }
+
+    [Inject] public required ApiClient ApiClient { get; set; }
+}

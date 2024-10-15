@@ -18,9 +18,6 @@ public static class AppConfiguration
 
         ShowSampleQuestions = config.GetValue<bool>("ShowSampleQuestions", true);
         ShowPremiumAOAIToggleSelection = config.GetValue<bool>("ShowPremiumAOAIToggleSelection", true);
-        ShowCollectionsSelection = config.GetValue<bool>("ShowCollectionsSelection", false);
-
-        ShowFileUploadSelection = config.GetValue<bool>("ShowFileUploadSelection", false);
 
         DisclaimerMessage = config.GetValue<string>("DisclaimerMessage", "DISCMLAIMER MESSAGE?");
     }
@@ -35,10 +32,6 @@ public static class AppConfiguration
     public static bool ShowSampleQuestions { get; set; } = true;
 
     public static bool ShowPremiumAOAIToggleSelection { get; set; } = true;
-
-    public static bool ShowFileUploadSelection { get; set; } = false;
-
-    public static bool ShowCollectionsSelection { get; set; } = false;
 
     public static string DisclaimerMessage { get; set; } = string.Empty;
 
