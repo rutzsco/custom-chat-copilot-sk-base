@@ -8,7 +8,7 @@
             <MudForm @ref="@_form">
                 <MudCardHeader>
                     <CardHeaderContent>
-                        <MudText Typo="Typo.h5">Upload Documents</MudText>
+                        <MudText Typo="Typo.h5">Upload Document Collections</MudText>
                     </CardHeaderContent>
                     <CardHeaderActions>
                         <MudIconButton Icon="@Icons.Material.Filled.CloudUpload"
@@ -65,27 +65,36 @@
                         </MudExpansionPanel>
                     </MudExpansionPanels>
                     <MudStack Spacing="4" Class="pb-4">
+						<MudText>&nbsp;<br />Enter a company name and industry for this set of files:</MudText>
                         <MudTextField T="string" Label="Company Name" @bind-Value="@_companyName" />
                         <MudTextField T="string" Label="Industry" @bind-Value="@_industry" />
                     </MudStack>
                 </MudCardContent>
                 <MudCardActions>
-                    <MudButton StartIcon="@Icons.Material.Filled.Clear"
+					@if (_isUpLoadingDocuments)
+					{
+						<MudText Typo="Typo.h5">Uploading Documents...</MudText>
+						<MudProgressCircular Indeterminate="true" Size="Size.Small" Class="ml-2" />
+					}
+					else
+					{
+						<MudButton StartIcon="@Icons.Material.Filled.Clear"
                                Variant="Variant.Filled"
                                Color="Color.Error"
                                Disabled=@(!_fileUploads.Any())
                                Size="Size.Large" Class="ml-2 mb-2"
                                OnClick="@(() => _fileUploads.Clear())">
-                        Clear Selected Documents
-                    </MudButton>
-                    <MudButton StartIcon="@Icons.Material.Filled.Upload"
-                               Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               Disabled=@(!_fileUploads.Any())
-                               Size="Size.Large" Class="ml-auto mr-2 mb-2"
-                               OnClick="@(async _ => await SubmitFilesForUploadAsync())">
-                        Upload File(s)
-                    </MudButton>
+							Clear Selected Documents
+						</MudButton>
+						<MudButton StartIcon="@Icons.Material.Filled.Upload"
+								   Variant="Variant.Filled"
+								   Color="Color.Primary"
+								   Disabled=@(!_fileUploads.Any() || string.IsNullOrEmpty(_companyName) || string.IsNullOrEmpty(_industry))
+								   Size="Size.Large" Class="ml-auto mr-2 mb-2"
+								   OnClick="@(async _ => await SubmitFilesForUploadAsync())">
+							Upload File(s)
+						</MudButton>
+					}
                 </MudCardActions>
             </MudForm>
         </MudCard>
@@ -113,7 +122,6 @@
                               AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"
                               DebounceInterval="500" Class="mt-0">
                 </MudTextField>
-                
             </ToolBarContent>
             <HeaderContent>
                 <MudTh Style="text-align:center">
@@ -126,7 +134,17 @@
                         Name
                     </MudTableSortLabel>
                 </MudTh>
-                <MudTh>Content Type</MudTh>
+				<MudTh>
+					<MudTableSortLabel SortBy="new Func<DocumentSummary, object>(d => d.CompanyName)">
+						Company
+					</MudTableSortLabel>
+				</MudTh>
+				<MudTh>
+					<MudTableSortLabel SortBy="new Func<DocumentSummary, object>(d => d.Industry)">
+						Industry
+					</MudTableSortLabel>
+				</MudTh>
+				<MudTh>Content Type</MudTh>
                 <MudTh>
                     <MudTableSortLabel SortBy="new Func<DocumentSummary, object>(d => d.StatusMessage)">
                         Processing State
@@ -137,7 +155,7 @@
                         Processing Progress
                     </MudTableSortLabel>
                 </MudTh>
- 
+
                 <MudTh>
                     <MudTableSortLabel SortBy="new Func<DocumentSummary, object>(d => d.Size)">
                         Size
@@ -172,7 +190,13 @@
                 <MudTd DataLabel="Name">
                     <strong>@context.Name</strong>
                 </MudTd>
-                <MudTd DataLabel="Content Type">
+                <MudTd DataLabel="Company">
+					@($"{context.CompanyName}")
+                </MudTd>
+				<MudTd DataLabel="Industry">
+					@($"{context.Industry}")
+				</MudTd>
+				<MudTd DataLabel="Content Type">
                     <code>@context.ContentType</code>
                 </MudTd>
                 <MudTd DataLabel="Processing State">

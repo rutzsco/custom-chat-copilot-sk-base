@@ -43,17 +43,18 @@ public class DocumentServiceAzureNative : IDocumentService
         {
             await CreateDocumentUploadAsync(userInfo, file);
         }
+
+        // need to trigger the new index update here...
+
         return response;
     }
-
 
     private async Task CreateDocumentUploadAsync(UserInformation user, UploadDocumentFileSummary fileSummary, string contentType = "application/pdf")
     {
         var indexName = "TEST";
-        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, fileSummary.FileName, fileSummary.FileName, contentType, fileSummary.Size, indexName, user.SessionId, DocumentProcessingStatus.Succeeded);
+        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, fileSummary.FileName, fileSummary.FileName, contentType, fileSummary.Size, indexName, user.SessionId, DocumentProcessingStatus.Succeeded, fileSummary.CompanyName, fileSummary.Industry);
         await _cosmosContainer.CreateItemAsync(document, partitionKey: new PartitionKey(document.UserId));
     }
-
 
     public async Task<List<DocumentUpload>> GetDocumentUploadsAsync(UserInformation user)
     {

@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 
 namespace MinimalApi.Services;
 
@@ -55,7 +56,11 @@ public sealed class AzureBlobStorageService(BlobServiceClient blobServiceClient,
                 {
                     ContentType = "image"
                 }, metadata, cancellationToken: cancellationToken);
-                uploadedFiles.Add(new UploadDocumentFileSummary(blobName, file.Length));           
+
+                var companyName = metadata.TryGetValue("CompanyName", out string? companyNameValue) ? companyNameValue : string.Empty;
+                var industry = metadata.TryGetValue("Industry", out string? industryValue) ? industryValue : string.Empty;
+
+                uploadedFiles.Add(new UploadDocumentFileSummary(blobName, file.Length, companyName, industry));
             }
 
             if (uploadedFiles.Count is 0)

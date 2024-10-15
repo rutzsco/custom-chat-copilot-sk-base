@@ -192,7 +192,7 @@ internal static class WebApplicationExtensions
     {
         var userInfo = context.GetUserInfo();
         var documents = await documentService.GetDocumentUploadsAsync(userInfo);
-        return TypedResults.Ok(documents.Select(d => new DocumentSummary(d.Id, d.SourceName, d.ContentType, d.Size, d.Status, d.StatusMessage,d.ProcessingProgress, d.Timestamp)));
+        return TypedResults.Ok(documents.Select(d => new DocumentSummary(d.Id, d.SourceName, d.ContentType, d.Size, d.Status, d.StatusMessage,d.ProcessingProgress, d.Timestamp, d.CompanyName, d.Industry)));
     }
     private static async Task<IResult> OnPostChatRatingAsync(HttpContext context, ChatRatingRequest request, IChatHistoryService chatHistoryService, CancellationToken cancellationToken)
     {

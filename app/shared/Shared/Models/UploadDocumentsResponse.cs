@@ -14,4 +14,4 @@ public record class UploadDocumentsResponse(UploadDocumentFileSummary[] Uploaded
         new([], error);
 }
 
-public record class UploadDocumentFileSummary(string FileName, long Size);
+public record class UploadDocumentFileSummary(string FileName, long Size, string CompanyName = "", string Industry = "");

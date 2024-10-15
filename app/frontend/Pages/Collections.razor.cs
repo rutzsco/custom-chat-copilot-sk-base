@@ -12,6 +12,7 @@ public sealed partial class Collections : IDisposable
     //private MudFileUpload<IReadOnlyList<IBrowserFile>> _fileUpload = null!;
     private Task _getDocumentsTask = null!;
     private bool _isLoadingDocuments = false;
+    private bool _isUpLoadingDocuments = false;
     private string _filter = "";
     private string _companyName = "";
     private string _industry = "";
@@ -71,6 +72,7 @@ public sealed partial class Collections : IDisposable
     {
         if (_fileUploads.Any())
         {
+            _isUpLoadingDocuments = true;
             //var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
             var result = await Client.UploadDocumentsAsync(_fileUploads.ToArray(), MaxIndividualFileSize, new Dictionary<string, string> { { "CompanyName", _companyName}, { "Industry", _industry }, });
 
@@ -101,7 +103,7 @@ public sealed partial class Collections : IDisposable
                     });
             }
         }
-
+        _isUpLoadingDocuments = false;
         await GetDocumentsAsync();
     }
 

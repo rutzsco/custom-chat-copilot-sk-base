@@ -22,7 +22,7 @@ param containerAppEnvironmentWorkloadProfiles array = []
 @description('Name of the Container Apps Environment workload profile to use for the app')
 param appContainerAppEnvironmentWorkloadProfileName string
 
-param useManagedIdentityResourceAccess bool = false
+param useManagedIdentityResourceAccess bool = true
 
 param virtualNetworkName string = ''
 param virtualNetworkResourceGroupName string = ''
@@ -353,11 +353,15 @@ var appDefinition = {
       }
       {
         name: 'EnableDataProtectionBlobKeyStorage'
-        value: string(false)
+        value: string(true)
       }
       {
         name: 'UseManagedIdentityResourceAccess'
         value: string(useManagedIdentityResourceAccess)
+      }
+      {
+        name: 'UseManagedManagedIdentityClientId'
+        value: managedIdentity.outputs.identityClientId
       }
     ],
     (useManagedIdentityResourceAccess)
