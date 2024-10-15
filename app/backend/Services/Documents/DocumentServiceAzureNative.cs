@@ -13,6 +13,10 @@ using System.Drawing;
 using System.Reflection.Metadata;
 using System;
 using OpenAI;
+using Azure;
+using System.Configuration;
+using Microsoft.Extensions.Azure;
+using Azure.Search.Documents.Indexes;
 
 namespace MinimalApi.Services.ChatHistory;
 
@@ -74,14 +78,17 @@ public class DocumentServiceAzureNative : IDocumentService
     private async Task<DocumentIndexResponse> MergeDocumentsIntoIndexAsync(List<DocumentIndexMerge> documents)
     {
         var structuredResponse = new DocumentIndexResponse();
+        // these are hard-coded for testing...  need to be dynamic when this is working
+        var searchServiceName = "srch-fuwyp7kyt7kmy";
+        var indexName = "vector-1729021028480";
+        var indexEndpoint = $"https://{searchServiceName}.search.windows.net/indexes('{indexName}')/docs/search.index?api-version=2024-07-01";
+
         try
         {
             // should I be using the SearchService SDK interface here...???
-
-            // these are hard-coded for testing...  need to be dynamic when this is working
-            var searchServiceName = "srch-fuwyp7kyt7kmy";
-            var indexName = "vector-1729021028480";
-            var indexEndpoint = $"https://{searchServiceName}.search.windows.net/indexes('{indexName}')/docs/search.index?api-version=2024-07-01";
+            var searchClient = new SearchClientFactory(_configuration, null, new AzureKeyCredential(_configuration[AppConfigurationSetting.AzureSearchServiceKey]));
+            var searchIndexClient = searchClient.GetOrCreateClient(indexName);
+            //var indexResults = await searchIndexClient.IndexDocumentsAsync(documents);
 
             var requestPayloadJson = documents != null ? System.Text.Json.JsonSerializer.Serialize(documents, SerializerOptions.Default) : "{}";
             // this action descriptor needs to be "@search.action"...  you should be able to specify that in the JSON properties (and I did...), but it's not coming through here...
