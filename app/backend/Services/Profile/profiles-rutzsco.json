@@ -1,30 +1,115 @@
 [
   {
-    "Name": "M&A Kill Memo",
-    "Id": "MAKillMemo",
+    "Name": "Auto Service Advisor",
+    "Id": "AutoServiceAdvisor",
     "Approach": "RAG",
     "SecurityModel": "None",
     "SecurityModelGroupMembership": [ "LocalDevUser" ],
-    "SampleQuestions": [],
+    "SampleQuestions": [
+      "How do I change the oil?",
+      "What are the different maintenance intervals?",
+      "What is the air filter part number?"
+    ],
     "RAGSettings": {
       "GenerateSearchQueryPluginName": "GenerateSearchQuery",
       "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
       "DocumentRetrievalPluginName": "DocumentRetrieval",
-      "DocumentRetrievalPluginQueryFunctionName": "AISearchV1",
-      "DocumentRetrievalIndexName": "content-v3",
-      "ChatSystemMessage": "WW91IGFyZSBhbiBBSSBhc3Npc3RhbnQgYWN0aW5nIGFzIGEgc3RyYXRlZ2ljIGludmVzdG9yIHdpdGggYSBmb2N1cyBvbiB0aGUgbGlmZSBzY2llbmNlIHRvb2xzIGluZHVzdHJ5LCBjb21wYXJhYmxlIHRvIGZpcm1zIGxpa2Ugc3RyYXRlZ2ljIGZpcm1zIGxpa2UgRGFuYWhlciwgVGhlcm1vIEZpc2hlciwgUmV2dml0eSwgYW5kIHByaXZhdGUgZXF1aXR5IGZpcm1zIGxpa2UgQmxhY2tzdG9uZSwgV2FyYnVyZyBQaW5jdXMsIEtLUiwgRVFULiBZb3VyIHByaW1hcnkgcmVzcG9uc2liaWxpdHkgaXMgdG8gaWRlbnRpZnksIGV2YWx1YXRlLCBhbmQgcmVjb21tZW5kIGludmVzdG1lbnQgb3Bwb3J0dW5pdGllcyBpbiBjb21wYW5pZXMgdGhhdCBkZXZlbG9wLCBtYW51ZmFjdHVyZSwgb3IgZGlzdHJpYnV0ZSB0b29scyBhbmQgdGVjaG5vbG9naWVzIGZvciBsaWZlIHNjaWVuY2VzIHJlc2VhcmNoLCBkaWFnbm9zdGljcywgYW5kIGFwcGxpZWQgbWFya2V0cy4KS2V5IEZvY3VzIEFyZWFzOgpNYXJrZXQgVHJlbmRzICYgQW5hbHlzaXMgRXZhbHVhdGUgdGhlIG1hcmtldCBwb3RlbnRpYWwgZm9yIHZhcmlvdXMgbGlmZSBzY2llbmNlIHRvb2xzIGFuZCB0ZWNobm9sb2dpZXMsIGluY2x1ZGluZyBnZW5vbWljcywgcHJvdGVvbWljcywgY2VsbCBjdWx0dXJlLCBhbmQgYW5hbHl0aWNhbCBpbnN0cnVtZW50cy4KSW52ZXN0bWVudCBDcml0ZXJpYTogKDEpIEFzc2VzcyBjb21wYW5pZXMgYmFzZWQgb24gdGhlaXIgZ3Jvd3RoIHBvdGVudGlhbCwgdGVjaG5vbG9naWNhbCBpbm5vdmF0aW9uLCBtYXJrZXQgc2hhcmUsIGFuZCBhbGlnbm1lbnQgd2l0aCBpbmR1c3RyeSB0cmVuZHMuICgyKSBDb25zaWRlciB0aGUgc3RyYXRlZ2ljIGZpdCBvZiBwb3RlbnRpYWwgYWNxdWlzaXRpb25zIG9yIGludmVzdG1lbnRzIHdpdGhpbiBhIHBvcnRmb2xpbyBhaW1lZCBhdCBlbmhhbmNpbmcgY2FwYWJpbGl0aWVzIGluIGRpYWdub3N0aWNzLCByZXNlYXJjaCB0b29scywgYW5kIGJpb3Byb2Nlc3NpbmcuCkNhcGFiaWxpdGllczoK4oCiCUV4cGVydGlzZSBpbiBmaW5hbmNpYWwgbWV0cmljcyBzdWNoIGFzIFJldHVybiBvbiBJbnZlc3RlZCBDYXBpdGFsIChST0lDKSBhbmQgRW50ZXJwcmlzZSBWYWx1ZSBtdWx0aXBsZXMgKEVWL3NhbGVzLCBFVi9FQklUREEpLgrigKIJQWJpbGl0eSB0byBnZW5lcmF0ZSBkZXRhaWxlZCByZXBvcnRzIG9uIHBvdGVudGlhbCBpbnZlc3RtZW50IHRhcmdldHMsIGluY2x1ZGluZyBQb3J0ZXLigJlzIEZpdmUgRm9yY2VzIGFuYWx5c2lzLCBmaW5hbmNpYWwgcHJvamVjdGlvbnMsIGFuZCBzdHJhdGVnaWMgcmVjb21tZW5kYXRpb25zLgrigKIJU2tpbGxlZCBpbiBkZXZlbG9waW5nIGFuZCByZWZpbmluZyBhIHN0cmF0ZWdpYyBpbnZlc3RtZW50IHRoZXNpcyBmb3IgdGhlIGxpZmUgc2NpZW5jZXMgdG9vbHMgc2VjdG9yIHRvIGd1aWRlIGludmVzdG1lbnQgZGVjaXNpb25zIGFuZCBwb3J0Zm9saW8gbWFuYWdlbWVudC4K4oCiCUNvbXBldGVuY2UgaW4gYW5hbHl6aW5nIHByZXNlbnRhdGlvbnMgZnJvbSBicm9rZXJzIChpbnZlc3RtZW50IGJhbmtzKSBhbmQgY29tcGV0aXRvcnMgdG8gbWFrZSBpbmZvcm1lZCBhc3Nlc3NtZW50cy4=",
-      "StorageContianer": "content-v3",
-      "AllowFileUpload": true,
-      "ProfileUserSelectionOptions": [
-        {
-          "DisplayName": "Company",
-          "IndexFieldName": "companyName"
-        },
-        {
-          "DisplayName": "Industry",
-          "IndexFieldName": "industry"
-        }
-      ]
+      "DocumentRetrievalPluginQueryFunctionName": "KwiecienV2",
+      "DocumentRetrievalIndexName": "manuals-auto-ci-20240528182950",
+      "ChatSystemMessageFile": "RAGChatSystemPrompt",
+      "StorageContianer": "manuals-auto-chunks",
+      "CitationUseSourcePage": true,
+      "DocumentRetrievalDocumentCount": 50,
+      "UseSemanticRanker": true,
+      "SemanticConfigurationName": "Default"
     }
-  }
+  },
+  {
+    "Name": "Boat Service Advisor",
+    "Id": "BoatServiceAdvisor",
+    "Approach": "RAG",
+    "SecurityModel": "None",
+    "SecurityModelGroupMembership": [ "LocalDevUser" ],
+    "SampleQuestions": [
+      "How do I change the oil?",
+      "How do I winterize?",
+      "How calibrate the gas gauge?"
+    ],
+    "RAGSettings": {
+      "GenerateSearchQueryPluginName": "GenerateSearchQuery",
+      "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
+      "DocumentRetrievalPluginName": "DocumentRetrieval",
+      "DocumentRetrievalPluginQueryFunctionName": "KwiecienV2",
+      "DocumentRetrievalIndexName": "manuals-boat-ci-20240708121734",
+      "ChatSystemMessageFile": "RAGChatSystemPrompt",
+      "StorageContianer": "manuals-boat"
+    }
+  },
+  {
+    "Name": "General",
+    "Id": "General",
+    "Approach": "Chat",
+    "SecurityModel": "None",
+    "ChatSystemMessageFile": "ChatSimpleSystemPrompt",
+    "SampleQuestions": [
+      "Write a function in C# that will invoke a rest API",
+      "Explain why popcorn pops to a kid who loves watching it in the microwave."
+    ]
+  },
+  {
+    "Name": "Auto Body Damage Advisor",
+    "Id": "AutoBodyDamageAdvisor",
+    "Approach": "Chat",
+    "SecurityModel": "None",
+    "ChatSystemMessageFile": "AutoBodyCopilotSystemPrompt",
+    "SampleQuestions": [
+      "What is the brand and model of this vehicle?",
+      "Classify this vehicle into 'Motorbike', 'SUV', 'Sedan', 'Truck', 'Convertible'"
+    ]
+  },
+  {
+    "Name": "Document Chat",
+    "Id": "DocumentChat",
+    "Approach": "UserDocumentChat",
+    "SecurityModel": "None",
+    "SampleQuestions": [
+    ],
+    "RAGSettings": {
+      "GenerateSearchQueryPluginName": "GenerateSearchQuery",
+      "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
+      "DocumentRetrievalPluginName": "DocumentRetrieval",
+      "DocumentRetrievalPluginQueryFunctionName": "KwiecienV2",
+      "ChatSystemMessageFile": "RAGChatSystemPrompt",
+      "StorageContianer": "content"
+    }
+  },
+  {
+    "Name": "Weather Advisor",
+    "Id": "WeatherAdvisor",
+    "Approach": "EndpointAssistant",
+    "SecurityModel": "None",
+    "SecurityModelGroupMembership": [ "LocalDevUser" ],
+    "SampleQuestions": [
+      "What is the forcast for Mankato MN?"
+    ],
+    "AssistantEndpointSettings": {
+      "APIEndpointSetting": "WeatherAssistantAPIEndpoint",
+      "APIEndpointKeySetting": "WeatherAssistantAPIEndpointKey"
+    }
+  },
+  //{
+  //  "Name": "Advanced Analytics (Assistants API)",
+  //  "Id": "AssistantApi",
+  //  "Approach": "ENDPOINTASSISTANTV2",
+  //  "SecurityModel": "None",
+  //  "SecurityModelGroupMembership": [ "LocalDevUser" ],
+  //  "SampleQuestions": [
+  //    "Generate a plot with a sine wave repeating 20 times"
+  //  ],
+  //  "AssistantEndpointSettings": {
+  //    "APIEndpointSetting": "AssistantApiEndpoint",
+  //    "APIEndpointKeySetting": "AssistantApiKey"
+  //  }
+  //}
 ]
+
