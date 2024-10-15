@@ -32,7 +32,7 @@ public sealed class RetrieveRelatedDocumentSkill
 
         searchQuery = searchQuery.Replace("\"", string.Empty);
         arguments[ContextVariableOptions.Intent] = searchQuery;
-        if (profile.RAGSettings.ProfileUserSelectionOptions.Any())
+        if (profile.RAGSettings.ProfileUserSelectionOptions != null && profile.RAGSettings.ProfileUserSelectionOptions.Any())
         {
             var sb = new StringBuilder();
             int count = 0;
