@@ -2,7 +2,7 @@
 
 namespace Shared.Models;
 
-public record class UploadDocumentsResponse(UploadDocumentFileSummary[] UploadedFiles, string? Error = null)
+public record class UploadDocumentsResponse(UploadDocumentFileSummary[] UploadedFiles, string? Error = null, int? filesIndexed = 0)
 {
     public bool IsSuccessful => this is
     {
@@ -10,8 +10,16 @@ public record class UploadDocumentsResponse(UploadDocumentFileSummary[] Uploaded
         UploadedFiles.Length: > 0
     };
 
-    public static UploadDocumentsResponse FromError(string error) =>
-        new([], error);
+    public static UploadDocumentsResponse FromError(string error) => new([], error);
+
+    public int FilesIndexed { get; set; }
+    public bool AllFilesIndexed { get; set; }
+    public string? IndexErrorMessage { get; set; }
 }
 
-public record class UploadDocumentFileSummary(string FileName, long Size, string CompanyName = "", string Industry = "");
+public record class UploadDocumentFileSummary(
+    string FileName,
+    long Size, string
+    CompanyName = "",
+    string Industry = ""
+);
