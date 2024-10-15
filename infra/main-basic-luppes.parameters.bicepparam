@@ -11,7 +11,7 @@ param existingCogServicesResourceGroup  = ''
 param existingContainerRegistryName = ''
 param existingContainerRegistryResourceGroup = ''
 
-param environmentName = 'rg-copilot-demo-1014'
+param environmentName = 'CI'
 param location = 'eastus2'
 param backendExists = false
 param backendDefinition = {
