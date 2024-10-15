@@ -75,12 +75,6 @@ public sealed partial class Chat
 
         StateHasChanged();
 
-        if (AppConfiguration.ShowFileUploadSelection)
-        {
-            var userDocuments = await ApiClient.GetUserDocumentsAsync();
-            _userDocuments = userDocuments.ToList();
-        }
-
         if (!string.IsNullOrEmpty(ArchivedChatId))
         {
             await LoadArchivedChatAsync(_cancellationTokenSource.Token, ArchivedChatId);
@@ -99,11 +93,15 @@ public sealed partial class Chat
         _selectedProfile = profile.Name;
         _selectedProfileSummary = profile;
         _supportsFileUpload = _selectedProfileSummary.Approach == ProfileApproach.Chat || _selectedProfileSummary.Approach == ProfileApproach.EndpointAssistantV2 || _selectedProfileSummary.SupportsFileUpload;
+        if (_supportsFileUpload)
+        {
+            var userDocuments = await ApiClient.GetUserDocumentsAsync();
+            _userDocuments = userDocuments.ToList();
+        }
         if (profile.SupportsUserSelectionOptions)
         {
             _userSelectionModel = await ApiClient.GetProfileUserSelectionModelAsync(profile.Id);
         }
-
     }
     private void OnFileUpload(FileSummary fileSummary)
     {
@@ -328,7 +326,7 @@ public sealed partial class Chat
             _showProfiles = false;
         }
 
-        if (!AppConfiguration.ShowFileUploadSelection)
+        if (!_profiles.Any(p => p.Approach == ProfileApproach.UserDocumentChat))
             _showDocumentUpload = false;
 
         if (_selectedProfileSummary.Approach != ProfileApproach.Chat || !string.IsNullOrEmpty(_selectedDocument))
