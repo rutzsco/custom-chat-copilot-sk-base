@@ -38,11 +38,18 @@ public class DocumentServiceAzureNative : IDocumentService
 
     public async Task<UploadDocumentsResponse> CreateDocumentUploadAsync(UserInformation userInfo, IFormFileCollection files, Dictionary<string, string>? fileMetadata, CancellationToken cancellationToken)
     {
+        // upload files to blob storage
         var response = await _blobStorageService.UploadFilesAsync(userInfo, files, cancellationToken, fileMetadata);
+
+        // upload record to Cosmos
         foreach (var file in response.UploadedFiles)
         {
             await CreateDocumentUploadAsync(userInfo, file);
         }
+
+        // need to trigger the new index update here...
+
+
         return response;
     }
 
@@ -50,7 +57,9 @@ public class DocumentServiceAzureNative : IDocumentService
     private async Task CreateDocumentUploadAsync(UserInformation user, UploadDocumentFileSummary fileSummary, string contentType = "application/pdf")
     {
         var indexName = "TEST";
-        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, fileSummary.FileName, fileSummary.FileName, contentType, fileSummary.Size, indexName, user.SessionId, DocumentProcessingStatus.Succeeded);
+        //var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, fileSummary.FileName, fileSummary.FileName, contentType, fileSummary.Size, indexName, user.SessionId, DocumentProcessingStatus.Succeeded);
+        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, fileSummary.FileName, fileSummary.FileName, contentType, fileSummary.Size, indexName, user.SessionId, DocumentProcessingStatus.Succeeded, fileSummary.CompanyName, fileSummary.Industry);
+        // create record in Cosmos
         await _cosmosContainer.CreateItemAsync(document, partitionKey: new PartitionKey(document.UserId));
     }
 

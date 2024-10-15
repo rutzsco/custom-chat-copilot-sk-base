@@ -1,11 +1,28 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using Newtonsoft.Json;
+using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 
 namespace MinimalApi.Services.Documents;
 
 public class DocumentUpload
 {
+    public DocumentUpload()
+    {
+        Timestamp = DateTimeOffset.Now;
+        Id = string.Empty;
+        UserId = string.Empty;
+        BlobName = string.Empty;
+        SourceName = string.Empty;
+        ContentType = string.Empty;
+        Size = 0;
+        RetrivalIndexName = string.Empty;
+        SessionId = string.Empty;
+        Status = DocumentProcessingStatus.New;
+        CompanyName = string.Empty;
+        Industry = string.Empty;
+        StatusMessage = string.Empty;
+    }
     public DocumentUpload(string id, string userId, string blobName, string sourceName, string contentType, long size, string retrivalIndexName, string sessionId, DocumentProcessingStatus status)
     {
         Timestamp = DateTimeOffset.Now;
@@ -18,8 +35,26 @@ public class DocumentUpload
         RetrivalIndexName = retrivalIndexName;
         SessionId = sessionId;
         Status = status;
+        CompanyName = string.Empty;
+        Industry = string.Empty;
+        StatusMessage = string.Empty;
     }
-
+    public DocumentUpload(string id, string userId, string blobName, string sourceName, string contentType, long size, string retrivalIndexName, string sessionId, DocumentProcessingStatus status, string companyName, string industry)
+    {
+        Timestamp = DateTimeOffset.Now;
+        Id = id;
+        UserId = userId;
+        BlobName = blobName;
+        SourceName = sourceName;
+        ContentType = contentType;
+        Size = size;
+        RetrivalIndexName = retrivalIndexName;
+        SessionId = sessionId;
+        Status = status;
+        CompanyName = companyName;
+        Industry = industry;
+        StatusMessage = string.Empty;
+    }
 
     [JsonProperty("id")]
     public string Id { get; set; }
@@ -56,4 +91,11 @@ public class DocumentUpload
 
     [JsonProperty("timestamp")]
     public DateTimeOffset Timestamp { get; set; }
+
+    [JsonProperty("companyName")]
+    public string CompanyName { get; set; }
+
+    [JsonProperty("industry")]
+    public string Industry { get; set; }
+
 }
