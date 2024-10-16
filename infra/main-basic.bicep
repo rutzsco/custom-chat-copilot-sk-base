@@ -353,7 +353,7 @@ var appDefinition = {
       }
       {
         name: 'EnableDataProtectionBlobKeyStorage'
-        value: string(true)
+        value: string(false)
       }
       {
         name: 'UseManagedIdentityResourceAccess'
