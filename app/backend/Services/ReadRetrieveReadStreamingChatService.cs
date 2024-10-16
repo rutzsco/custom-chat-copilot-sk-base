@@ -1,14 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System.Data;
-using Azure.AI.OpenAI;
-using Azure.Core;
-using ClientApp.Pages;
 using Microsoft.SemanticKernel.ChatCompletion;
-using MinimalApi.Extensions;
 using MinimalApi.Services.Profile;
 using MinimalApi.Services.Profile.Prompts;
-using Shared.Models;
 
 namespace MinimalApi.Services;
 
@@ -29,6 +23,7 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
 
     public async IAsyncEnumerable<ChatChunkResponse> ReplyAsync(UserInformation user, ProfileDefinition profile, ChatRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(profile.RAGSettings, "profile.RAGSettings");
         var sw = Stopwatch.StartNew();
 
         // Kernel setup
@@ -49,22 +44,10 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
 
         // Chat Step
         var chatGpt = kernel.Services.GetService<IChatCompletionService>();
-        var systemMessagePrompt = string.Empty;
-        if (!string.IsNullOrEmpty(profile.RAGSettings.ChatSystemMessageFile))
-        {
-            systemMessagePrompt = PromptService.GetPromptByName(profile.RAGSettings.ChatSystemMessageFile);
-            context["SystemMessagePrompt"] = systemMessagePrompt;
-        }
-
-        if (!string.IsNullOrEmpty(profile.RAGSettings.ChatSystemMessage))
-        {
-            var bytes = Convert.FromBase64String(profile.RAGSettings.ChatSystemMessage);
-            systemMessagePrompt = Encoding.UTF8.GetString(bytes);
-            context[ContextVariableOptions.SystemMessagePrompt] = systemMessagePrompt;
-        }
-
+        var systemMessagePrompt = ResolveSystemMessage(profile);
+        context[ContextVariableOptions.SystemMessagePrompt] = systemMessagePrompt;
         var chatHistory = new Microsoft.SemanticKernel.ChatCompletion.ChatHistory(systemMessagePrompt).AddChatHistory(request.History);
-        var userMessage = await PromptService.RenderPromptAsync(kernel, PromptService.GetPromptByName(PromptService.ChatUserPrompt), context);
+        var userMessage = await ResolveUserMessageAsync(profile, kernel, context);
         context[ContextVariableOptions.UserMessage] = userMessage;
         chatHistory.AddUserMessage(userMessage);
 
@@ -109,5 +92,41 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
         }
 
         return results;
+    }
+
+    private string ResolveSystemMessage(ProfileDefinition profile)
+    {
+        ArgumentNullException.ThrowIfNull(profile.RAGSettings, "profile.RAGSettings");
+
+        var systemMessagePrompt = string.Empty;
+        if (!string.IsNullOrEmpty(profile.RAGSettings.ChatSystemMessageFile))
+        {
+            systemMessagePrompt = PromptService.GetPromptByName(profile.RAGSettings.ChatSystemMessageFile);
+        }
+
+        if (!string.IsNullOrEmpty(profile.RAGSettings.ChatSystemMessage))
+        {
+            var bytes = Convert.FromBase64String(profile.RAGSettings.ChatSystemMessage);
+            systemMessagePrompt = Encoding.UTF8.GetString(bytes);
+        }
+        return systemMessagePrompt;
+    }
+
+    private async Task<string> ResolveUserMessageAsync(ProfileDefinition profile, Kernel kernel, KernelArguments context)
+    {
+        ArgumentNullException.ThrowIfNull(profile.RAGSettings, "profile.RAGSettings");
+
+        var userMessage = string.Empty;
+        if (!string.IsNullOrEmpty(profile.RAGSettings.ChatUserMessage))
+        {
+            var bytes = Convert.FromBase64String(profile.RAGSettings.ChatUserMessage);
+            userMessage = Encoding.UTF8.GetString(bytes);
+        }
+        else
+        {
+            userMessage = await PromptService.RenderPromptAsync(kernel, PromptService.GetPromptByName(PromptService.ChatUserPrompt), context);
+        }
+
+        return userMessage;
     }
 }
