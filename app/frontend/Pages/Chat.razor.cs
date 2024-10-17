@@ -227,7 +227,7 @@ public sealed partial class Chat
 
                 if (chunk.FinalResult != null)
                 {
-                    _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(responseText, chunk.FinalResult.CitationBaseUrl, chunk.FinalResult.Context);
+                    _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(chunk.FinalResult.Answer, chunk.FinalResult.CitationBaseUrl, chunk.FinalResult.Context);
                     _isReceivingResponse = false;
                     _userQuestion = "";
                     _currentQuestion = default;

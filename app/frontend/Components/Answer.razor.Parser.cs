@@ -1,12 +1,16 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using Markdig;
+using MudBlazor;
+
 namespace ClientApp.Components;
 
 public sealed partial class Answer
 {
     private static readonly MarkdownPipeline s_pipeline = new MarkdownPipelineBuilder()
-    .ConfigureNewLine("\n")
-    .Build();
+        .UsePipeTables()
+        .UseSoftlineBreakAsHardlineBreak()
+        .Build();
 
     internal static HtmlParsedAnswer ParseAnswerToHtml(string answer, string citationBaseUrl, bool containsSources = true)
     {
@@ -53,6 +57,7 @@ public sealed partial class Answer
             raw = string.Join(string.Empty, fragments);
         }
 
+        raw = raw.Replace("\r\n", "\n");
         var html = Markdown.ToHtml(raw, s_pipeline);
         var followUpQuestions = followupQuestions.Select(f => f.Replace("<<", "").Replace(">>", "")).ToHashSet();
         return new HtmlParsedAnswer(html, citations, followUpQuestions);
