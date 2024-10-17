@@ -34,5 +34,23 @@
       "APIEndpointSetting": "AssistantApiEndpoint",
       "APIEndpointKeySetting": "AssistantApiKey"
     }
+  },
+  {
+    "Name": "Document Chat",
+    "Id": "DocumentChat",
+    "Approach": "UserDocumentChat",
+    "SecurityModel": "None",
+    "SampleQuestions": [
+    ],
+    "RAGSettings": {
+      "GenerateSearchQueryPluginName": "GenerateSearchQuery",
+      "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
+      "DocumentRetrievalPluginName": "DocumentRetrieval",
+      "DocumentRetrievalPluginQueryFunctionName": "KwiecienV2",
+      "ChatSystemMessageFile": "RAGChatSystemPrompt",
+      "StorageContianer": "content",
+      "AllowFileUpload":  true
+    }
   }
+
 ]

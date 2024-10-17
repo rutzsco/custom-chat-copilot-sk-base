@@ -7,4 +7,5 @@ public interface IDocumentService
 {
     Task<UploadDocumentsResponse> CreateDocumentUploadAsync(UserInformation userInfo, IFormFileCollection files, Dictionary<string, string>? fileMetadata, CancellationToken cancellationToken);
     Task<List<DocumentUpload>> GetDocumentUploadsAsync(UserInformation user);
+    Task<DocumentIndexResponse> MergeDocumentsIntoIndexAsync(UploadDocumentsResponse uploadResponse);
 }

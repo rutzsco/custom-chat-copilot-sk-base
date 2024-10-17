@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System.Net.Http.Headers;
+using MinimalApi.Services.Documents;
 
 namespace ClientApp.Services;
 
@@ -79,6 +80,23 @@ public sealed class ApiClient(HttpClient httpClient)
         catch (Exception ex)
         {
             return UploadDocumentsResponse.FromError(ex.ToString());
+        }
+    }
+
+    public async Task<DocumentIndexResponse> NativeIndexDocumentsAsync(UploadDocumentsResponse uploadResponse)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(uploadResponse, SerializerOptions.Default);
+            using var body = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync("api/native/index/documents", body);
+            response.EnsureSuccessStatusCode();
+            var result = await response.Content.ReadFromJsonAsync<DocumentIndexResponse>();
+            return result ?? DocumentIndexResponse.FromError("Unable to index files, unknown error.");
+        }
+        catch (Exception ex)
+        {
+            return DocumentIndexResponse.FromError(ex.ToString());
         }
     }
 

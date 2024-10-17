@@ -46,7 +46,6 @@ public class DocumentService : IDocumentService
         return response;
     }
 
-
     private async Task CreateDocumentUploadAsync(UserInformation user, UploadDocumentFileSummary fileSummary, string contentType = "application/pdf")
     {
         // Get Ingestion Index Name
@@ -79,7 +78,6 @@ public class DocumentService : IDocumentService
         var triggerResponse = await _httpClient.PostAsync("/api/orchestrators/pdf_orchestrator", body);
     }
 
-
     public async Task<List<DocumentUpload>> GetDocumentUploadsAsync(UserInformation user)
     {
         var query = _cosmosContainer.GetItemQueryIterator<DocumentUpload>(
@@ -95,5 +93,10 @@ public class DocumentService : IDocumentService
         }
 
         return results;
+    }
+
+    public Task<DocumentIndexResponse> MergeDocumentsIntoIndexAsync(UploadDocumentsResponse uploadResponse)
+    {
+        throw new NotImplementedException();
     }
 }

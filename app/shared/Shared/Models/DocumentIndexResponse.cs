@@ -12,10 +12,9 @@ public class DocumentIndexResponse
     public int IndexedCount { get; set; }
     public bool AllFilesIndexed { get; set; }
     public string ErrorMessage { get; set; }
+    public string EndPointUrl { get; set; }
 
-    //public int DocumentCount => DocumentIndexResults.Count;
-    //public int IndexedCount => DocumentIndexResults.Where(d => d.Status).Count();
-    //public bool AllFilesIndexed => DocumentIndexResults.Count == DocumentIndexResults.Where(d => d.Status).Count();
+    public static DocumentIndexResponse FromError(string error) => new([], error);
 
     public DocumentIndexResponse()
     {
@@ -23,6 +22,17 @@ public class DocumentIndexResponse
         IndexedCount = 0;
         DocumentCount = 0;
         AllFilesIndexed = true;
+        ErrorMessage = string.Empty;
+        EndPointUrl = string.Empty;
+    }
+    public DocumentIndexResponse(List<DocumentIndexReturnValue> results, string error)
+    {
+        DocumentIndexResults = results;
+        IndexedCount = 0;
+        DocumentCount = 0;
+        AllFilesIndexed = true;
+        ErrorMessage = error;
+        EndPointUrl = string.Empty;
     }
     public DocumentIndexResponse(string responseString)
     {
@@ -30,6 +40,8 @@ public class DocumentIndexResponse
         DocumentCount = DocumentIndexResults.Count;
         IndexedCount = DocumentIndexResults.Where(d => d.Status).Count();
         AllFilesIndexed = DocumentIndexResults.Count == DocumentIndexResults.Where(d => d.Status).Count();
+        ErrorMessage = string.Empty;
+        EndPointUrl = string.Empty;
     }
 }
 

@@ -44,6 +44,8 @@ public static class AppConfigurationSetting
     // Azure Search
     public static string AzureSearchServiceEndpoint { get; } = "AzureSearchServiceEndpoint";
     public static string AzureSearchServiceKey { get; } = "AzureSearchServiceKey";
+    public static string AzureSearchServiceIndexName { get; } = "AzureSearchIndexName";
+
     // Azure Storage
     public static string AzureStorageAccountEndpoint { get; } = "AzureStorageAccountEndpoint";
     public static string AzureStorageAccountConnectionString { get; } = "AzureStorageAccountConnectionString";

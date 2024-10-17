@@ -2,7 +2,7 @@
 
 namespace Shared.Models;
 
-public record class UploadDocumentsResponse(UploadDocumentFileSummary[] UploadedFiles, string? Error = null, int? filesIndexed = 0)
+public record class UploadDocumentsResponse(UploadDocumentFileSummary[] UploadedFiles, string? Error = null)
 {
     public bool IsSuccessful => this is
     {

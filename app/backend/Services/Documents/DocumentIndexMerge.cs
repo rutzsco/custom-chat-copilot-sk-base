@@ -10,29 +10,33 @@ public class DocumentIndexMerge
     public DocumentIndexMerge()
     {
         SearchAction = SearchActions.mergeOrUpload;
-        DocId = string.Empty;
+        DocId = 0;
+        Key = 0;
         Title = string.Empty;
         Description = string.Empty;
     }
-    public DocumentIndexMerge(string docId, string title)
+    public DocumentIndexMerge(int docId, string title)
     {
         SearchAction = SearchActions.mergeOrUpload;
         DocId = docId;
+        Key = docId;
         Title = title;
         Description = title;
     }
 
-    public DocumentIndexMerge(string docId, string title, string description)
+    public DocumentIndexMerge(int docId, string title, string description)
     {
         SearchAction = SearchActions.mergeOrUpload;
         DocId = docId;
+        Key = docId;
         Title = title;
         Description = description;
     }
-    public DocumentIndexMerge(SearchActions searchAction, string docId, string title, string description)
+    public DocumentIndexMerge(SearchActions searchAction, int docId, string title, string description)
     {
         SearchAction = searchAction;
         DocId = docId;
+        Key = docId;
         Title = title;
         Description = description;
     }
@@ -41,7 +45,10 @@ public class DocumentIndexMerge
     public SearchActions SearchAction { get; set; }
 
     [JsonProperty("docId")]
-    public string DocId { get; set; }
+    public int DocId { get; set; }
+
+    [JsonProperty("key")]
+    public int Key { get; set; }
 
     [JsonProperty("title")]
     public string Title { get; set; }

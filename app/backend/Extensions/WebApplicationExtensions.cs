@@ -29,7 +29,7 @@ internal static class WebApplicationExtensions
         api.MapGet("chat/history-v2", OnGetHistoryV2Async);
         api.MapGet("chat/history/{chatId}", OnGetChatHistorySessionAsync);
 
-        // Process chat turn rating 
+        // Process chat turn rating
         api.MapPost("chat/rating", OnPostChatRatingAsync);
 
         // Get recent feedback
@@ -44,6 +44,9 @@ internal static class WebApplicationExtensions
         // User document
         api.MapPost("documents", OnPostDocumentAsync);
         api.MapGet("user/documents", OnGetUserDocumentsAsync);
+
+        // Azure Search Native Index documents
+        api.MapPost("native/index/documents", OnPostNativeIndexDocumentsAsync);
 
         // Profile Selections
         api.MapGet("profile/selections", OnGetProfileUserSelectionOptionsAsync);
@@ -101,8 +104,8 @@ internal static class WebApplicationExtensions
             var searchOptions = new SearchOptions { Size = 0, Facets = { selectionOption.IndexFieldName }};
             SearchResults<SearchDocument> results = await searchClient.SearchAsync<SearchDocument>("*", searchOptions);
             if (results.Facets != null && results.Facets.ContainsKey(selectionOption.IndexFieldName))
-            { 
-                var selectionValues = new List<string>();             
+            {
+                var selectionValues = new List<string>();
                 foreach (FacetResult facet in results.Facets[selectionOption.IndexFieldName])
                     selectionValues.Add(facet.Value.ToString());
                 selectionOptions.Add(new UserSelectionOption(selectionOption.DisplayName, selectionValues));
@@ -112,7 +115,7 @@ internal static class WebApplicationExtensions
         var result = new UserSelectionModel(selectionOptions);
         return Results.Ok(result);
     }
-    
+
     private static async Task<IResult> OnGetSourceFileAsync(HttpContext context, string fileName, BlobServiceClient blobServiceClient, IConfiguration configuration)
     {
         try
@@ -163,6 +166,7 @@ internal static class WebApplicationExtensions
             return Results.Problem("Internal server error");
         }
     }
+
     private static async Task<IResult> OnPostDocumentAsync(HttpContext context, [FromForm] IFormFileCollection files,
         [FromServices] AzureBlobStorageService service,
         [FromServices] IDocumentService documentService,
@@ -175,14 +179,26 @@ internal static class WebApplicationExtensions
         Dictionary<string, string>? fileMetadata = null;
         if (!string.IsNullOrEmpty(fileMetadataContent))
             fileMetadata = JsonSerializer.Deserialize<Dictionary<string,string>>(fileMetadataContent);
-        
 
         var response = await documentService.CreateDocumentUploadAsync(userInfo, files, fileMetadata, cancellationToken);
         logger.LogInformation("Upload documents: {x}", response);
 
         return TypedResults.Ok(response);
     }
-    
+
+    private static async Task<IResult> OnPostNativeIndexDocumentsAsync(HttpContext context,
+        [FromBody] UploadDocumentsResponse uploadResponse,
+        [FromServices] IDocumentService documentService,
+        [FromServices] ILogger<AzureBlobStorageService> logger,
+        CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Call Azure Search Native index to index the uploaded documents...");
+        var userInfo = context.GetUserInfo();
+        var response = await documentService.MergeDocumentsIntoIndexAsync(uploadResponse);
+        logger.LogInformation("Azure Search Native index response: {x}", response);
+        return TypedResults.Ok(response);
+    }
+
     private static IResult OnGetUser(HttpContext context)
     {
         var userInfo = context.GetUserInfo();
@@ -253,7 +269,7 @@ internal static class WebApplicationExtensions
         }
     }
     private static IChatService ResolveChatService(ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, EndpointChatService endpointChatService, EndpointChatServiceV2 endpointChatServiceV2)
-    {  
+    {
         if (request.OptionFlags.IsChatProfile())
             return chatService;
 

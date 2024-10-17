@@ -12,7 +12,8 @@ public sealed partial class Collections : IDisposable
     //private MudFileUpload<IReadOnlyList<IBrowserFile>> _fileUpload = null!;
     private Task _getDocumentsTask = null!;
     private bool _isLoadingDocuments = false;
-    private bool _isUpLoadingDocuments = false;
+    private bool _isUploadingDocuments = false;
+    private bool _isIndexingDocuments = false;
     private string _filter = "";
     private string _companyName = "";
     private string _industry = "";
@@ -72,7 +73,8 @@ public sealed partial class Collections : IDisposable
     {
         if (_fileUploads.Any())
         {
-            _isUpLoadingDocuments = true;
+            _isUploadingDocuments = true;
+            _isIndexingDocuments = false;
             //var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
             var result = await Client.UploadDocumentsAsync(_fileUploads.ToArray(), MaxIndividualFileSize, new Dictionary<string, string> { { "CompanyName", _companyName }, { "Industry", _industry }, });
 
@@ -88,16 +90,22 @@ public sealed partial class Collections : IDisposable
                 SnackBarError($"Failed to upload {_fileUploads.Count} documents. {result.Error}");
             }
 
+            _isUploadingDocuments = false;
+            _isIndexingDocuments = true;
+            StateHasChanged();
+
+            var indexResult = await Client.NativeIndexDocumentsAsync(result);
             if (result.AllFilesIndexed)
             {
                 SnackBarMessage($"{result.FilesIndexed} files indexed!");
             }
             else
             {
-                SnackBarError($"Index Failure!  Indexed {result.FilesIndexed} documents out of {_fileUploads.Count}. {result.IndexErrorMessage}");
+                SnackBarError($"Trigger Index Failure!  Indexed {result.FilesIndexed} documents out of {_fileUploads.Count}. {result.IndexErrorMessage}");
             }
         }
-        _isUpLoadingDocuments = false;
+        _isUploadingDocuments = false;
+        _isIndexingDocuments = false;
         await GetDocumentsAsync();
     }
     private void SnackBarMessage(string? message) { SnackBarAdd(false, message); }
