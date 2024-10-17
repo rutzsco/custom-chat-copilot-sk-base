@@ -118,6 +118,13 @@ public sealed partial class Chat
         return OnAskClickedAsync();
     }
 
+    private Task OnPromptTemplateClickedAsync(string promptTemplate)
+    {
+        _userQuestion = promptTemplate;
+        return OnAskClickedAsync();
+    }
+    
+
     private async Task OnRetryQuestionAsync()
     {
         _questionAndAnswerMap.Remove(_currentQuestion);

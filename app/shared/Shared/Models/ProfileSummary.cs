@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Shared.Models;
-public record ProfileSummary(string Id, string Name, string Description, ProfileApproach Approach, List<string> SampleQuestions, bool SupportsUserSelectionOptions, bool SupportsFileUpload);
+public record ProfileSummary(string Id, string Name, string Description, ProfileApproach Approach, List<string> SampleQuestions, List<UserPromptTemplate> PromptTemplates, bool SupportsUserSelectionOptions, bool SupportsFileUpload);
 
 public enum ProfileApproach
 {
@@ -17,3 +17,11 @@ public enum ProfileApproach
     EndpointAssistant,
     EndpointAssistantV2
 };
+public record UserPromptTemplate(string Name, string PromptTemplate, UserPromptTemplateVariable[] Variables);
+public class UserPromptTemplateVariable
+{
+    public string Name { get; set; }
+    public string Value { get; set; }
+}
+
+

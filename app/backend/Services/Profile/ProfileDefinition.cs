@@ -80,6 +80,9 @@ public class ProfileDefinition
     public string ChatSystemMessage { get; set; }
     
     public List<string> SampleQuestions { get; set; }
+
+    public List<UserPromptTemplate> UserPromptTemplates { get; set; }
+
 }
 
 
@@ -136,3 +139,5 @@ public class AssistantEndpointSettingsSummary
     public required string APIEndpointSetting { get; set; }
     public required string APIEndpointKeySetting { get; set; }
 }
+
+
