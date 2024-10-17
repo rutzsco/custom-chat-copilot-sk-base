@@ -11,10 +11,6 @@ public record class UploadDocumentsResponse(UploadDocumentFileSummary[] Uploaded
     };
 
     public static UploadDocumentsResponse FromError(string error) => new([], error);
-
-    public int FilesIndexed { get; set; }
-    public bool AllFilesIndexed { get; set; }
-    public string? IndexErrorMessage { get; set; }
 }
 
 public record class UploadDocumentFileSummary(

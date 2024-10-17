@@ -1,9 +1,21 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using Newtonsoft.Json;
-using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
+using Shared.Models;
 
 namespace MinimalApi.Services.Documents;
+
+public class DocumentIndexRequest
+{
+    public UploadDocumentsResponse Documents { get; set; }
+    public string AccessToken { get; set; }
+
+    public DocumentIndexRequest(UploadDocumentsResponse documents, string token)
+    {
+        Documents = documents;
+        AccessToken = token;
+    }
+}
 
 public class DocumentIndexMerge
 {

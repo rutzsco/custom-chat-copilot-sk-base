@@ -6,6 +6,7 @@ using ClientApp.Pages;
 using Microsoft.AspNetCore.Antiforgery;
 using MinimalApi.Services;
 using MinimalApi.Services.ChatHistory;
+using MinimalApi.Services.Documents;
 using MinimalApi.Services.Profile;
 using MinimalApi.Services.Search;
 using MinimalApi.Services.Security;
@@ -187,14 +188,15 @@ internal static class WebApplicationExtensions
     }
 
     private static async Task<IResult> OnPostNativeIndexDocumentsAsync(HttpContext context,
-        [FromBody] UploadDocumentsResponse uploadResponse,
+        [FromBody] UploadDocumentsResponse documentList,
+        //[FromBody] DocumentIndexRequest indexRequest,
         [FromServices] IDocumentService documentService,
         [FromServices] ILogger<AzureBlobStorageService> logger,
         CancellationToken cancellationToken)
     {
         logger.LogInformation("Call Azure Search Native index to index the uploaded documents...");
         var userInfo = context.GetUserInfo();
-        var response = await documentService.MergeDocumentsIntoIndexAsync(uploadResponse);
+        var response = await documentService.MergeDocumentsIntoIndexAsync(documentList);
         logger.LogInformation("Azure Search Native index response: {x}", response);
         return TypedResults.Ok(response);
     }

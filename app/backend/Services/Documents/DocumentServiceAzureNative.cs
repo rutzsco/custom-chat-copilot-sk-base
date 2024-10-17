@@ -60,7 +60,7 @@ public class DocumentServiceAzureNative : IDocumentService
         return response;
     }
 
-    public async Task<DocumentIndexResponse> MergeDocumentsIntoIndexAsync(UploadDocumentsResponse uploadResponse)
+    public async Task<DocumentIndexResponse> MergeDocumentsIntoIndexAsync(UploadDocumentsResponse uploadList) // DocumentIndexRequest indexRequest)
     {
         var searchServiceUrl = _configuration[AppConfigurationSetting.AzureSearchServiceEndpoint];
         var indexName = _configuration[AppConfigurationSetting.AzureSearchServiceIndexName];
@@ -81,7 +81,7 @@ public class DocumentServiceAzureNative : IDocumentService
             // See https://learn.microsoft.com/en-us/azure/search/search-howto-dotnet-sdk
             //   Not sure how to creat this batch record properly...
             //var batch = new IndexDocumentsBatch<DocumentIndexMerge>();
-            //foreach (var file in uploadResponse.UploadedFiles)
+            //foreach (var file in indexRequest.Documents.UploadedFiles)
             //{
             //    var action = IndexDocumentsAction("Upload", new DocumentIndexMerge(i++, file.FileName));
             //    batch.Actions.Add(new DocumentIndexMerge(i++, file.FileName));
@@ -94,7 +94,8 @@ public class DocumentServiceAzureNative : IDocumentService
             //IndexDocumentsResult indexResults = searchIndexClient.IndexDocuments(batch);
             //IndexDocumentsResult indexResults = await searchIndexClient.IndexDocumentsAsync<IndexDocumentsBatch<DocumentIndexMerge>>(documents);
 
-            foreach (var file in uploadResponse.UploadedFiles)
+            //foreach (var file in indexRequest.Documents.UploadedFiles)
+            foreach (var file in uploadList.UploadedFiles)
             {
                 documents.Add(new DocumentIndexMerge(i++, file.FileName));
             }
@@ -102,6 +103,7 @@ public class DocumentServiceAzureNative : IDocumentService
             // FYI - this json field name needs to be "@search.action"...  you should be able to specify that in the JSON properties (and I did...), but it's not coming through here...
             requestPayloadJson = requestPayloadJson.Replace("\"searchAction\"", "\"@search.action\"");
             var requestPayload = new StringContent(requestPayloadJson, Encoding.UTF8, "application/json");
+            //_httpClient.DefaultRequestHeaders.Add("X-MS-TOKEN-AAD-ACCESS-TOKEN", indexRequest.AccessToken);
 
             Console.WriteLine($"\nDEBUG: Calling {indexEndpoint}\n");
             var response = await _httpClient.PostAsync(indexEndpoint, requestPayload);

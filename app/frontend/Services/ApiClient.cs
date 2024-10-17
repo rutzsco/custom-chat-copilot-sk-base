@@ -83,11 +83,11 @@ public sealed class ApiClient(HttpClient httpClient)
         }
     }
 
-    public async Task<DocumentIndexResponse> NativeIndexDocumentsAsync(UploadDocumentsResponse uploadResponse)
+    public async Task<DocumentIndexResponse> NativeIndexDocumentsAsync(UploadDocumentsResponse documentList) // DocumentIndexRequest indexRequest)
     {
         try
         {
-            var json = JsonSerializer.Serialize(uploadResponse, SerializerOptions.Default);
+            var json = JsonSerializer.Serialize(documentList, SerializerOptions.Default);
             using var body = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await httpClient.PostAsync("api/native/index/documents", body);
             response.EnsureSuccessStatusCode();

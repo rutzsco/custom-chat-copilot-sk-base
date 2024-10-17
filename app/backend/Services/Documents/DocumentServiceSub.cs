@@ -15,7 +15,7 @@ public class DocumentServiceSub : IDocumentService
     {
         return Task.FromResult(new List<DocumentUpload>());
     }
-    public Task<DocumentIndexResponse> MergeDocumentsIntoIndexAsync(UploadDocumentsResponse uploadResponse)
+    public Task<DocumentIndexResponse> MergeDocumentsIntoIndexAsync(UploadDocumentsResponse documentList) // DocumentIndexRequest indexRequest)
     {
         throw new NotImplementedException();
     }

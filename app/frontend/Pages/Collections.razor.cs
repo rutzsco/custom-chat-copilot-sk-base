@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using MinimalApi.Services.Documents;
+
 namespace ClientApp.Pages;
 
 public sealed partial class Collections : IDisposable
@@ -22,17 +24,11 @@ public sealed partial class Collections : IDisposable
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly HashSet<DocumentSummary> _documents = [];
 
-    [Inject]
-    public required ApiClient Client { get; set; }
-
-    [Inject]
-    public required ISnackbar Snackbar { get; set; }
-
-    [Inject]
-    public required ILogger<Docs> Logger { get; set; }
-
-    [Inject]
-    public required IJSRuntime JSRuntime { get; set; }
+    [Inject] public required ApiClient Client { get; set; }
+    [Inject] public required ISnackbar Snackbar { get; set; }
+    [Inject] public required ILogger<Docs> Logger { get; set; }
+    [Inject] public required IJSRuntime JSRuntime { get; set; }
+    [Inject] public required HttpClient HttpClient { get; set; }
 
     //private bool FilesSelected => _fileUpload is { _files.: > 0 };
 
@@ -88,20 +84,29 @@ public sealed partial class Collections : IDisposable
             else
             {
                 SnackBarError($"Failed to upload {_fileUploads.Count} documents. {result.Error}");
+                _isUploadingDocuments = false;
+                _isIndexingDocuments = false;
+                await GetDocumentsAsync();
+                return;
             }
 
             _isUploadingDocuments = false;
             _isIndexingDocuments = true;
             StateHasChanged();
 
+            // tried to get the access token and pass it into the API call but it crashes and burns here...
+            //var accessToken = await GetAuthMeFieldAsync("access_token");
+            //var indexRequest = new DocumentIndexRequest(result, accessToken);
+            //var indexResult = await Client.NativeIndexDocumentsAsync(indexRequest);
+
             var indexResult = await Client.NativeIndexDocumentsAsync(result);
-            if (result.AllFilesIndexed)
+            if (indexResult.AllFilesIndexed)
             {
-                SnackBarMessage($"{result.FilesIndexed} files indexed!");
+                SnackBarMessage($"{indexResult.IndexedCount} files indexed!");
             }
             else
             {
-                SnackBarError($"Trigger Index Failure!  Indexed {result.FilesIndexed} documents out of {_fileUploads.Count}. {result.IndexErrorMessage}");
+                SnackBarError($"Trigger Index Failure!  Indexed {indexResult.IndexedCount} documents out of {indexResult.DocumentCount}. {indexResult.ErrorMessage}");
             }
         }
         _isUploadingDocuments = false;
@@ -121,7 +126,24 @@ public sealed partial class Collections : IDisposable
                 options.VisibleStateDuration = 10_000;
             });
     }
+    private async Task<string?> GetAuthMeFieldAsync(string field)
+    {
+        try
+        {
+            var httpResponse = await HttpClient.GetAsync(".auth/me");
+            httpResponse.EnsureSuccessStatusCode();
 
+            var httpResponseContent = await httpResponse.Content.ReadAsStringAsync();
+            var httpResponseContentJson = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(httpResponseContent);
+            var httpResponseField = httpResponseContentJson?.FirstOrDefault()?[field]?.ToString();
+            return httpResponseField;
+        }
+        catch
+        {
+            Console.WriteLine($"Cannot fetch AuthMe field {field}!");
+            return string.Empty;
+        }
+    }
 
     private IList<IBrowserFile> _fileUploads = new List<IBrowserFile>();
     private void UploadFiles(IReadOnlyList<IBrowserFile> files)
