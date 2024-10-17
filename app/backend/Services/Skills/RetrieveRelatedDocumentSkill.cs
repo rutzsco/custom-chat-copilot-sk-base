@@ -36,16 +36,21 @@ public sealed class RetrieveRelatedDocumentSkill
         {
             var sb = new StringBuilder();
             int count = 0;
-            foreach(var o in profile.RAGSettings.ProfileUserSelectionOptions)
+            foreach (var o in profile.RAGSettings.ProfileUserSelectionOptions)
             {
-                if (count > 0)
+                if(arguments.ContainsName(o.DisplayName) == false)
+                    continue;
+
+                if (profile.RAGSettings.ProfileUserSelectionOptions.Count() > 1 && count > 0)
                     sb.Append(" and ");
 
                 var filter = $"{o.IndexFieldName} eq '{arguments[o.DisplayName]}'";
                 sb.Append(filter);
                 count++;
             }
-            arguments[ContextVariableOptions.SelectedFilters] = sb.ToString();
+
+            if(sb.Length > 0)
+                arguments[ContextVariableOptions.SelectedFilters] = sb.ToString();
         }
 
         var searchLogic = ResolveRetrievalLogic(_openAIClient, _searchClientFactory, profile.RAGSettings, _config["AOAIEmbeddingsDeployment"], profile.RAGSettings.DocumentRetrievalPluginQueryFunctionName);
