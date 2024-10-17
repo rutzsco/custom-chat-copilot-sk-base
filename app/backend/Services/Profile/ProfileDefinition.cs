@@ -93,6 +93,7 @@ public class RAGSettingsSummary
 
     public required int DocumentRetrievalDocumentCount { get; set; }
     public required string ChatSystemMessage { get; set; }
+    public required string ChatUserMessage { get; set; }
     public required string ChatSystemMessageFile { get; set; }
     public required string StorageContianer { get; set; }
 
