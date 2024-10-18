@@ -99,4 +99,14 @@ public sealed partial class TextInputV4
 
         await OnFileUpload.InvokeAsync(fileSummary);
     }
+
+    public string Trim(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text) || text.Length <= 24)
+        {
+            return text;
+        }
+
+        return text.Substring(0, 24) + "...";
+    }
 }

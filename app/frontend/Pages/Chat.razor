@@ -38,12 +38,13 @@
                     {
                         <MudStack Justify="Justify.Center" AlignItems="AlignItems.Start" Spacing="4">
                             <MudBadge Origin="Origin.TopLeft" Overlap="true" Color="Color.Secondary" Icon="@Icons.Material.Filled.QuestionMark" Class="d-flex align-self-end">
-                                <MudPaper Class="ma-1 pa-6 d-flex flex-column" Elevation="3">
+@*                                 <MudPaper Class="ma-1 pa-6 d-flex flex-column" Elevation="3">
                                     <MudText Typo="Typo.body1" Align="Align.End">@question</MudText>
                                     <MudText Typo="Typo.caption" Align="Align.End" Color="Color.Secondary">
                                         @($"Asked at {askedOn:h:mm:ss tt} on {askedOn:M/dd/yy}")
                                     </MudText>
-                                </MudPaper>
+                                </MudPaper>         *@
+                                <Question UserQuestion="@question" AskedOn="askedOn" />
                             </MudBadge>
                             <div class="ten-twelves">
                                 @if (answer is null)
@@ -177,5 +178,13 @@
 
     tr:nth-child(even) {
         background-color: #f9f9f9;
+    }
+
+    .truncate-text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 200px; /* Adjust this as needed */
+        display: block;
     }
 </style>
