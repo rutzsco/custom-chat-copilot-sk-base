@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using MinimalApi.Services.Documents;
+
 namespace ClientApp.Pages;
 
 public sealed partial class Collections : IDisposable
@@ -12,7 +14,8 @@ public sealed partial class Collections : IDisposable
     //private MudFileUpload<IReadOnlyList<IBrowserFile>> _fileUpload = null!;
     private Task _getDocumentsTask = null!;
     private bool _isLoadingDocuments = false;
-    private bool _isUpLoadingDocuments = false;
+    private bool _isUploadingDocuments = false;
+    private bool _isIndexingDocuments = false;
     private string _filter = "";
     private string _companyName = "";
     private string _industry = "";
@@ -21,17 +24,11 @@ public sealed partial class Collections : IDisposable
     private readonly CancellationTokenSource _cancellationTokenSource = new();
     private readonly HashSet<DocumentSummary> _documents = [];
 
-    [Inject]
-    public required ApiClient Client { get; set; }
-
-    [Inject]
-    public required ISnackbar Snackbar { get; set; }
-
-    [Inject]
-    public required ILogger<Docs> Logger { get; set; }
-
-    [Inject]
-    public required IJSRuntime JSRuntime { get; set; }
+    [Inject] public required ApiClient Client { get; set; }
+    [Inject] public required ISnackbar Snackbar { get; set; }
+    [Inject] public required ILogger<Docs> Logger { get; set; }
+    [Inject] public required IJSRuntime JSRuntime { get; set; }
+    [Inject] public required HttpClient HttpClient { get; set; }
 
     //private bool FilesSelected => _fileUpload is { _files.: > 0 };
 
@@ -72,39 +69,62 @@ public sealed partial class Collections : IDisposable
     {
         if (_fileUploads.Any())
         {
-            _isUpLoadingDocuments = true;
+            _isUploadingDocuments = true;
+            _isIndexingDocuments = false;
             //var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
-            var result = await Client.UploadDocumentsAsync(_fileUploads.ToArray(), MaxIndividualFileSize, new Dictionary<string, string> { { "CompanyName", _companyName}, { "Industry", _industry }, });
+            var result = await Client.UploadDocumentsAsync(_fileUploads.ToArray(), MaxIndividualFileSize, new Dictionary<string, string> { { "CompanyName", _companyName }, { "Industry", _industry }, });
 
             Logger.LogInformation("Result: {x}", result);
 
             if (result.IsSuccessful)
             {
-                Snackbar.Add(
-                    $"Uploaded {result.UploadedFiles.Length} documents.",
-                    Severity.Success,
-                    static options =>
-                    {
-                        options.ShowCloseIcon = true;
-                        options.VisibleStateDuration = 10_000;
-                    });
-
+                SnackBarMessage($"Uploaded {result.UploadedFiles.Length} documents.");
                 _fileUploads.Clear();
             }
             else
             {
-                Snackbar.Add(
-                    result.Error,
-                    Severity.Error,
-                    static options =>
-                    {
-                        options.ShowCloseIcon = true;
-                        options.VisibleStateDuration = 10_000;
-                    });
+                SnackBarError($"Failed to upload {_fileUploads.Count} documents. {result.Error}");
+                _isUploadingDocuments = false;
+                _isIndexingDocuments = false;
+                await GetDocumentsAsync();
+                return;
+            }
+
+            _isUploadingDocuments = false;
+            _isIndexingDocuments = true;
+            StateHasChanged();
+
+            // tried to get the access token and pass it into the API call but it crashes and burns here...
+            //var accessToken = await GetAuthMeFieldAsync("access_token");
+            //var indexRequest = new DocumentIndexRequest(result, accessToken);
+            //var indexResult = await Client.NativeIndexDocumentsAsync(indexRequest);
+
+            var indexResult = await Client.NativeIndexDocumentsAsync(result);
+            if (indexResult.AllFilesIndexed)
+            {
+                SnackBarMessage($"{indexResult.IndexedCount} files indexed!");
+            }
+            else
+            {
+                SnackBarError($"Trigger Index Failure!  Indexed {indexResult.IndexedCount} documents out of {indexResult.DocumentCount}. {indexResult.ErrorMessage}");
             }
         }
-        _isUpLoadingDocuments = false;
+        _isUploadingDocuments = false;
+        _isIndexingDocuments = false;
         await GetDocumentsAsync();
+    }
+    private void SnackBarMessage(string? message) { SnackBarAdd(false, message); }
+    private void SnackBarError(string? message) { SnackBarAdd(true, message); }
+    private void SnackBarAdd(bool isError, string? message)
+    {
+        Snackbar.Add(
+            message ?? "Error occurred!",
+            isError ? Severity.Error : Severity.Success,
+            static options =>
+            {
+                options.ShowCloseIcon = true;
+                options.VisibleStateDuration = 10_000;
+            });
     }
 
     private IList<IBrowserFile> _fileUploads = new List<IBrowserFile>();

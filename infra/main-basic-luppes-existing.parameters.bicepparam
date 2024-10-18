@@ -12,7 +12,7 @@ param existingContainerRegistryName = 'crfuwyp7kyt7kmy'
 param existingContainerRegistryResourceGroup = 'rg-copilot-lll'
 
 param environmentName = 'CI'
-param location = 'eastus2'
+param location = 'westus' // 'eastus2'
 param backendExists = false
 param backendDefinition = {
   settings: []

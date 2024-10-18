@@ -3,7 +3,8 @@ param location string = resourceGroup().location
 param tags object = {}
 
 param sku object = {
-  name: 'basic' // 'standard'
+  name: 'standard' 
+  //name: 'basic'  
 }
 
 param networkRuleSet object = {
@@ -68,32 +69,24 @@ module privateEndpoint '../shared/private-endpoint.bicep' =
     }
   }
 
-var searchIndexDataContributorRoleDefinitionId = '8ebe5a00-799e-43f5-93ac-243d3dce84a7'
-
+var roleDefinitions = loadJsonContent('./roleDefinitions.json')
+ // See https://docs.microsoft.com/azure/role-based-access-control/role-assignments-template#new-service-principal 
 resource managedIdentitySearchIndexDataContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' =
   if (useManagedIdentityResourceAccess) {
-    name: guid(subscription().id, managedIdentityPrincipalId, searchIndexDataContributorRoleDefinitionId)
+    name: guid(subscription().id, managedIdentityPrincipalId, roleDefinitions.search.indexDataContributorRoleId)
     properties: {
       principalId: managedIdentityPrincipalId
-      roleDefinitionId: subscriptionResourceId(
-        'Microsoft.Authorization/roleDefinitions',
-        searchIndexDataContributorRoleDefinitionId
-      )
+      roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleDefinitions.search.indexDataContributorRoleId)
       principalType: 'ServicePrincipal'
     }
   }
 
-var searchServiceContributorRoleDefinitionId = '7ca78c08-252a-4471-8644-bb5ff32d4ba0'
-
 resource managedIdentitySearchServiceContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' =
   if (useManagedIdentityResourceAccess) {
-    name: guid(subscription().id, managedIdentityPrincipalId, searchServiceContributorRoleDefinitionId)
+    name: guid(subscription().id, managedIdentityPrincipalId, roleDefinitions.search.serviceContributorRoleId)
     properties: {
       principalId: managedIdentityPrincipalId
-      roleDefinitionId: subscriptionResourceId(
-        'Microsoft.Authorization/roleDefinitions',
-        searchServiceContributorRoleDefinitionId
-      )
+      roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleDefinitions.search.serviceContributorRoleId)
       principalType: 'ServicePrincipal'
     }
   }
@@ -102,3 +95,4 @@ output id string = search.id
 output endpoint string = 'https://${name}.search.windows.net/'
 output name string = search.name
 output searchKeySecretName string = searchKeySecretName
+output searchServicePrincipalId string = search.identity.principalId

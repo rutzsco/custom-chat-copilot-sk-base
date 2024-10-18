@@ -71,9 +71,9 @@
                     </MudStack>
                 </MudCardContent>
                 <MudCardActions>
-					@if (_isUpLoadingDocuments)
+					@if (_isUploadingDocuments || _isIndexingDocuments)
 					{
-						<MudText Typo="Typo.h5">Uploading Documents...</MudText>
+						<MudText Typo="Typo.h5">@(_isUploadingDocuments ? "Uploading Documents..." : "Indexing Documents...")</MudText>
 						<MudProgressCircular Indeterminate="true" Size="Size.Small" Class="ml-2" />
 					}
 					else

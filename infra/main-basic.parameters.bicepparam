@@ -30,3 +30,23 @@ param containerAppEnvironmentWorkloadProfiles = [
 param useManagedIdentityResourceAccess = true
 param azureChatGptStandardDeploymentName = 'gpt-4o'
 param azureEmbeddingDeploymentName = 'text-embedding'
+
+param azureEmbeddingModelName = 'text-embedding-ada-002'
+param embeddingDeploymentCapacity = 30
+
+param chatGptStandardDeploymentCapacity = 10
+param azureOpenAIChatGptStandardModelName = 'gpt-4o'
+param azureOpenAIChatGptStandardModelVersion = '2024-05-13'
+
+param azureChatGptPremiumDeploymentName = 'chat-gpt4'
+param chatGptPremiumDeploymentCapacity = 10
+param azureOpenAIChatGptPremiumModelName = 'gpt-4o'
+param azureOpenAIChatGptPremiumModelVersion = '2024-05-13'
+
+@description('If you have an existing VNET to use, provide the name here')
+param virtualNetworkName = ''
+param virtualNetworkResourceGroupName = ''
+param privateEndpointSubnetName = ''
+param privateEndpointSubnetAddressPrefix = ''
+param containerAppSubnetName = ''
+param containerAppSubnetAddressPrefix = ''

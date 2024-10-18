@@ -256,6 +256,8 @@ module azureOpenAi './app/cognitive-services.bicep' = {
     name: '${abbrs.cognitiveServicesAccounts}${resourceToken}'
     location: location
     tags: tags
+    useManagedIdentityResourceAccess: useManagedIdentityResourceAccess
+    searchServicePrincipalId: search.outputs.searchServicePrincipalId
     deploymentSuffix: deploymentSuffix
     deployments: concat(
       [
