@@ -129,26 +129,26 @@ module privateEndpoint '../shared/private-endpoint.bicep' =
     }
   }
 
-var cosmosDbDataContributorRoleDefinitionId = '00000000-0000-0000-0000-000000000002'
+var roleDefinitions = loadJsonContent('./roleDefinitions.json')
 
 resource cosmosDbDataContributorRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-05-15' =
   if (useManagedIdentityResourceAccess) {
-    name: guid(subscription().id, managedIdentityPrincipalId, cosmosDbDataContributorRoleDefinitionId, account.id)
+    name: guid(subscription().id, managedIdentityPrincipalId, roleDefinitions.cosmos.dataContributorRoleId, account.id)
     parent: account
     properties: {
       principalId: managedIdentityPrincipalId
-      roleDefinitionId: '/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${database.name}/sqlRoleDefinitions/${cosmosDbDataContributorRoleDefinitionId}'
+      roleDefinitionId: '/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${database.name}/sqlRoleDefinitions/${roleDefinitions.cosmos.dataContributorRoleId}'
       scope: account.id
     }
   }
 
 resource cosmosDbUserAccessRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2024-05-15' =
   if (useManagedIdentityResourceAccess) {
-    name: guid(subscription().id, userPrincipalId, cosmosDbDataContributorRoleDefinitionId, account.id)
+    name: guid(subscription().id, userPrincipalId, roleDefinitions.cosmos.dataContributorRoleId, account.id)
     parent: account
     properties: {
       principalId: userPrincipalId
-      roleDefinitionId: '/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${database.name}/sqlRoleDefinitions/${cosmosDbDataContributorRoleDefinitionId}'
+      roleDefinitionId: '/${subscription().id}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${database.name}/sqlRoleDefinitions/${roleDefinitions.cosmos.dataContributorRoleId}'
       scope: account.id
     }
   }
