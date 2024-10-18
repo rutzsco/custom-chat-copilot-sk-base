@@ -13,7 +13,7 @@
             @if (_questionAndAnswerMap is { Count: 0 })
             {
                 <div class="d-flex align-content-center flex-wrap flex-grow-1 full-height">
-                    <Examples Profile=@_selectedProfileSummary Message="@AppConfiguration.HelloText" OnExampleClicked="@OnAskQuestionAsync" />
+                    <Examples Profile=@_selectedProfileSummary Message="@AppConfiguration.HelloText" OnExampleClicked="@OnAskQuestionAsync" OnPromptTemplateClicked="@OnPromptTemplateClickedAsync" />
                     <MudStack Row="true" StretchItems="StretchItems.None" Justify="Justify.Center" Style="width: 100%;">
                         @if (_selectedProfileSummary != null && _userSelectionModel != null)
                         {
@@ -156,5 +156,27 @@
         margin-top: 0px;
         margin-bottom: 175px;
         height: calc(100% - 150px); 
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        font-size: 18px;
+        text-align: left;
+    }
+
+    th, td {
+        padding: 12px;
+        border: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #f4f4f4;
+        font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
     }
 </style>

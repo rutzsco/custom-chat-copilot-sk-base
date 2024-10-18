@@ -7,6 +7,7 @@ namespace ClientApp.Services;
 
 public sealed class ApiClient(HttpClient httpClient)
 {
+    private static UserInformation? _UserInformation = null;
     public async Task IngestionTriggerAsync(string sourceContainer, string indexName)
     {
         var request = new IngestionRequest(sourceContainer, $"{sourceContainer}-extract", indexName);
@@ -17,10 +18,16 @@ public sealed class ApiClient(HttpClient httpClient)
 
     public async Task<UserInformation> GetUserAsync()
     {
+        if (Cache.UserInformation != null)
+            return Cache.UserInformation;
+
         var response = await httpClient.GetAsync("api/user");
         response.EnsureSuccessStatusCode();
 
-        return await response.Content.ReadFromJsonAsync<UserInformation>();
+        var user = await response.Content.ReadFromJsonAsync<UserInformation>();
+        Cache.SetUserInformation(user);
+
+        return user;
     }
 
     public async Task<List<DocumentSummary>> GetUserDocumentsAsync()
