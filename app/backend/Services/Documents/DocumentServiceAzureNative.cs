@@ -1,22 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System.Drawing.Printing;
 using Microsoft.Azure.Cosmos;
 using MinimalApi.Services.Documents;
-using MinimalApi.Services.Search.IndexDefinitions;
-using MinimalApi.Services.Search;
 using Shared.Json;
-using ClientApp.Pages;
-using ClientApp;
-using Microsoft.Extensions.Hosting;
-using System.Drawing;
-using System.Reflection.Metadata;
-using System;
-using OpenAI;
-using Azure;
-using System.Configuration;
-using Microsoft.Extensions.Azure;
-using Azure.Search.Documents.Indexes;
 
 namespace MinimalApi.Services.ChatHistory;
 

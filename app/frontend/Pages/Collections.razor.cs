@@ -126,24 +126,6 @@ public sealed partial class Collections : IDisposable
                 options.VisibleStateDuration = 10_000;
             });
     }
-    private async Task<string?> GetAuthMeFieldAsync(string field)
-    {
-        try
-        {
-            var httpResponse = await HttpClient.GetAsync(".auth/me");
-            httpResponse.EnsureSuccessStatusCode();
-
-            var httpResponseContent = await httpResponse.Content.ReadAsStringAsync();
-            var httpResponseContentJson = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(httpResponseContent);
-            var httpResponseField = httpResponseContentJson?.FirstOrDefault()?[field]?.ToString();
-            return httpResponseField;
-        }
-        catch
-        {
-            Console.WriteLine($"Cannot fetch AuthMe field {field}!");
-            return string.Empty;
-        }
-    }
 
     private IList<IBrowserFile> _fileUploads = new List<IBrowserFile>();
     private void UploadFiles(IReadOnlyList<IBrowserFile> files)

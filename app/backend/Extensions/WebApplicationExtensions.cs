@@ -167,7 +167,6 @@ internal static class WebApplicationExtensions
             return Results.Problem("Internal server error");
         }
     }
-
     private static async Task<IResult> OnPostDocumentAsync(HttpContext context, [FromForm] IFormFileCollection files,
         [FromServices] AzureBlobStorageService service,
         [FromServices] IDocumentService documentService,
@@ -180,6 +179,7 @@ internal static class WebApplicationExtensions
         Dictionary<string, string>? fileMetadata = null;
         if (!string.IsNullOrEmpty(fileMetadataContent))
             fileMetadata = JsonSerializer.Deserialize<Dictionary<string,string>>(fileMetadataContent);
+
 
         var response = await documentService.CreateDocumentUploadAsync(userInfo, files, fileMetadata, cancellationToken);
         logger.LogInformation("Upload documents: {x}", response);

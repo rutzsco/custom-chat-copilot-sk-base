@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.Azure.Cosmos;
 using MinimalApi.Services.Documents;
 using Shared.Json;
@@ -46,6 +47,7 @@ public class DocumentService : IDocumentService
         return response;
     }
 
+
     private async Task CreateDocumentUploadAsync(UserInformation user, UploadDocumentFileSummary fileSummary, string contentType = "application/pdf")
     {
         // Get Ingestion Index Name
@@ -77,6 +79,7 @@ public class DocumentService : IDocumentService
         using var body = new StringContent(json, Encoding.UTF8, "application/json");
         var triggerResponse = await _httpClient.PostAsync("/api/orchestrators/pdf_orchestrator", body);
     }
+
 
     public async Task<List<DocumentUpload>> GetDocumentUploadsAsync(UserInformation user)
     {
