@@ -1,0 +1,140 @@
+﻿<MudPaper Elevation="0" Class="pl-4 pt-4 pr-4 pb-4" Style="">
+    <MudStack Style="width: 100%;">
+        <MudStack Row="true" StretchItems="StretchItems.None" Style="width: 100%;">
+            @if (SelectedProfileSummary != null && UserSelectionModel != null)
+            {  
+                @if (SelectedProfileSummary.PromptTemplates != null)
+                {
+                    @foreach (var template in SelectedProfileSummary.PromptTemplates)
+                    {                 
+                        <MudCard>
+                            <MudCardHeader>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">@template.Name</MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <MudStack>
+
+                                
+                                <MudStack Row="true">
+                                @foreach (var variable in template.Variables)
+                                {
+                                    <MudPaper Class="pa-3" Elevation="0">
+                                        <MudTextField @bind-Value="variable.Value" Label="@variable.Name" Variant="Variant.Outlined" Style="width: 250px;"></MudTextField>
+                                    </MudPaper>
+                                }
+                                @foreach (var option in UserSelectionModel.Options)
+                                {
+                                    <MudPaper Class="pa-3" Elevation="0">
+                                        <MudSelect T="string" Variant="Variant.Outlined" Label="@option.Name" @bind-Value="option.SelectedValue" Style="width: 250px;">
+                                            @foreach (var option in option.Values)
+                                            {
+                                                <MudSelectItem Value="@option">@option</MudSelectItem>
+                                            }
+                                        </MudSelect>
+                                    </MudPaper>
+                                    }
+                                </MudStack>
+                                <MudTextField T="string"
+                                              AutoFocus="true"
+                                              Immediate=true
+                                              MaxLines=5 Disabled=@Disabled
+                                              AutoGrow="true"
+                                              Placeholder="Enter your message..." Class="pl-2" OnKeyUp="@OnKeyUpAsync" @bind-Value="@UserQuestion" />
+                                                                              <MudToolBar Gutters="false" Class="mt-n4 pb-0">
+                                    @if (SupportsFileUpload)
+                                    {
+                                        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFilesAsync" Style="margin-top: 0px">
+                                            <ActivatorContent>
+                                                <MudIconButton Style="color: #616161" Class="pa-2" Size="Size.Small" HtmlTag="label" Icon="@Icons.Material.Filled.AttachFile"></MudIconButton>
+                                            </ActivatorContent>
+                                        </MudFileUpload>
+                                    }
+
+                                    @if (_files.Any())
+                                    {
+                                        <MudStack Row="true">
+                                            @foreach (var file in _files)
+                                            {
+                                                if (file.ContentType == "image/jpeg" || file.ContentType == "image/png")
+                                                {
+                                                    <MudImage Src="@file.DataUrl" Alt="Image" Elevation="5" Width="75" Height="50" Class="rounded-lg ma-4" />
+                                                }
+
+                                                @if (file.ContentType == "application/pdf")
+                                                {
+                                                    <MudChip T="string" Icon="@Icons.Material.Filled.PictureAsPdf" IconColor="Color.Primary">@file.FileName</MudChip>
+                                                }
+
+                                                @if (file.ContentType == "text/plain" || file.ContentType == "text/csv" || file.ContentType == "text/richtext" || file.ContentType == "text/markdown" || file.ContentType == "text/xml")
+                                                {
+                                                    <MudChip T="string" Icon="@Icons.Material.Filled.InsertDriveFile" IconColor="Color.Primary">@file.FileName</MudChip>
+                                                }
+
+                                                @if (file.ContentType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || file.ContentType == "application/vnd.ms-excel")
+                                                {
+                                                    <MudChip T="string" Icon="@Icons.Material.Filled.TableChart" IconColor="Color.Primary">@file.FileName</MudChip>
+                                                }
+                                            }
+                                        </MudStack>
+                                    }
+                                    <MudSpacer />
+                                    <MudIconButton Style="color: #616161" Class="pa-2" Size="Size.Small" Icon=@Icons.Material.Filled.Cancel ButtonType="ButtonType.Reset" OnClick="@OnClearChatAsync" Disabled=@Disabled />
+                                    <MudIconButton Class="pa-2" Size="Size.Small" Icon=@Icons.Material.Outlined.Send Color="Color.Secondary" OnClick="OnAskClickedAsync" Disabled=@Disabled></MudIconButton>
+                                </MudToolBar>
+                                </MudStack>
+                            </MudCardContent>
+@*                             <MudCardActions>
+                                <MudToolBar Gutters="false" Class="mt-n4 pb-0">
+                                    @if (SupportsFileUpload)
+                                    {
+                                        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFilesAsync" Style="margin-top: 0px">
+                                            <ActivatorContent>
+                                                <MudIconButton Style="color: #616161" Class="pa-2" Size="Size.Small" HtmlTag="label" Icon="@Icons.Material.Filled.AttachFile"></MudIconButton>
+                                            </ActivatorContent>
+                                        </MudFileUpload>
+                                    }
+
+                                    @if (_files.Any())
+                                    {
+                                        <MudStack Row="true">
+                                            @foreach (var file in _files)
+                                            {
+                                                if (file.ContentType == "image/jpeg" || file.ContentType == "image/png")
+                                                {
+                                                    <MudImage Src="@file.DataUrl" Alt="Image" Elevation="5" Width="75" Height="50" Class="rounded-lg ma-4" />
+                                                }
+
+                                                @if (file.ContentType == "application/pdf")
+                                                {
+                                                    <MudChip T="string" Icon="@Icons.Material.Filled.PictureAsPdf" IconColor="Color.Primary">@file.FileName</MudChip>
+                                                }
+
+                                                @if (file.ContentType == "text/plain" || file.ContentType == "text/csv" || file.ContentType == "text/richtext" || file.ContentType == "text/markdown" || file.ContentType == "text/xml")
+                                                {
+                                                    <MudChip T="string" Icon="@Icons.Material.Filled.InsertDriveFile" IconColor="Color.Primary">@file.FileName</MudChip>
+                                                }
+
+                                                @if (file.ContentType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || file.ContentType == "application/vnd.ms-excel")
+                                                {
+                                                    <MudChip T="string" Icon="@Icons.Material.Filled.TableChart" IconColor="Color.Primary">@file.FileName</MudChip>
+                                                }
+                                            }
+                                        </MudStack>
+                                    }
+                                    <MudSpacer />
+                                    <MudIconButton Style="color: #616161" Class="pa-2" Size="Size.Small" Icon=@Icons.Material.Filled.Cancel ButtonType="ButtonType.Reset" OnClick="@OnClearChatAsync" Disabled=@Disabled />
+                                    <MudIconButton Class="pa-2" Size="Size.Small" Icon=@Icons.Material.Outlined.Send Color="Color.Secondary" OnClick="OnAskClickedAsync" Disabled=@Disabled></MudIconButton>
+                                </MudToolBar>
+                            </MudCardActions> *@
+                        </MudCard>
+                    
+                    }
+                }
+
+            }
+        </MudStack>
+
+    </MudStack>
+</MudPaper>

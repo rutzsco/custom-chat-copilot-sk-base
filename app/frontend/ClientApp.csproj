@@ -31,6 +31,9 @@
     <Content Update="Components\FeedbackDialog.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
+    <Content Update="Components\TextInputV4.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
     <Content Update="Components\TextInputV3.razor">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>

@@ -13,23 +13,22 @@
             @if (_questionAndAnswerMap is { Count: 0 })
             {
                 <div class="d-flex align-content-center flex-wrap flex-grow-1 full-height">
-                    <Examples Profile=@_selectedProfileSummary Message="@AppConfiguration.HelloText" OnExampleClicked="@OnAskQuestionAsync" OnPromptTemplateClicked="@OnPromptTemplateClickedAsync" />
-                    <MudStack Row="true" StretchItems="StretchItems.None" Justify="Justify.Center" Style="width: 100%;">
-                        @if (_selectedProfileSummary != null && _userSelectionModel != null)
-                        {
-                            @foreach (var option in _userSelectionModel.Options)
-                            {
-                                   <MudPaper Class="pa-3" Elevation="0">
-                                        <MudSelect T="string" Variant="Variant.Outlined" Label="@option.Name" @bind-Value="option.SelectedValue" Style="width: 250px;">
-                                            @foreach (var option in option.Values)
-                                            {
-                                                <MudSelectItem Value="@option">@option</MudSelectItem>
-                                            }
-                                        </MudSelect>
-                                    </MudPaper>
-                             }
-                        }
-                    </MudStack>
+                    <Examples Profile=@_selectedProfileSummary Message="@AppConfiguration.HelloText" OnExampleClicked="@OnAskQuestionAsync" />
+                    @if (_selectedProfileSummary != null && _selectedProfileSummary.PromptTemplates != null && _selectedProfileSummary.PromptTemplates.Any())
+                    {
+                        
+                        <MudStack Row="true" StretchItems="StretchItems.None" Justify="Justify.Center" Style="width: 100%;">
+                            <TextInputV4 Label="Prompt"
+                                         Placeholder="Additional details..."
+                                         Disabled=@_isReceivingResponse
+                                         OnEnterKeyPressed="OnAskQuestionAsync"
+                                         OnResetPressed="OnClearChat"
+                                         OnFileUpload="OnFileUpload"
+                                         OnModelSelection="OnModelSelection"
+                                         SupportsFileUpload=@_supportsFileUpload UserSelectionModel="@_userSelectionModel" SelectedProfileSummary="@_selectedProfileSummary" />
+                        </MudStack>
+                    }
+
                 </div>
             }
             else
@@ -124,7 +123,7 @@
                                  OnResetPressed="OnClearChat" 
                                  OnFileUpload="OnFileUpload"
                                  OnModelSelection="OnModelSelection"
-                                 SupportsFileUpload=@_supportsFileUpload />
+                                 SupportsFileUpload=@_supportsFileUpload/>
                 </MudItem>
             </MudGrid>
         </MudItem>
