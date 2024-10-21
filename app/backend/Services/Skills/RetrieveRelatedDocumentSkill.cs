@@ -71,25 +71,25 @@ public sealed class RetrieveRelatedDocumentSkill
     {
         async Task<KnowledgeSourceSummary> func1(string searchQuery, KernelArguments arguments)
         {
-            var logic = new SearchLogic<AIStudioIndexDefinition>(client, factory, ragSettings.DocumentRetrievalIndexName, embeddingModelName, AIStudioIndexDefinition.EmbeddingsFieldName, AIStudioIndexDefinition.SelectFieldNames, ResolveDocumentCount(ragSettings.DocumentRetrievalDocumentCount));
+            var logic = new SearchLogic<AIStudioIndexDefinition>(client, factory, ragSettings.DocumentRetrievalIndexName, embeddingModelName, AIStudioIndexDefinition.EmbeddingsFieldName, AIStudioIndexDefinition.SelectFieldNames, ResolveDocumentCount(ragSettings.DocumentRetrievalDocumentCount), ragSettings.DocumentRetrievalMaxSourceTokens);
             return await logic.SearchAsync(searchQuery, arguments);
         }
 
         async Task<KnowledgeSourceSummary> func2(string searchQuery, KernelArguments arguments)
         {
-            var logic = new SearchLogic<AISearchIndexerIndexDefinintion>(client, factory, ragSettings.DocumentRetrievalIndexName, embeddingModelName, AISearchIndexerIndexDefinintion.EmbeddingsFieldName, AISearchIndexerIndexDefinintion.SelectFieldNames, ResolveDocumentCount(ragSettings.DocumentRetrievalDocumentCount));
+            var logic = new SearchLogic<AISearchIndexerIndexDefinintion>(client, factory, ragSettings.DocumentRetrievalIndexName, embeddingModelName, AISearchIndexerIndexDefinintion.EmbeddingsFieldName, AISearchIndexerIndexDefinintion.SelectFieldNames, ResolveDocumentCount(ragSettings.DocumentRetrievalDocumentCount), ragSettings.DocumentRetrievalMaxSourceTokens);
             return await logic.SearchAsync(searchQuery, arguments);
         }
 
         async Task<KnowledgeSourceSummary> func3(string searchQuery, KernelArguments arguments)
         {
-            var logic = new SearchLogic<KwiecienCustomIndexDefinition>(client, factory, ragSettings.DocumentRetrievalIndexName, embeddingModelName, KwiecienCustomIndexDefinition.EmbeddingsFieldName, KwiecienCustomIndexDefinition.SelectFieldNames, ResolveDocumentCount(ragSettings.DocumentRetrievalDocumentCount));
+            var logic = new SearchLogic<KwiecienCustomIndexDefinition>(client, factory, ragSettings.DocumentRetrievalIndexName, embeddingModelName, KwiecienCustomIndexDefinition.EmbeddingsFieldName, KwiecienCustomIndexDefinition.SelectFieldNames, ResolveDocumentCount(ragSettings.DocumentRetrievalDocumentCount), ragSettings.DocumentRetrievalMaxSourceTokens);
             return await logic.SearchAsync(searchQuery, arguments);
         }
 
         async Task<KnowledgeSourceSummary> func4(string searchQuery, KernelArguments arguments)
         {
-            var logic = new SearchLogic<KwiecienCustomIndexDefinitionV2>(client, factory, ragSettings.DocumentRetrievalIndexName, embeddingModelName, KwiecienCustomIndexDefinitionV2.EmbeddingsFieldName, KwiecienCustomIndexDefinitionV2.SelectFieldNames, ResolveDocumentCount(ragSettings.DocumentRetrievalDocumentCount));
+            var logic = new SearchLogic<KwiecienCustomIndexDefinitionV2>(client, factory, ragSettings.DocumentRetrievalIndexName, embeddingModelName, KwiecienCustomIndexDefinitionV2.EmbeddingsFieldName, KwiecienCustomIndexDefinitionV2.SelectFieldNames, ResolveDocumentCount(ragSettings.DocumentRetrievalDocumentCount), ragSettings.DocumentRetrievalMaxSourceTokens);
             return await logic.SearchAsync(searchQuery, arguments);
         }
 

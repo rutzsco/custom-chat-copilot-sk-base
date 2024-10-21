@@ -95,6 +95,7 @@ public class RAGSettingsSummary
     public required string DocumentRetrievalIndexName { get; set; }
 
     public required int DocumentRetrievalDocumentCount { get; set; }
+    public required int DocumentRetrievalMaxSourceTokens { get; set; } = 12000;
     public required string ChatSystemMessage { get; set; }
     public required string ChatUserMessage { get; set; }
     public required string ChatSystemMessageFile { get; set; }

@@ -12,8 +12,9 @@ public class SearchLogic<T> where T : IKnowledgeSource
     private readonly string _embeddingFieldName;
     private readonly List<string> _selectFields;
     private readonly int _documentFilesCount;
-
-    public SearchLogic(AzureOpenAIClient openAIClient, SearchClientFactory factory, string indexName, string embeddingModelName, string embeddingFieldName, List<string> selectFields, int documentFilesCount)
+    private readonly int _maxSourceTokens;
+  
+    public SearchLogic(AzureOpenAIClient openAIClient, SearchClientFactory factory, string indexName, string embeddingModelName, string embeddingFieldName, List<string> selectFields, int documentFilesCount, int maxSourceTokens)
     {
         _searchClient = factory.GetOrCreateClient(indexName);
         _openAIClient = openAIClient;
@@ -21,6 +22,7 @@ public class SearchLogic<T> where T : IKnowledgeSource
         _embeddingFieldName = embeddingFieldName;
         _selectFields = selectFields;
         _documentFilesCount = documentFilesCount;
+        _maxSourceTokens = maxSourceTokens;
     }
 
     public async Task<KnowledgeSourceSummary> SearchAsync(string query, KernelArguments arguments)
@@ -80,7 +82,7 @@ public class SearchLogic<T> where T : IKnowledgeSource
         }
 
         // Filter the results by the maximum request token size
-        var sourceSummary = FilterByMaxRequestTokenSize(list, DefaultSettings.MaxRequestTokens, ragSettings.CitationUseSourcePage);
+        var sourceSummary = FilterByMaxRequestTokenSize(list, _maxSourceTokens, ragSettings.CitationUseSourcePage);
         return sourceSummary;
     }
 

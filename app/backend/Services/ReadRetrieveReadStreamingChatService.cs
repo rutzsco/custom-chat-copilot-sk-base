@@ -47,9 +47,43 @@ internal sealed class ReadRetrieveReadStreamingChatService : IChatService
         var systemMessagePrompt = ResolveSystemMessage(profile);
         context[ContextVariableOptions.SystemMessagePrompt] = systemMessagePrompt;
         var chatHistory = new Microsoft.SemanticKernel.ChatCompletion.ChatHistory(systemMessagePrompt).AddChatHistory(request.History);
+
+
         var userMessage = await ResolveUserMessageAsync(profile, kernel, context);
         context[ContextVariableOptions.UserMessage] = userMessage;
-        chatHistory.AddUserMessage(userMessage);
+        if (request.FileUploads.Any())
+        {
+            ChatMessageContentItemCollection chatMessageContentItemCollection = new ChatMessageContentItemCollection();
+            chatMessageContentItemCollection.Add(new TextContent(userMessage));
+
+            foreach (var file in request.FileUploads)
+            {
+                DataUriParser parser = new DataUriParser(file.DataUrl);
+                if (parser.MediaType == "image/jpeg" || parser.MediaType == "image/png")
+                {
+                    chatMessageContentItemCollection.Add(new ImageContent(parser.Data, parser.MediaType));
+                }
+                else if (parser.MediaType == "application/pdf")
+                {
+                    string pdfData = PDFTextExtractor.ExtractTextFromPdf(parser.Data);
+                    chatMessageContentItemCollection.Add(new TextContent(pdfData));
+                }
+                else
+                {
+                    string csvData = System.Text.Encoding.UTF8.GetString(parser.Data);
+                    chatMessageContentItemCollection.Add(new TextContent(csvData));
+
+                }
+            }
+
+            chatHistory.AddUserMessage(chatMessageContentItemCollection);
+        }
+        else
+        {
+            chatHistory.AddUserMessage(userMessage);
+        }
+
+
 
         var requestProperties = GenerateRequestProperties(chatHistory, DefaultSettings.AIChatRequestSettings);
         var sb = new StringBuilder();
