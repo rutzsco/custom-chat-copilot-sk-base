@@ -33,7 +33,7 @@ public class DocumentService : IDocumentService
         // Create database if it doesn't exist
         var db = _cosmosClient.CreateDatabaseIfNotExistsAsync(DefaultSettings.CosmosDBDatabaseName).GetAwaiter().GetResult();
 
-        // Create get container if it doenst exist
+        // Create get container if it doesn't exist
         _cosmosContainer = db.Database.CreateContainerIfNotExistsAsync(DefaultSettings.CosmosDBUserDocumentsCollectionName, "/userId").GetAwaiter().GetResult();
     }
 
@@ -96,5 +96,10 @@ public class DocumentService : IDocumentService
         }
 
         return results;
+    }
+
+    public Task<DocumentIndexResponse> MergeDocumentsIntoIndexAsync(UploadDocumentsResponse documentList) // DocumentIndexRequest indexRequest)
+    {
+        throw new NotImplementedException();
     }
 }

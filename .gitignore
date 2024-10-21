@@ -396,11 +396,13 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+
 app/backend/appsettings.Development.json
 infrastructure/main.rutzsco.parameters.json
 infrastructure/main.parameters.json
 app/frontend/wwwroot/appsettings.development.json
-app/frontend/wwwroot/appsettings.json
+#app/frontend/wwwroot/appsettings.json
 app/backend/appsettings.Development-v1.json
 infrastructure/main.rutzsco.k.parameters.json
 .azure
