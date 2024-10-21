@@ -3,6 +3,19 @@
 <PageTitle>Documents</PageTitle>
 
 <MudGrid Justify="Justify.Center">
+    <MudItem>
+        <MudMenu Class="" Label="@_selectedProfile" Color="Color.Primary" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" FullWidth="true">
+            <ActivatorContent>
+                <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Category" EndIcon="@Icons.Material.Filled.KeyboardArrowDown">@_selectedProfile</MudButton>
+            </ActivatorContent>
+            <ChildContent>
+                @foreach (var profile in _profiles)
+                {
+                    <MudMenuItem OnClick="@(e => OnProfileClickAsync(@profile.Name))">@profile.Name</MudMenuItem>
+                }
+            </ChildContent>
+        </MudMenu>
+    </MudItem>
     <MudItem id="uploads" xs="12" Class="overflow-x-auto">
         <MudCard Class="ma-1">
             <MudForm @ref="@_form">
@@ -66,8 +79,13 @@
                     </MudExpansionPanels>
                     <MudStack Spacing="4" Class="pb-4">
 						<MudText>&nbsp;<br />Enter a company name and industry for this set of files:</MudText>
-                        <MudTextField T="string" Label="Company Name" @bind-Value="@_companyName" />
-                        <MudTextField T="string" Label="Industry" @bind-Value="@_industry" />
+                        @if (_userSelectionModel != null && _userSelectionModel.Options.Any())
+                        {
+                            @foreach (var option in _userSelectionModel.Options)
+                            {
+                                <MudTextField T="string" Label="@option.Name" @bind-Value="option.SelectedValue" />
+                            }
+                        }
                     </MudStack>
                 </MudCardContent>
                 <MudCardActions>

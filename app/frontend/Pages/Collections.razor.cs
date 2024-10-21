@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using MinimalApi.Services.Documents;
+using Shared.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ClientApp.Pages;
 
@@ -32,11 +34,32 @@ public sealed partial class Collections : IDisposable
 
     //private bool FilesSelected => _fileUpload is { _files.: > 0 };
 
-    protected override void OnInitialized()
+    private List<ProfileSummary> _profiles = new();
+    private ProfileSummary? _selectedProfileSummary = null;
+    private string _selectedProfile = "";
+    private UserSelectionModel? _userSelectionModel = null;
+
+    protected override async Task OnInitializedAsync()
     {
+        var user = await Client.GetUserAsync();
+        _profiles = user.Profiles.Where(x => x.SupportsUserSelectionOptions).ToList();
+        _selectedProfileSummary = user.Profiles.Where(x => x.SupportsUserSelectionOptions).FirstOrDefault();
+        await SetSelectedProfileAsync(_selectedProfileSummary);
+
         // Instead of awaiting this async enumerable here, let's capture it in a task
         // and start it in the background. This way, we can await it in the UI.
         _getDocumentsTask = GetDocumentsAsync();
+    }
+    private async Task OnProfileClickAsync(string selection)
+    {
+        await SetSelectedProfileAsync(_profiles.FirstOrDefault(x => x.Name == selection));
+    }
+
+    private async Task SetSelectedProfileAsync(ProfileSummary profile)
+    {
+        _selectedProfile = profile.Name;
+        _selectedProfileSummary = profile;
+        _userSelectionModel = await Client.GetProfileUserSelectionModelAsync(profile.Id);
     }
 
     private bool OnFilter(DocumentSummary document) => document is not null
@@ -72,7 +95,16 @@ public sealed partial class Collections : IDisposable
             _isUploadingDocuments = true;
             _isIndexingDocuments = false;
             //var cookie = await JSRuntime.InvokeAsync<string>("getCookie", "XSRF-TOKEN");
-            var result = await Client.UploadDocumentsAsync(_fileUploads.ToArray(), MaxIndividualFileSize, new Dictionary<string, string> { { "CompanyName", _companyName }, { "Industry", _industry }, });
+
+            var metadata = new Dictionary<string, string>();
+            foreach (var option in _userSelectionModel.Options)
+            {
+                if (!string.IsNullOrEmpty(option.SelectedValue))
+                {
+                    metadata.Add(option.Name, option.SelectedValue);
+                }  
+            }
+            var result = await Client.UploadDocumentsAsync(_fileUploads.ToArray(), MaxIndividualFileSize, metadata);
 
             Logger.LogInformation("Result: {x}", result);
 
