@@ -19,8 +19,6 @@ public sealed partial class Collections : IDisposable
     private bool _isUploadingDocuments = false;
     private bool _isIndexingDocuments = false;
     private string _filter = "";
-    private string _companyName = "";
-    private string _industry = "";
 
     // Store a cancelation token that will be used to cancel if the user disposes of this component.
     private readonly CancellationTokenSource _cancellationTokenSource = new();
