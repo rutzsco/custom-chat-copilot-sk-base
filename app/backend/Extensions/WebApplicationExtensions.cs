@@ -89,7 +89,7 @@ internal static class WebApplicationExtensions
         return TypedResults.Ok(tokens?.RequestToken ?? string.Empty);
     }
 
-    private static async Task<IResult> OnGetProfileUserSelectionOptionsAsync(HttpContext context, string profileId, SearchClientFactory searchClientFactory)
+    private static async Task<IResult> OnGetProfileUserSelectionOptionsAsync(HttpContext context, string profileId, SearchClientFactory searchClientFactory, ILogger<WebApplication> logger)
     {
         var profileDefinition = ProfileDefinition.All.FirstOrDefault(x => x.Id == profileId);
         if (profileDefinition == null)
@@ -102,14 +102,21 @@ internal static class WebApplicationExtensions
         var selectionOptions = new List<UserSelectionOption>();
         foreach (var selectionOption in profileDefinition.RAGSettings.ProfileUserSelectionOptions)
         {
-            var searchOptions = new SearchOptions { Size = 0, Facets = { selectionOption.IndexFieldName }};
-            SearchResults<SearchDocument> results = await searchClient.SearchAsync<SearchDocument>("*", searchOptions);
-            if (results.Facets != null && results.Facets.ContainsKey(selectionOption.IndexFieldName))
+            try
             {
-                var selectionValues = new List<string>();
-                foreach (FacetResult facet in results.Facets[selectionOption.IndexFieldName])
-                    selectionValues.Add(facet.Value.ToString());
-                selectionOptions.Add(new UserSelectionOption(selectionOption.DisplayName, selectionValues));
+                var searchOptions = new SearchOptions { Size = 0, Facets = { selectionOption.IndexFieldName } };
+                SearchResults<SearchDocument> results = await searchClient.SearchAsync<SearchDocument>("*", searchOptions);
+                if (results.Facets != null && results.Facets.ContainsKey(selectionOption.IndexFieldName))
+                {
+                    var selectionValues = new List<string>();
+                    foreach (FacetResult facet in results.Facets[selectionOption.IndexFieldName])
+                        selectionValues.Add(facet.Value.ToString());
+                    selectionOptions.Add(new UserSelectionOption(selectionOption.DisplayName, selectionValues));
+                }
+            }
+            catch(Exception ex)
+            {
+                logger.LogError(ex, $"Error getting user selection options for profile {profileId}");
             }
         }
 
