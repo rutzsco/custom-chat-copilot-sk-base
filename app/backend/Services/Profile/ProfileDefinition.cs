@@ -9,8 +9,19 @@ public class ProfileDefinition
 {
     public static List<ProfileDefinition> All;
 
-    public static void Load(IConfiguration configuration)
+    public static void Load(IConfiguration configuration, BlobServiceClient blobServiceClient)
     {
+        var profileConfigurationBlobStorageContainer = configuration["ProfileConfigurationBlobStorageContainer"];
+        if (profileConfigurationBlobStorageContainer != null)
+        {
+            var container = blobServiceClient.GetBlobContainerClient(profileConfigurationBlobStorageContainer);
+            var blobClient = container.GetBlobClient("profiles.json");
+            var downloadResult = blobClient.DownloadContent();
+            var profiles = JsonConvert.DeserializeObject<List<ProfileDefinition>>(Encoding.UTF8.GetString(downloadResult.Value.Content));
+            All = profiles;
+            return;
+        }
+
         var profileConfig = configuration["ProfileConfiguration"];
         if (profileConfig != null)
         {
