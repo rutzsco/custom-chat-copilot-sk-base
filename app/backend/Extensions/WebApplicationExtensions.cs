@@ -119,6 +119,7 @@ internal static class WebApplicationExtensions
             catch(Exception ex)
             {
                 logger.LogError(ex, $"Error getting user selection options for profile {profileId}");
+                selectionOptions.Add(new UserSelectionOption(selectionOption.DisplayName, new string[] { } ));
             }
         }
 

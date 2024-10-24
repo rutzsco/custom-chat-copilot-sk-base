@@ -41,12 +41,16 @@ public sealed class RetrieveRelatedDocumentSkill
                 if(arguments.ContainsName(o.DisplayName) == false)
                     continue;
 
-                if (profile.RAGSettings.ProfileUserSelectionOptions.Count() > 1 && count > 0)
-                    sb.Append(" and ");
+                var value = arguments[o.DisplayName] as string;
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    if (profile.RAGSettings.ProfileUserSelectionOptions.Count() > 1 && count > 0)
+                        sb.Append(" and ");
 
-                var filter = $"{o.IndexFieldName} eq '{arguments[o.DisplayName]}'";
-                sb.Append(filter);
-                count++;
+                    var filter = $"{o.IndexFieldName} eq '{arguments[o.DisplayName]}'";
+                    sb.Append(filter);
+                    count++;
+                }
             }
 
             if(sb.Length > 0)
