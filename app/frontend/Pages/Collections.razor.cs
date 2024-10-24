@@ -69,7 +69,7 @@ public sealed partial class Collections : IDisposable
 
         try
         {
-            var documents = await Client.GetDocumentsAsync(_cancellationTokenSource.Token).ToListAsync();
+            var documents = await Client.GetCollectionDocumentsAsync(_selectedProfileSummary.Id);
             _documents.Clear();
             foreach (var document in documents)
             {
@@ -102,7 +102,7 @@ public sealed partial class Collections : IDisposable
                     metadata.Add(option.Name, option.SelectedValue);
                 }  
             }
-            var result = await Client.UploadDocumentsAsync(_fileUploads.ToArray(), MaxIndividualFileSize, metadata);
+            var result = await Client.UploadDocumentsAsync(_fileUploads.ToArray(), MaxIndividualFileSize, _selectedProfileSummary.Id, metadata);
 
             Logger.LogInformation("Result: {x}", result);
 
@@ -129,15 +129,15 @@ public sealed partial class Collections : IDisposable
             //var indexRequest = new DocumentIndexRequest(result, accessToken);
             //var indexResult = await Client.NativeIndexDocumentsAsync(indexRequest);
 
-            var indexResult = await Client.NativeIndexDocumentsAsync(result);
-            if (indexResult.AllFilesIndexed)
-            {
-                SnackBarMessage($"{indexResult.IndexedCount} files indexed!");
-            }
-            else
-            {
-                SnackBarError($"Trigger Index Failure!  Indexed {indexResult.IndexedCount} documents out of {indexResult.DocumentCount}. {indexResult.ErrorMessage}");
-            }
+            //var indexResult = await Client.NativeIndexDocumentsAsync(result);
+            //if (indexResult.AllFilesIndexed)
+            //{
+            //    SnackBarMessage($"{indexResult.IndexedCount} files indexed!");
+            //}
+            //else
+            //{
+            //    SnackBarError($"Trigger Index Failure!  Indexed {indexResult.IndexedCount} documents out of {indexResult.DocumentCount}. {indexResult.ErrorMessage}");
+            //}
         }
         _isUploadingDocuments = false;
         _isIndexingDocuments = false;

@@ -19,8 +19,7 @@ public class DocumentUpload
         RetrivalIndexName = string.Empty;
         SessionId = string.Empty;
         Status = DocumentProcessingStatus.New;
-        CompanyName = string.Empty;
-        Industry = string.Empty;
+        Metadata = string.Empty;
         StatusMessage = string.Empty;
     }
     public DocumentUpload(string id, string userId, string blobName, string sourceName, string contentType, long size, string retrivalIndexName, string sessionId, DocumentProcessingStatus status)
@@ -35,11 +34,10 @@ public class DocumentUpload
         RetrivalIndexName = retrivalIndexName;
         SessionId = sessionId;
         Status = status;
-        CompanyName = string.Empty;
-        Industry = string.Empty;
+        Metadata = string.Empty;
         StatusMessage = string.Empty;
     }
-    public DocumentUpload(string id, string userId, string blobName, string sourceName, string contentType, long size, string retrivalIndexName, string sessionId, DocumentProcessingStatus status, string companyName, string industry)
+    public DocumentUpload(string id, string userId, string blobName, string sourceName, string contentType, long size, string retrivalIndexName, string sessionId, DocumentProcessingStatus status, string metadata)
     {
         Timestamp = DateTimeOffset.Now;
         Id = id;
@@ -51,8 +49,7 @@ public class DocumentUpload
         RetrivalIndexName = retrivalIndexName;
         SessionId = sessionId;
         Status = status;
-        CompanyName = companyName;
-        Industry = industry;
+        Metadata = metadata;
         StatusMessage = string.Empty;
     }
 
@@ -92,10 +89,6 @@ public class DocumentUpload
     [JsonProperty("timestamp")]
     public DateTimeOffset Timestamp { get; set; }
 
-    [JsonProperty("companyName")]
-    public string CompanyName { get; set; }
-
-    [JsonProperty("industry")]
-    public string Industry { get; set; }
-
+    [JsonProperty("metadata")]
+    public string Metadata { get; set; }
 }

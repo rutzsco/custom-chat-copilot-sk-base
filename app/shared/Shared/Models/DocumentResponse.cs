@@ -12,6 +12,4 @@ public record class DocumentSummary(
     string StatusMessage,
     double ProcessingProgress,
     DateTimeOffset Timestamp,
-    string CompanyName = "",
-    string Industry = ""
-    );
+    string Metadata = "");

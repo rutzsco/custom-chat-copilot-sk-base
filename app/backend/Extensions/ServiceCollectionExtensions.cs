@@ -12,19 +12,10 @@ using MinimalApi.Services.HealthChecks;
 using MinimalApi.Services.Documents;
 using MinimalApi.Services.Search;
 using MinimalApi.Services.Skills;
-using Microsoft.Azure.Cosmos.Linq;
-using Azure.AI.OpenAI;
-using Azure.Core.Pipeline;
-using System.Net.Http;
-using System.ClientModel.Primitives;
-using Microsoft.Extensions.Azure;
-using Microsoft.AspNetCore.Http;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
 using Microsoft.SemanticKernel.TextGeneration;
 using System.ClientModel.Primitives;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.SemanticKernel;
 
 namespace MinimalApi.Extensions;
 
@@ -131,12 +122,12 @@ internal static class ServiceCollectionExtensions
                 kernel4 = kernel4Builder.Build();
 
             }
-            else
-            {
-                kernel4 = Kernel.CreateBuilder()
-                .AddAzureOpenAIChatCompletion(premiumChatGptDeployment, premiumServiceEndpoint, premiumServiceKey)
-                .Build();
-            }
+            //else
+            //{
+            //    kernel4 = Kernel.CreateBuilder()
+            //    .AddAzureOpenAIChatCompletion(premiumChatGptDeployment, premiumServiceEndpoint, premiumServiceKey)
+            //    .Build();
+            //}
 
             kernel3.ImportPluginFromObject(retrieveRelatedDocumentPlugin3, DefaultSettings.DocumentRetrievalPluginName);
             kernel3.ImportPluginFromObject(generateSearchQueryPlugin, DefaultSettings.GenerateSearchQueryPluginName);

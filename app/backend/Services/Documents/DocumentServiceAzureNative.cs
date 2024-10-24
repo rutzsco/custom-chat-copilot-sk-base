@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Collections.Generic;
 using Microsoft.Azure.Cosmos;
 using MinimalApi.Services.Documents;
+using MinimalApi.Services.Profile;
 using Shared.Json;
 
 namespace MinimalApi.Services.ChatHistory;
@@ -18,16 +20,8 @@ public class DocumentServiceAzureNative : IDocumentService
     {
         _cosmosClient = cosmosClient;
         _blobStorageService = blobStorageService;
+        _configuration = configuration;
 
-        if (configuration[AppConfigurationSetting.IngestionPipelineAPI] != null)
-        {
-            _httpClient = httpClient;
-
-            _httpClient.BaseAddress = new Uri(configuration[AppConfigurationSetting.IngestionPipelineAPI]);
-            _httpClient.DefaultRequestHeaders.Add("x-functions-key", configuration[AppConfigurationSetting.IngestionPipelineAPIKey]);
-            _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-            _configuration = configuration;
-        }
 
         // Create database if it doesn't exist
         var db = _cosmosClient.CreateDatabaseIfNotExistsAsync(DefaultSettings.CosmosDBDatabaseName).GetAwaiter().GetResult();
@@ -36,12 +30,15 @@ public class DocumentServiceAzureNative : IDocumentService
         _cosmosContainer = db.Database.CreateContainerIfNotExistsAsync(DefaultSettings.CosmosDBUserDocumentsCollectionName, "/userId").GetAwaiter().GetResult();
     }
 
-    public async Task<UploadDocumentsResponse> CreateDocumentUploadAsync(UserInformation userInfo, IFormFileCollection files, Dictionary<string, string>? fileMetadata, CancellationToken cancellationToken)
+    public async Task<UploadDocumentsResponse> CreateDocumentUploadAsync(UserInformation userInfo, IFormFileCollection files, string selectedProfile, Dictionary<string, string>? fileMetadata, CancellationToken cancellationToken)
     {
-        var response = await _blobStorageService.UploadFilesAsync(userInfo, files, cancellationToken, fileMetadata);
+        var selectedProfileDefinition = ProfileDefinition.All.FirstOrDefault(p => p.Id == selectedProfile);
+        var indexName = selectedProfileDefinition.RAGSettings.DocumentRetrievalIndexName;
+        var metadata = string.Join(",", fileMetadata.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+        var response = await _blobStorageService.UploadFilesV2Async(userInfo, files, selectedProfile, fileMetadata, cancellationToken);
         foreach (var file in response.UploadedFiles)
         {
-            await CreateDocumentUploadAsync(userInfo, file);
+            await CreateDocumentUploadAsync(userInfo, file, indexName, selectedProfileDefinition.Id, metadata);
         }
         return response;
     }
@@ -112,18 +109,18 @@ public class DocumentServiceAzureNative : IDocumentService
         }
     }
 
-    private async Task CreateDocumentUploadAsync(UserInformation user, UploadDocumentFileSummary fileSummary, string contentType = "application/pdf")
+    private async Task CreateDocumentUploadAsync(UserInformation user, UploadDocumentFileSummary fileSummary, string indexName, string profileId, string metadata, string contentType = "application/pdf")
     {
-        var indexName = "TEST";
-        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, fileSummary.FileName, fileSummary.FileName, contentType, fileSummary.Size, indexName, user.SessionId, DocumentProcessingStatus.Succeeded, fileSummary.CompanyName, fileSummary.Industry);
+        var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, fileSummary.FileName, fileSummary.FileName, contentType, fileSummary.Size, indexName, profileId, DocumentProcessingStatus.Succeeded, metadata);
         await _cosmosContainer.CreateItemAsync(document, partitionKey: new PartitionKey(document.UserId));
     }
 
-    public async Task<List<DocumentUpload>> GetDocumentUploadsAsync(UserInformation user)
+    public async Task<List<DocumentUpload>> GetDocumentUploadsAsync(UserInformation user, string profileId)
     {
         var query = _cosmosContainer.GetItemQueryIterator<DocumentUpload>(
-            new QueryDefinition("SELECT TOP 100 * FROM c WHERE  c.userId = @username ORDER BY c.sourceName DESC")
-            .WithParameter("@username", user.UserId));
+            new QueryDefinition("SELECT TOP 100 * FROM c WHERE  c.userId = @username AND  c.sessionId = @sessionId ORDER BY c.sourceName DESC")
+            .WithParameter("@username", user.UserId)
+            .WithParameter("@sessionId", profileId));
 
         var results = new List<DocumentUpload>();
         while (query.HasMoreResults)

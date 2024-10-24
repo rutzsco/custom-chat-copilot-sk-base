@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
 using System;
+using System.Net.Http;
 using Azure.Core;
 using ClientApp.Pages;
 using Microsoft.AspNetCore.Antiforgery;
@@ -45,9 +46,10 @@ internal static class WebApplicationExtensions
         // User document
         api.MapPost("documents", OnPostDocumentAsync);
         api.MapGet("user/documents", OnGetUserDocumentsAsync);
+        api.MapGet("collection/documents/{profileId}", OnGetCollectionDocumentsAsync);
 
         // Azure Search Native Index documents
-        api.MapPost("native/index/documents", OnPostNativeIndexDocumentsAsync);
+        //api.MapPost("native/index/documents", OnPostNativeIndexDocumentsAsync);
 
         // Profile Selections
         api.MapGet("profile/selections", OnGetProfileUserSelectionOptionsAsync);
@@ -183,30 +185,31 @@ internal static class WebApplicationExtensions
         logger.LogInformation("Upload documents");
         var userInfo = context.GetUserInfo();
         var fileMetadataContent = context.Request.Headers["X-FILE-METADATA"];
+        var selectedProfile = context.Request.Headers["X-PROFILE-METADATA"];
         Dictionary<string, string>? fileMetadata = null;
         if (!string.IsNullOrEmpty(fileMetadataContent))
             fileMetadata = JsonSerializer.Deserialize<Dictionary<string,string>>(fileMetadataContent);
 
 
-        var response = await documentService.CreateDocumentUploadAsync(userInfo, files, fileMetadata, cancellationToken);
+        var response = await documentService.CreateDocumentUploadAsync(userInfo, files, selectedProfile, fileMetadata, cancellationToken);
         logger.LogInformation("Upload documents: {x}", response);
 
         return TypedResults.Ok(response);
     }
 
-    private static async Task<IResult> OnPostNativeIndexDocumentsAsync(HttpContext context,
-        [FromBody] UploadDocumentsResponse documentList,
-        //[FromBody] DocumentIndexRequest indexRequest,
-        [FromServices] IDocumentService documentService,
-        [FromServices] ILogger<AzureBlobStorageService> logger,
-        CancellationToken cancellationToken)
-    {
-        logger.LogInformation("Call Azure Search Native index to index the uploaded documents...");
-        var userInfo = context.GetUserInfo();
-        var response = await documentService.MergeDocumentsIntoIndexAsync(documentList);
-        logger.LogInformation("Azure Search Native index response: {x}", response);
-        return TypedResults.Ok(response);
-    }
+    //private static async Task<IResult> OnPostNativeIndexDocumentsAsync(HttpContext context,
+    //    [FromBody] UploadDocumentsResponse documentList,
+    //    //[FromBody] DocumentIndexRequest indexRequest,
+    //    [FromServices] IDocumentService documentService,
+    //    [FromServices] ILogger<AzureBlobStorageService> logger,
+    //    CancellationToken cancellationToken)
+    //{
+    //    logger.LogInformation("Call Azure Search Native index to index the uploaded documents...");
+    //    var userInfo = context.GetUserInfo();
+    //    //var response = await documentService.MergeDocumentsIntoIndexAsync(documentList);
+    //    logger.LogInformation("Azure Search Native index response: {x}", response);
+    //    return TypedResults.Ok(response);
+    //}
 
     private static IResult OnGetUser(HttpContext context)
     {
@@ -216,9 +219,17 @@ internal static class WebApplicationExtensions
     private static async Task<IResult> OnGetUserDocumentsAsync(HttpContext context, IDocumentService documentService)
     {
         var userInfo = context.GetUserInfo();
-        var documents = await documentService.GetDocumentUploadsAsync(userInfo);
-        return TypedResults.Ok(documents.Select(d => new DocumentSummary(d.Id, d.SourceName, d.ContentType, d.Size, d.Status, d.StatusMessage,d.ProcessingProgress, d.Timestamp, d.CompanyName, d.Industry)));
+        var documents = await documentService.GetDocumentUploadsAsync(userInfo, null);
+        return TypedResults.Ok(documents.Select(d => new DocumentSummary(d.Id, d.SourceName, d.ContentType, d.Size, d.Status, d.StatusMessage,d.ProcessingProgress, d.Timestamp, d.Metadata)));
     }
+
+    private static async Task<IResult> OnGetCollectionDocumentsAsync(HttpContext context, IDocumentService documentService, string profileId)
+    {
+        var userInfo = context.GetUserInfo();
+        var documents = await documentService.GetDocumentUploadsAsync(userInfo, profileId);
+        return TypedResults.Ok(documents.Select(d => new DocumentSummary(d.Id, d.SourceName, d.ContentType, d.Size, d.Status, d.StatusMessage, d.ProcessingProgress, d.Timestamp, d.Metadata)));
+    }
+
     private static async Task<IResult> OnPostChatRatingAsync(HttpContext context, ChatRatingRequest request, IChatHistoryService chatHistoryService, CancellationToken cancellationToken)
     {
         var userInfo = context.GetUserInfo();
@@ -260,7 +271,7 @@ internal static class WebApplicationExtensions
             ArgumentNullException.ThrowIfNull(profile.RAGSettings, "Profile RAGSettings is null");
 
             var selectedDocument = request.SelectedUserCollectionFiles.FirstOrDefault();
-            var documents = await documentService.GetDocumentUploadsAsync(userInfo);
+            var documents = await documentService.GetDocumentUploadsAsync(userInfo,null);
             var document = documents.FirstOrDefault(d => d.SourceName == selectedDocument);
 
             ArgumentNullException.ThrowIfNull(document, "Document is null");
