@@ -13,7 +13,7 @@ trigger:
     - app/*
 
 pool:
-      vmImage: 'ubuntu-latest'
+  vmImage: 'ubuntu-latest'
 
 parameters:
   - name: environmentName
@@ -28,11 +28,15 @@ parameters:
     displayName: 'Azure Region'
     type: string
     default: 'eastus2'
+  - name: resourceGroupPrefix
+    displayName: 'Resource Group Prefix'
+    type: string
+    default: 'rg-copilot-demo'
 
 variables:
   rootDirectory: 'app'
   serviceConnectionName: 'DEMO_ACCOUNT'
-  resourceGroupName: 'rg-copilot-demo-${{ parameters.environmentName }}'
+  resourceGroupName: '${{ parameters.resourceGroupPrefix }}-${{ parameters.environmentName }}'
   appName: 'chat-app'
   imageName: custom-chat-copilot/$(appName):$(Build.BuildId)
   fullImageName: $(ContainerRegistryUrl)/$(imageName)

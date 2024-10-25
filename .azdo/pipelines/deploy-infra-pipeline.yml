@@ -22,10 +22,19 @@ parameters:
     displayName: 'Azure Region'
     type: string
     default: 'eastus2'
+  - name: resourceGroupPrefix
+    displayName: 'Resource Group Prefix'
+    type: string
+    default: 'rg-copilot-demo'
+  - name: parameterFile
+    displayName: 'Parameter File'
+    type: string
+    default: 'main-basic.parameters.bicepparam'
+
 
 variables:
   serviceConnectionName: 'DEMO_ACCOUNT'
-  resourceGroupName: 'rg-copilot-demo-${{ parameters.environmentName }}'
+  resourceGroupName: '${{ parameters.resourceGroupPrefix }}-${{ parameters.environmentName }}'
   region: "${{ parameters.region }}"
 
 stages:
@@ -39,4 +48,4 @@ stages:
     environmentName: ${{ parameters.environmentName }}
     templateFolderName: 'Infrastructure'
     templateFileName: 'main-basic.bicep'
-    parameterFileName: 'main-basic.parameters.bicepparam'
+    parameterFileName: ${{ parameters.parameterFile }}
