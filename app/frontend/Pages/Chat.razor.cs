@@ -245,6 +245,7 @@ public sealed partial class Chat
                     _isReceivingResponse = true;
                 }
 
+                await Task.Delay(1);
                 StateHasChanged();
             }
         }
