@@ -222,7 +222,7 @@ public sealed partial class Chat
             using Stream responseStream = await response.Content.ReadAsStreamAsync();
             var responseBuffer = new StringBuilder();
 
-            await foreach (ChatChunkResponse chunk in JsonSerializer.DeserializeAsyncEnumerable<ChatChunkResponse>(responseStream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, DefaultBufferSize = 32 }))
+            await foreach (var chunk in JsonSerializer.DeserializeAsyncEnumerable<ChatChunkResponse>(responseStream, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, DefaultBufferSize = 32 }))
             {
                 if (chunk == null)
                 {
@@ -249,19 +249,14 @@ public sealed partial class Chat
                 StateHasChanged();
             }
         }
-        catch (HttpRequestException ex)
+        catch (HttpRequestException)
         {
             _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(string.Empty, null, null, "Error: Unable to get a response from the server.");
         }
-        catch (JsonException ex)
+        catch (JsonException)
         {
             _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(string.Empty, null, null, "Error: Failed to parse the server response.");
         }
-        //catch (Exception ex)
-        //{
-        //    Console.WriteLine($"OnAskClickedAsync: {ex}");
-        //    _questionAndAnswerMap[_currentQuestion] = new ApproachResponse(string.Empty, null, null, "An unexpected error occurred.");
-        //}
         finally
         {
             _isReceivingResponse = false;
