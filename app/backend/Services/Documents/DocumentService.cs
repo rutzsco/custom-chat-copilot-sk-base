@@ -37,9 +37,9 @@ public class DocumentService : IDocumentService
         _cosmosContainer = db.Database.CreateContainerIfNotExistsAsync(DefaultSettings.CosmosDBUserDocumentsCollectionName, "/userId").GetAwaiter().GetResult();
     }
 
-    public async Task<UploadDocumentsResponse> CreateDocumentUploadAsync(UserInformation userInfo, IFormFileCollection files, Dictionary<string, string>? fileMetadata, CancellationToken cancellationToken)
+    public async Task<UploadDocumentsResponse> CreateDocumentUploadAsync(UserInformation userInfo, IFormFileCollection files, string selectedProfile, Dictionary<string, string>? fileMetadata, CancellationToken cancellationToken)
     {
-        var response = await _blobStorageService.UploadFilesAsync(userInfo, files, cancellationToken, new Dictionary<string, string>());
+        var response = await _blobStorageService.UploadFilesAsync(userInfo, files, selectedProfile, new Dictionary<string, string>(), cancellationToken);
         foreach (var file in response.UploadedFiles)
         {
             await CreateDocumentUploadAsync(userInfo, file);
@@ -81,7 +81,7 @@ public class DocumentService : IDocumentService
     }
 
 
-    public async Task<List<DocumentUpload>> GetDocumentUploadsAsync(UserInformation user)
+    public async Task<List<DocumentUpload>> GetDocumentUploadsAsync(UserInformation user, string profileId = null)
     {
         var query = _cosmosContainer.GetItemQueryIterator<DocumentUpload>(
             new QueryDefinition("SELECT TOP 100 * FROM c WHERE  c.userId = @username AND c.sessionId = @sessionId ORDER BY c.sourceName DESC")

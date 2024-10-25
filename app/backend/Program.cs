@@ -24,10 +24,13 @@ if (!string.IsNullOrEmpty(isMIBasedAuthentication) && isMIBasedAuthentication.To
 else
     builder.Services.AddAzureServices(builder.Configuration);
 
-
 builder.Services.AddAntiforgery(options => { options.HeaderName = "X-CSRF-TOKEN-HEADER"; options.FormFieldName = "X-CSRF-TOKEN-FORM"; });
+
+var serviceProvider = builder.Services.BuildServiceProvider();
+var blobServiceClient = serviceProvider.GetRequiredService<BlobServiceClient>();
+
 AppConfiguration.Load(builder.Configuration);
-ProfileDefinition.Load(builder.Configuration);
+ProfileDefinition.Load(builder.Configuration, blobServiceClient);
 
 static string? GetEnvVar(string key) => Environment.GetEnvironmentVariable(key);
 
@@ -50,8 +53,6 @@ else
 
     if (AppConfiguration.EnableDataProtectionBlobKeyStorage)
     {
-        var serviceProvider = builder.Services.BuildServiceProvider();
-        var blobServiceClient = serviceProvider.GetRequiredService<BlobServiceClient>();
         var container = blobServiceClient.GetBlobContainerClient(AppConfiguration.DataProtectionKeyContainer);
         if (!await container.ExistsAsync())
         {

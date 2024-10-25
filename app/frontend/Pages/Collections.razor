@@ -154,13 +154,8 @@
                     </MudTableSortLabel>
                 </MudTh>
 				<MudTh>
-					<MudTableSortLabel SortBy="new Func<DocumentSummary, object>(d => d.CompanyName)">
-						Company
-					</MudTableSortLabel>
-				</MudTh>
-				<MudTh>
-					<MudTableSortLabel SortBy="new Func<DocumentSummary, object>(d => d.Industry)">
-						Industry
+					<MudTableSortLabel SortBy="new Func<DocumentSummary, object>(d => d.Metadata)">
+                        Metadata
 					</MudTableSortLabel>
 				</MudTh>
 				<MudTh>Content Type</MudTh>
@@ -210,11 +205,8 @@
                     <strong>@context.Name</strong>
                 </MudTd>
                 <MudTd DataLabel="Company">
-					@($"{context.CompanyName}")
+                    @($"{context.Metadata}")
                 </MudTd>
-				<MudTd DataLabel="Industry">
-					@($"{context.Industry}")
-				</MudTd>
 				<MudTd DataLabel="Content Type">
                     <code>@context.ContentType</code>
                 </MudTd>

@@ -37,6 +37,13 @@ public sealed class ApiClient(HttpClient httpClient)
 
         return await response.Content.ReadFromJsonAsync<List<DocumentSummary>>();
     }
+    public async Task<List<DocumentSummary>> GetCollectionDocumentsAsync(string profileId)
+    {
+        var response = await httpClient.GetAsync($"api/collection/documents/{profileId}");
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<List<DocumentSummary>>();
+    }
     public async Task<UserSelectionModel> GetProfileUserSelectionModelAsync(string profileId)
     {
         var response = await httpClient.GetAsync($"api/profile/selections?profileId={profileId}");
@@ -44,7 +51,7 @@ public sealed class ApiClient(HttpClient httpClient)
 
         return await response.Content.ReadFromJsonAsync<UserSelectionModel>();
     }
-    public async Task<UploadDocumentsResponse> UploadDocumentsAsync(IReadOnlyList<IBrowserFile> files, long maxAllowedSize, IDictionary<string, string>? metadata = null)
+    public async Task<UploadDocumentsResponse> UploadDocumentsAsync(IReadOnlyList<IBrowserFile> files, long maxAllowedSize, string selectedProfile, IDictionary<string, string>? metadata = null)
     {
         try
         {
@@ -78,6 +85,12 @@ public sealed class ApiClient(HttpClient httpClient)
                 // Add the serialized dictionary as a single header value
                 content.Headers.Add("X-FILE-METADATA", serializedHeaders);
             }
+
+            if (selectedProfile != null)
+            {
+                content.Headers.Add("X-PROFILE-METADATA", selectedProfile);
+            }
+
             var response = await httpClient.PostAsync("api/documents", content);
             response.EnsureSuccessStatusCode();
 
