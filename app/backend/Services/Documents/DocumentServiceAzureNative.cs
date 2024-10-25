@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.Azure.Cosmos;
 using MinimalApi.Services.Documents;
 using MinimalApi.Services.Profile;
+using MinimalApi.Services.Search;
 using Shared.Json;
 
 namespace MinimalApi.Services.ChatHistory;
@@ -15,13 +16,14 @@ public class DocumentServiceAzureNative : IDocumentService
     private readonly AzureBlobStorageService _blobStorageService;
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
+    private readonly SearchClientFactory _searchClientFactory;
 
-    public DocumentServiceAzureNative(CosmosClient cosmosClient, AzureBlobStorageService blobStorageService, HttpClient httpClient, IConfiguration configuration)
+    public DocumentServiceAzureNative(CosmosClient cosmosClient, AzureBlobStorageService blobStorageService, HttpClient httpClient, IConfiguration configuration, SearchClientFactory searchClientFactory)
     {
         _cosmosClient = cosmosClient;
         _blobStorageService = blobStorageService;
         _configuration = configuration;
-
+        _searchClientFactory = searchClientFactory;
 
         // Create database if it doesn't exist
         var db = _cosmosClient.CreateDatabaseIfNotExistsAsync(DefaultSettings.CosmosDBDatabaseName).GetAwaiter().GetResult();
@@ -36,6 +38,11 @@ public class DocumentServiceAzureNative : IDocumentService
         var indexName = selectedProfileDefinition.RAGSettings.DocumentRetrievalIndexName;
         var metadata = string.Join(",", fileMetadata.Select(kvp => $"{kvp.Key}={kvp.Value}"));
         var response = await _blobStorageService.UploadFilesV2Async(userInfo, files, selectedProfile, fileMetadata, cancellationToken);
+
+        var searchIndexerClient = _searchClientFactory.GetSearchIndexerClient();
+        var task = searchIndexerClient.RunIndexerAsync(selectedProfileDefinition.RAGSettings.DocumentIndexerName);
+        task.Wait(5000);
+
         foreach (var file in response.UploadedFiles)
         {
             await CreateDocumentUploadAsync(userInfo, file, indexName, selectedProfileDefinition.Id, metadata);

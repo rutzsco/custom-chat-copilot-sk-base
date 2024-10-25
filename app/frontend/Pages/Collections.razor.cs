@@ -51,6 +51,7 @@ public sealed partial class Collections : IDisposable
     private async Task OnProfileClickAsync(string selection)
     {
         await SetSelectedProfileAsync(_profiles.FirstOrDefault(x => x.Name == selection));
+        await GetDocumentsAsync();
     }
 
     private async Task SetSelectedProfileAsync(ProfileSummary profile)

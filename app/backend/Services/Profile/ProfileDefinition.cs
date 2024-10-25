@@ -104,6 +104,7 @@ public class RAGSettingsSummary
     public required string DocumentRetrievalPluginName { get; set; }
     public required string DocumentRetrievalPluginQueryFunctionName { get; set; }
     public required string DocumentRetrievalIndexName { get; set; }
+    public string? DocumentIndexerName { get; set; }
 
     public required int DocumentRetrievalDocumentCount { get; set; }
     public required int DocumentRetrievalMaxSourceTokens { get; set; } = 12000;
