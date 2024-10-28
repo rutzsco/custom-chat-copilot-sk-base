@@ -123,6 +123,9 @@ internal static class WebApplicationExtensions
             }
         }
 
+        // Set headers to prevent caching
+        context.Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0";
+        context.Response.Headers["Pragma"] = "no-cache";
         var result = new UserSelectionModel(selectionOptions);
         return Results.Ok(result);
     }
@@ -215,6 +218,8 @@ internal static class WebApplicationExtensions
     private static IResult OnGetUser(HttpContext context)
     {
         var userInfo = context.GetUserInfo();
+        context.Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0";
+        context.Response.Headers["Pragma"] = "no-cache";
         return TypedResults.Ok(userInfo);
     }
     private static async Task<IResult> OnGetUserDocumentsAsync(HttpContext context, IDocumentService documentService)
