@@ -14,7 +14,7 @@ param privateEndpointName string
 
 param searchServicePrincipalId string
 param useManagedIdentityResourceAccess bool
-param deploymentSuffix string = '-cs'
+//param deploymentSuffix string = '-cog'
 
 var resourceGroupName = resourceGroup().name
 var cognitiveServicesKeySecretName = 'cognitive-services-key'
@@ -27,7 +27,7 @@ resource existingAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' exist
 
 resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' =
   if (empty(existingCogServicesName)) {
-    name: '${name}${deploymentSuffix}'
+    name: name
     location: location
     tags: tags
     kind: kind
@@ -45,7 +45,7 @@ resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' =
 resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = [
   for deployment in deployments: if (empty(existingCogServicesName)) {
     parent: account
-    name: '${deployment.name}${deploymentSuffix}'
+    name: deployment.name
     properties: {
       model: deployment.model
       // use the policy in the deployment if it exists, otherwise default to null
@@ -59,8 +59,8 @@ resource deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01
   }
 ]
 
-// this is not quite right yet...!
 var roleDefinitions = loadJsonContent('./roleDefinitions.json')
+// this is not quite right yet...!
 // Search service needs "Cognitive Services OpenAI Contributor" role to create indexes using the text-embedding model
 // See https://docs.microsoft.com/azure/role-based-access-control/role-assignments-template#new-service-principal 
 resource managedIdentitySearchServiceContributorRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' =

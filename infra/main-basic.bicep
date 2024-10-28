@@ -258,7 +258,6 @@ module azureOpenAi './app/cognitive-services.bicep' = {
     tags: tags
     useManagedIdentityResourceAccess: useManagedIdentityResourceAccess
     searchServicePrincipalId: search.outputs.searchServicePrincipalId
-    deploymentSuffix: deploymentSuffix
     deployments: concat(
       [
         {
