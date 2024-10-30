@@ -106,14 +106,16 @@ internal static class WebApplicationExtensions
         {
             try
             {
-                var searchOptions = new SearchOptions { Size = 0, Facets = { selectionOption.IndexFieldName } };
+
+                var searchOptions = new SearchOptions { Size = 0, Facets = { $"{selectionOption.IndexFieldName},count:{100}" },  };
                 SearchResults<SearchDocument> results = await searchClient.SearchAsync<SearchDocument>("*", searchOptions);
                 if (results.Facets != null && results.Facets.ContainsKey(selectionOption.IndexFieldName))
                 {
                     var selectionValues = new List<string>();
                     foreach (FacetResult facet in results.Facets[selectionOption.IndexFieldName])
                         selectionValues.Add(facet.Value.ToString());
-                    selectionOptions.Add(new UserSelectionOption(selectionOption.DisplayName, selectionValues));
+
+                    selectionOptions.Add(new UserSelectionOption(selectionOption.DisplayName, selectionValues.OrderBy(x => x)));
                 }
             }
             catch(Exception ex)
