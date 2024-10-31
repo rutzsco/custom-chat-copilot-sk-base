@@ -58,6 +58,8 @@ internal static class WebApplicationExtensions
 
         api.MapGet("status", OnGetStatus);
 
+        api.MapGet("tag", OnTagSyncAsync);
+        
         api.MapPost("ingestion/trigger", OnPostTriggerIngestionPipelineAsync);
         api.MapGet("headers", OnGetHeadersAsync);
         return app;
@@ -353,4 +355,48 @@ internal static class WebApplicationExtensions
         await ingestionService.TriggerIngestionPipelineAsync(ingestionRequest);
         return Results.Ok();
     }
+
+
+    private static async Task<IResult> OnTagSyncAsync([FromServices] BlobServiceClient blobServiceClient)
+    {
+        BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("content-kill-memo");
+
+        // Loop through each blob in the container
+        await foreach (BlobItem blobItem in containerClient.GetBlobsAsync())
+        {
+            // Get the BlobClient
+            BlobClient blobClient = containerClient.GetBlobClient(blobItem.Name);
+
+            // Fetch the metadata
+            var properties = await blobClient.GetPropertiesAsync();
+            var tags = await blobClient.GetTagsAsync();
+
+            Console.WriteLine($"Blob Name: {blobItem.Name}");
+            Console.WriteLine("Metadata Tags:");
+
+            // Loop through and print metadata
+            foreach (var m in properties.Value.Metadata)
+            {
+                Console.WriteLine($"  {m.Key}: {m.Value}");
+            }
+
+
+            var existingMetadata = properties.Value.Metadata;
+            // Loop through and print blob index tags
+            foreach (var tag in tags.Value.Tags)
+            {
+                if (tag.Key == "Type")
+                {
+                    Console.WriteLine($"  {tag.Key}: {tag.Value}");
+                    existingMetadata.Add("Type", tag.Value);
+                    await blobClient.SetMetadataAsync(existingMetadata);
+                }
+                
+            }                
+
+            Console.WriteLine(); // Blank line for readability
+        }
+        return Results.Ok("OK");
+    }
+
 }

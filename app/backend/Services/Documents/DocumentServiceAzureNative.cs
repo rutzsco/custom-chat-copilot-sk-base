@@ -50,72 +50,6 @@ public class DocumentServiceAzureNative : IDocumentService
         return response;
     }
 
-    public async Task<DocumentIndexResponse> MergeDocumentsIntoIndexAsync(UploadDocumentsResponse uploadList) // DocumentIndexRequest indexRequest)
-    {
-        var searchServiceUrl = _configuration[AppConfigurationSetting.AzureSearchServiceEndpoint];
-        var indexName = _configuration[AppConfigurationSetting.AzureSearchServiceIndexName];
-
-        var indexEndpoint = $"{searchServiceUrl}/indexes('{indexName}')/docs/search.index?api-version=2024-07-01";
-        var structuredResponse = new DocumentIndexResponse
-        {
-            EndPointUrl = indexEndpoint
-        };
-        var documents = new List<DocumentIndexMerge>();
-        var i = 1;
-
-        try
-        {
-            // should I be using the SearchService SDK interface here...???
-            //var searchClient = new SearchClientFactory(_configuration, null, new AzureKeyCredential(_configuration[AppConfigurationSetting.AzureSearchServiceKey]));
-            //var searchIndexClient = searchClient.GetOrCreateClient(indexName);
-            // See https://learn.microsoft.com/en-us/azure/search/search-howto-dotnet-sdk
-            //   Not sure how to creat this batch record properly...
-            //var batch = new IndexDocumentsBatch<DocumentIndexMerge>();
-            //foreach (var file in indexRequest.Documents.UploadedFiles)
-            //{
-            //    var action = IndexDocumentsAction("Upload", new DocumentIndexMerge(i++, file.FileName));
-            //    batch.Actions.Add(new DocumentIndexMerge(i++, file.FileName));
-            //}
-
-            //IndexDocumentsBatch<DocumentIndexMerge> batch = IndexDocumentsBatch.Create(
-            //  IndexDocumentsAction.Upload(  iterate documents here ???...)
-            //);
-
-            //IndexDocumentsResult indexResults = searchIndexClient.IndexDocuments(batch);
-            //IndexDocumentsResult indexResults = await searchIndexClient.IndexDocumentsAsync<IndexDocumentsBatch<DocumentIndexMerge>>(documents);
-
-            //foreach (var file in indexRequest.Documents.UploadedFiles)
-            foreach (var file in uploadList.UploadedFiles)
-            {
-                documents.Add(new DocumentIndexMerge(i++, file.FileName));
-            }
-            var requestPayloadJson = documents.Count != 0 ? System.Text.Json.JsonSerializer.Serialize(documents, SerializerOptions.Default) : "{}";
-            // FYI - this json field name needs to be "@search.action"...  you should be able to specify that in the JSON properties (and I did...), but it's not coming through here...
-            requestPayloadJson = requestPayloadJson.Replace("\"searchAction\"", "\"@search.action\"");
-            var requestPayload = new StringContent(requestPayloadJson, Encoding.UTF8, "application/json");
-            //_httpClient.DefaultRequestHeaders.Add("X-MS-TOKEN-AAD-ACCESS-TOKEN", indexRequest.AccessToken);
-
-            Console.WriteLine($"\nDEBUG: Calling {indexEndpoint}\n");
-            var response = await _httpClient.PostAsync(indexEndpoint, requestPayload);
-            response.EnsureSuccessStatusCode();
-            requestPayload.Dispose();
-
-            structuredResponse = new DocumentIndexResponse(await response.Content.ReadAsStringAsync());
-            Console.WriteLine($"\nDEBUG: EOF MergeDocumentsIntoIndexAsync: {System.Text.Json.JsonSerializer.Serialize(structuredResponse)}\n");
-            return structuredResponse;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            structuredResponse.ErrorMessage = ex.Message;
-            structuredResponse.DocumentCount = documents.Count;
-            structuredResponse.IndexedCount = 0;
-            structuredResponse.AllFilesIndexed = false;
-            Console.WriteLine($"\nDEBUG: Catch MergeDocumentsIntoIndexAsync: {System.Text.Json.JsonSerializer.Serialize(structuredResponse)}\n");
-            return structuredResponse;
-        }
-    }
-
     private async Task CreateDocumentUploadAsync(UserInformation user, UploadDocumentFileSummary fileSummary, string indexName, string profileId, string metadata, string contentType = "application/pdf")
     {
         var document = new DocumentUpload(Guid.NewGuid().ToString(), user.UserId, fileSummary.FileName, fileSummary.FileName, contentType, fileSummary.Size, indexName, profileId, DocumentProcessingStatus.Succeeded, metadata);
@@ -125,7 +59,7 @@ public class DocumentServiceAzureNative : IDocumentService
     public async Task<List<DocumentUpload>> GetDocumentUploadsAsync(UserInformation user, string profileId)
     {
         var query = _cosmosContainer.GetItemQueryIterator<DocumentUpload>(
-            new QueryDefinition("SELECT TOP 100 * FROM c WHERE  c.userId = @username AND  c.sessionId = @sessionId ORDER BY c.sourceName DESC")
+            new QueryDefinition("SELECT TOP 100 * FROM c WHERE c.sessionId = @sessionId ORDER BY c.sourceName DESC")
             .WithParameter("@username", user.UserId)
             .WithParameter("@sessionId", profileId));
 

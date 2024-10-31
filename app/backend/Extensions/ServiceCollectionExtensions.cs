@@ -79,6 +79,7 @@ internal static class ServiceCollectionExtensions
             }
 
             var retrieveRelatedDocumentPlugin3 = new RetrieveRelatedDocumentSkill(config, searchClientFactory, openAIClient3);
+            var retrieveRelatedDocumentPluginKM = new RetrieveRelatedDocumentSkillKM(config, searchClientFactory, openAIClient3);
             var retrieveRelatedDocumentPlugin4 = new RetrieveRelatedDocumentSkill(config, searchClientFactory, openAIClient4);
 
             var generateSearchQueryPlugin = new GenerateSearchQuerySkill();
@@ -128,8 +129,8 @@ internal static class ServiceCollectionExtensions
             //    .AddAzureOpenAIChatCompletion(premiumChatGptDeployment, premiumServiceEndpoint, premiumServiceKey)
             //    .Build();
             //}
-
             kernel3.ImportPluginFromObject(retrieveRelatedDocumentPlugin3, DefaultSettings.DocumentRetrievalPluginName);
+            kernel3.ImportPluginFromObject(retrieveRelatedDocumentPluginKM, DefaultSettings.DocumentRetrievalPluginNameKM);
             kernel3.ImportPluginFromObject(generateSearchQueryPlugin, DefaultSettings.GenerateSearchQueryPluginName);
             kernel3.ImportPluginFromObject(chatPlugin, DefaultSettings.ChatPluginName);
 

@@ -97,9 +97,4 @@ public class DocumentService : IDocumentService
 
         return results;
     }
-
-    public Task<DocumentIndexResponse> MergeDocumentsIntoIndexAsync(UploadDocumentsResponse documentList) // DocumentIndexRequest indexRequest)
-    {
-        throw new NotImplementedException();
-    }
 }

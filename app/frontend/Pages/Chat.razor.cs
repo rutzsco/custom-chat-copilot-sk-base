@@ -302,10 +302,10 @@ public sealed partial class Chat
         Console.WriteLine($"OnAfterRenderAsync: _isReceivingResponse - {_isReceivingResponse}");
         await JS.InvokeVoidAsync("scrollToBottom", "answerSection");
         await JS.InvokeVoidAsync("highlight");
-        if (!_isReceivingResponse)
-        {
-            await JS.InvokeVoidAsync("renderMathJax");
-        }
+        //if (!_isReceivingResponse)
+        //{
+        //    await JS.InvokeVoidAsync("renderMathJax");
+        //}
     }
 
     private void OnClearChatDocuumentSelection()

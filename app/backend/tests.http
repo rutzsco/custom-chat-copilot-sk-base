@@ -1,11 +1,10 @@
 
 ###
 ### API Request
-POST https://localhost:7181/api/chat/image
+POST https://localhost:60580/api/chat/streaming
 Content-Type: application/json
 
-
-{"ChatId":"9b4ba6b5-c614-4672-9ad5-e89db1b6873c","ChatTurnId":"93fae531-2bb9-4d82-a248-d7fef8239a57","History":[{"User":"How do I change the oil?","Bot":null}],"OptionFlags":{"GPT4ENABLED":"False","PROFILE":"Auto Service Advisor"},"Overrides":{"SemanticRanker":false,"RetrievalMode":"Vector","SemanticCaptions":null,"ExcludeCategory":null,"Top":3,"Temperature":null,"PromptTemplate":null,"PromptTemplatePrefix":null,"PromptTemplateSuffix":null,"SuggestFollowupQuestions":true,"ChatGPT4":false},"LastUserQuestion":"How do I change the oil?","Approach":0}
+{"ChatId":"9b4ba6b5-c614-4672-9ad5-e89db1b6873c","ChatTurnId":"2aa1b384-5b9b-4d5f-ba43-f32eb3f49c1f","History":[{"User":"How do I change the oil?","Bot":null}],"OptionFlags":{"GPT4ENABLED":"False","PROFILE":"Auto Service Advisor"},"Overrides":{"SemanticRanker":false,"RetrievalMode":"Vector","SemanticCaptions":null,"ExcludeCategory":null,"Top":3,"Temperature":null,"PromptTemplate":null,"PromptTemplatePrefix":null,"PromptTemplateSuffix":null,"SuggestFollowupQuestions":true,"ChatGPT4":false},"LastUserQuestion":"How do I change the oil?","Approach":0}
 
 
 ### API Request
@@ -13,3 +12,7 @@ POST https://localhost:7181/api/ingestion/trigger
 Content-Type: application/json
 
 {"SourceCountainer":"ecl-sds", "ExtractContainer":"ecl-sds-extract", "IndexStemName":"ecl-sds-v4"}
+
+### API Request
+GET https://localhost:60580/api/tag
+Content-Type: application/json
