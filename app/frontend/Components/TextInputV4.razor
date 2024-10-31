@@ -27,7 +27,7 @@
                                 @foreach (var option in UserSelectionModel.Options)
                                 {
                                     <MudPaper Class="pa-3" Elevation="0">
-                                        <MudSelect T="string" Variant="Variant.Outlined" Label="@option.Name" @bind-Value="option.SelectedValue" Style="width: 250px;">
+                                        <MudSelect T="string" Variant="Variant.Outlined" Label="@option.Name" @bind-Value="option.SelectedValue" Clearable="true" Style="width: 250px;">
                                             @foreach (var option in option.Values)
                                             {
                                                 <MudSelectItem Value="@option">@option</MudSelectItem>
