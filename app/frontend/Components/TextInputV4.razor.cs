@@ -87,7 +87,7 @@ public sealed partial class TextInputV4
         await OnModelSelection.InvokeAsync(toggle);
     }
 
-    private async Task UploadFilesAsync(IBrowserFile file)
+    private async Task UploadFileAsync(IBrowserFile file)
     {
         Console.WriteLine("UploadFilesAsync");
         var buffer = new byte[file.Size];
@@ -98,6 +98,21 @@ public sealed partial class TextInputV4
         _files.Add(fileSummary);
 
         await OnFileUpload.InvokeAsync(fileSummary);
+    }
+
+    private async Task UploadFilesAsync(IReadOnlyList<IBrowserFile> files)
+    {
+        foreach (var file in files)
+        {
+            var buffer = new byte[file.Size];
+            await file.OpenReadStream(8192000).ReadAsync(buffer);
+            var imageContent = Convert.ToBase64String(buffer);
+
+            var fileSummary = new FileSummary($"data:{file.ContentType};base64,{imageContent}", file.Name, file.ContentType);
+            _files.Add(fileSummary);
+
+            await OnFileUpload.InvokeAsync(fileSummary);
+        }
     }
 
     public string Trim(string text)

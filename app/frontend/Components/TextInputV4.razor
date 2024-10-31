@@ -42,10 +42,10 @@
                                               MaxLines=5 Disabled=@Disabled
                                               AutoGrow="true"
                                               Placeholder="Enter your message..." Class="pl-2" OnKeyUp="@OnKeyUpAsync" @bind-Value="@UserQuestion" />
-                                                                              <MudToolBar Gutters="false" Class="mt-n4 pb-0">
+                                 <MudToolBar Gutters="false" Class="mt-n4 pb-0">
                                     @if (SupportsFileUpload)
                                     {
-                                        <MudFileUpload T="IBrowserFile" FilesChanged="UploadFilesAsync" Style="margin-top: 0px">
+                                        <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFilesAsync" Style="margin-top: 0px">
                                             <ActivatorContent>
                                                 <MudIconButton Style="color: #616161" Class="pa-2" Size="Size.Small" HtmlTag="label" Icon="@Icons.Material.Filled.AttachFile"></MudIconButton>
                                             </ActivatorContent>
