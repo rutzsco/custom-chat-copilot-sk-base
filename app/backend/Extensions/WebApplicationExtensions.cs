@@ -247,24 +247,19 @@ internal static class WebApplicationExtensions
         return Results.Ok();
     }
 
-    private static async Task<IResult> OnPostChatAsync(HttpContext context, ChatRequest request, ReadRetrieveReadChatService chatService, IChatHistoryService chatHistoryService, CancellationToken cancellationToken)
+    private static async Task<ApproachResponse> OnPostChatAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, IChatHistoryService chatHistoryService, EndpointChatService endpointChatService, EndpointChatServiceV2 endpointChatServiceV2, IDocumentService documentService, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        // Get user information
-        var userInfo = context.GetUserInfo();
-        var profile = request.OptionFlags.GetChatProfile();
-        if (!userInfo.HasAccess(profile))
+        ApproachResponse response = null;
+        var resultChunks = OnPostChatStreamingAsync(context, request, chatService, ragChatService, chatHistoryService, endpointChatService, endpointChatServiceV2, documentService, cancellationToken);
+        await foreach (var chunk in resultChunks)
         {
-            throw new UnauthorizedAccessException("User does not have access to this profile");
+            if (chunk.FinalResult != null)
+            {
+                response = chunk.FinalResult;
+            }
         }
 
-        if (request is { History.Length: > 0 })
-        {
-            var response = await chatService.ReplyAsync(userInfo, profile, request, cancellationToken);
-            await chatHistoryService.RecordChatMessageAsync(userInfo, request, response);
-            return TypedResults.Ok(response);
-        }
-
-        return Results.BadRequest();
+        return response;
     }
 
     private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, IChatHistoryService chatHistoryService, EndpointChatService endpointChatService, EndpointChatServiceV2 endpointChatServiceV2, IDocumentService documentService, [EnumeratorCancellation] CancellationToken cancellationToken)
