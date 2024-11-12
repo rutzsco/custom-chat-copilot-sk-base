@@ -1,7 +1,7 @@
 using 'main-basic.bicep'
 
 @description('ID of the service principal that will be granted access to the Key Vault')
-param principalId = 'af35198e-8dc7-4a2e-a41e-b2ba79bebd51'
+param principalId = 'xxxxxx-xxxx-xxxx-xxxxx-xxxxxxxxxx'
 
 @description('If you have an existing Cog Services Account, provide the name here')
 param existingCogServicesName = ''
