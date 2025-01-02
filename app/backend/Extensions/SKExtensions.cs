@@ -109,6 +109,12 @@ public static class SKExtensions
         var selected = ProfileDefinition.All.FirstOrDefault(x => x.Name == profile.Name);
         return selected?.Approach.ToUpper() == "ENDPOINTASSISTANTV2";
     }
+    public static bool IsEndpointAssistantTaskProfile(this Dictionary<string, string> options)
+    {
+        var profile = options.GetChatProfile();
+        var selected = ProfileDefinition.All.FirstOrDefault(x => x.Name == profile.Name);
+        return selected?.Approach.ToUpper() == "ENDPOINTASSISTANTTASK";
+    }
     public static ProfileDefinition GetChatProfile(this Dictionary<string, string> options)
     {
         var defaultProfile = ProfileDefinition.All.First();

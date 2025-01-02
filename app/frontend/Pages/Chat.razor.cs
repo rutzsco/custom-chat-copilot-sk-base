@@ -106,6 +106,7 @@ public sealed partial class Chat
     private void OnFileUpload(FileSummary fileSummary)
     {
         _files.Add(fileSummary);
+        Console.WriteLine($"OnFileUpload - {_files.Count()}");
     }
     private void OnModelSelection(bool isPremium)
     {

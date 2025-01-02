@@ -15,7 +15,8 @@ public enum ProfileApproach
     UserDocumentChat,
     RAG,
     EndpointAssistant,
-    EndpointAssistantV2
+    EndpointAssistantV2,
+    EndpointAssistantTask
 };
 public record UserPromptTemplate(string Name, string PromptTemplate, UserPromptTemplateVariable[] Variables);
 public class UserPromptTemplateVariable

@@ -56,17 +56,24 @@ public class SearchLogic<T> where T : IKnowledgeSource
             searchOptions.Select.Add(field);
         }
 
-        if (arguments.ContainsName(ContextVariableOptions.SelectedDocuments))
-        {
-            var sourcefiles = arguments[ContextVariableOptions.SelectedDocuments] as IEnumerable<string>;
-            if (sourcefiles.Any())
-            {
-                var userId = arguments[ContextVariableOptions.UserId] as string;
-                var sessionId = arguments[ContextVariableOptions.SessionId] as string;
-                var sourcefilesString = string.Join(",", sourcefiles);
-                searchOptions.Filter = $"entra_id eq '{userId}' and session_id eq '{sessionId}' and search.in(sourcefile, '{sourcefilesString}')";
-            }
-        }
+        //if (ragSettings.UserLevelSecurity)
+        //{
+        //    var userId = arguments[ContextVariableOptions.UserId] as string;
+        //    var sessionId = arguments[ContextVariableOptions.SessionId] as string;
+        //    var filter = $"entra_id eq '{userId}' and session_id eq '{sessionId}'";
+        //    if (arguments.ContainsName(ContextVariableOptions.SelectedDocuments))
+        //    {
+        //        var sourcefiles = arguments[ContextVariableOptions.SelectedDocuments] as IEnumerable<string>;
+        //        if (sourcefiles.Any())
+        //        {
+
+        //            var sourcefilesString = string.Join(",", sourcefiles);
+        //            searchOptions.Filter = $"{filter} and search.in(sourcefile, '{sourcefilesString}')";
+        //        }
+        //    }
+
+        //    searchOptions.Filter = filter;
+        //}
 
         if (arguments.ContainsName(ContextVariableOptions.SelectedFilters))
         {

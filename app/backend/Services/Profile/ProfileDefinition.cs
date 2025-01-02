@@ -151,6 +151,8 @@ public class AssistantEndpointSettingsSummary
 {
     public required string APIEndpointSetting { get; set; }
     public required string APIEndpointKeySetting { get; set; }
+
+    public required bool AllowFileUpload { get; set; }
 }
 
 

@@ -39,6 +39,6 @@ internal static class UserExtensions
 
     public static bool SupportsFileUpload(ProfileDefinition p)
     {
-        return p.RAGSettings != null && p.RAGSettings.AllowFileUpload;
+        return (p.RAGSettings != null && p.RAGSettings.AllowFileUpload) || (p.AssistantEndpointSettings != null && p.AssistantEndpointSettings.AllowFileUpload);
     }
 }

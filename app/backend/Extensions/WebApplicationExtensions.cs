@@ -247,10 +247,10 @@ internal static class WebApplicationExtensions
         return Results.Ok();
     }
 
-    private static async Task<ApproachResponse> OnPostChatAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, IChatHistoryService chatHistoryService, EndpointChatService endpointChatService, EndpointChatServiceV2 endpointChatServiceV2, IDocumentService documentService, [EnumeratorCancellation] CancellationToken cancellationToken)
+    private static async Task<ApproachResponse> OnPostChatAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, IChatHistoryService chatHistoryService, EndpointChatService endpointChatService, EndpointChatServiceV2 endpointChatServiceV2, EndpointTaskService endpointTaskService, IDocumentService documentService, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         ApproachResponse response = null;
-        var resultChunks = OnPostChatStreamingAsync(context, request, chatService, ragChatService, chatHistoryService, endpointChatService, endpointChatServiceV2, documentService, cancellationToken);
+        var resultChunks = OnPostChatStreamingAsync(context, request, chatService, ragChatService, chatHistoryService, endpointChatService, endpointChatServiceV2, endpointTaskService, documentService, cancellationToken);
         await foreach (var chunk in resultChunks)
         {
             if (chunk.FinalResult != null)
@@ -262,7 +262,7 @@ internal static class WebApplicationExtensions
         return response;
     }
 
-    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, IChatHistoryService chatHistoryService, EndpointChatService endpointChatService, EndpointChatServiceV2 endpointChatServiceV2, IDocumentService documentService, [EnumeratorCancellation] CancellationToken cancellationToken)
+    private static async IAsyncEnumerable<ChatChunkResponse> OnPostChatStreamingAsync(HttpContext context, ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, IChatHistoryService chatHistoryService, EndpointChatService endpointChatService, EndpointChatServiceV2 endpointChatServiceV2, EndpointTaskService endpointTaskService, IDocumentService documentService, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var userInfo = context.GetUserInfo();
         var profile = request.OptionFlags.GetChatProfile();
@@ -283,7 +283,7 @@ internal static class WebApplicationExtensions
             profile.RAGSettings.DocumentRetrievalIndexName = document.RetrivalIndexName;
         }
 
-        var chat = ResolveChatService(request, chatService, ragChatService, endpointChatService, endpointChatServiceV2);
+        var chat = ResolveChatService(request, chatService, ragChatService, endpointChatService, endpointChatServiceV2, endpointTaskService);
         await foreach (var chunk in chat.ReplyAsync(userInfo, profile, request).WithCancellation(cancellationToken))
         {
             yield return chunk;
@@ -293,7 +293,7 @@ internal static class WebApplicationExtensions
             }
         }
     }
-    private static IChatService ResolveChatService(ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, EndpointChatService endpointChatService, EndpointChatServiceV2 endpointChatServiceV2)
+    private static IChatService ResolveChatService(ChatRequest request, ChatService chatService, ReadRetrieveReadStreamingChatService ragChatService, EndpointChatService endpointChatService, EndpointChatServiceV2 endpointChatServiceV2, EndpointTaskService endpointTaskService)
     {
         if (request.OptionFlags.IsChatProfile())
             return chatService;
@@ -303,6 +303,9 @@ internal static class WebApplicationExtensions
 
         if (request.OptionFlags.IsEndpointAssistantV2Profile())
             return endpointChatServiceV2;
+
+        if (request.OptionFlags.IsEndpointAssistantTaskProfile())
+            return endpointTaskService;
 
         return ragChatService;
     }
