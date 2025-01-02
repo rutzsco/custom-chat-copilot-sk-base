@@ -1,16 +1,8 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System.Collections;
-using Azure.AI.OpenAI;
-using Azure.Core;
-using ClientApp.Pages;
 using Microsoft.SemanticKernel.ChatCompletion;
-using MinimalApi.Extensions;
-using MinimalApi.Services.ChatHistory;
 using MinimalApi.Services.Profile;
 using MinimalApi.Services.Profile.Prompts;
-using Shared.Models;
-using UglyToad.PdfPig.Graphics;
 
 namespace MinimalApi.Services;
 

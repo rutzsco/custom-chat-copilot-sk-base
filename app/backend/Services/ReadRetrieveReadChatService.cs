@@ -1,7 +1,4 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
-using ClientApp.Pages;
-using Microsoft.SemanticKernel.ChatCompletion;
-using MinimalApi.Extensions;
 using MinimalApi.Services.Profile;
 
 namespace MinimalApi.Services;

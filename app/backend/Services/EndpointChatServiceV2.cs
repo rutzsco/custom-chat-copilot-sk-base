@@ -1,23 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System.Collections;
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Security.Cryptography.Xml;
-using System.Security.Policy;
-using Azure.AI.OpenAI;
-using Azure.Core;
-using ClientApp.Pages;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Azure.Cosmos.Serialization.HybridRow;
-using Microsoft.SemanticKernel.ChatCompletion;
-using MinimalApi.Extensions;
-using MinimalApi.Services.ChatHistory;
 using MinimalApi.Services.Profile;
-using MinimalApi.Services.Profile.Prompts;
-using Shared.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using static MudBlazor.CategoryTypes;
 
 namespace MinimalApi.Services;
 

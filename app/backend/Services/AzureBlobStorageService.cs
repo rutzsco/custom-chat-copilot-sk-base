@@ -1,8 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System.Collections.Generic;
-using System.IO;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using MinimalApi.Services.Profile;
 
 namespace MinimalApi.Services;

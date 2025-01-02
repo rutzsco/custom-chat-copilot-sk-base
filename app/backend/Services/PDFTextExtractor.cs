@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
-using System;
 using UglyToad.PdfPig;
-using UglyToad.PdfPig.Content;
 namespace MinimalApi.Services;
 
 public class PDFTextExtractor
