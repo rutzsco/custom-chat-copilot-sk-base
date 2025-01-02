@@ -20,7 +20,7 @@
     <PackageVersion Include="bunit" Version="1.24.10" />
     <PackageVersion Include="coverlet.collector" Version="6.0.0" />
     <PackageVersion Include="iTextSharp" Version="5.5.13.3" />
-    <PackageVersion Include="Markdig" Version="0.39.0" />
+    <PackageVersion Include="Markdig" Version="0.39.1" />
     <PackageVersion Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
     <PackageVersion Include="Microsoft.AspNet.WebApi.Client" Version="6.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.10" />
