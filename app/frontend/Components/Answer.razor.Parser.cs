@@ -9,7 +9,7 @@ public sealed partial class Answer
 {
     private static readonly MarkdownPipeline s_pipeline = new MarkdownPipelineBuilder()
         .UsePipeTables()
-        .UseSoftlineBreakAsHardlineBreak()
+        .UseSoftlineBreakAsHardlineBreak().DisableHtml()
         .Build();
 
     internal static HtmlParsedAnswer ParseAnswerToHtml(string answer, string citationBaseUrl, bool containsSources = true)

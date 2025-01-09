@@ -35,7 +35,7 @@ internal sealed class EndpointTaskService : IChatService
         var thoughts = new List<ThoughtRecord>();
         foreach (var thought in taskResponse.thoughtProcess)
         {
-            thoughts.Add(new ThoughtRecord($"{thought.agentName}-{thought.step}", thought.content));
+            thoughts.Add(new ThoughtRecord(FormatLogStep(thought), thought.content));
         }
 
         yield return new ChatChunkResponse("", new ApproachResponse(taskResponse.answer, null, new ResponseContext(profile.Name, null, thoughts.ToArray(), request.ChatTurnId, request.ChatId, null)));
@@ -70,9 +70,20 @@ internal sealed class EndpointTaskService : IChatService
         var content = new StringContent(payload, Encoding.UTF8, "application/json");
         return content;
     }
+
+    private string FormatLogStep(WorkflowLogEntry logEntry)
+    {
+        if (logEntry.diagnostics == null)
+            return $"{logEntry.agentName}-{logEntry.step}";
+
+        return $"{logEntry.agentName}-{logEntry.step} ({logEntry.diagnostics.elapsedMilliseconds} milliseconds)";
+    }
 }
 
 public record TaskResponse(string answer, IEnumerable<WorkflowLogEntry> thoughtProcess, string? error = null);
 
+public record WorkflowLogEntry(string agentName, string step, string? content, WorkflowStepDiagnostics? diagnostics);
 
-public record WorkflowLogEntry(string agentName, string step, string? content = null);
+public record WorkflowStepDiagnostics(long elapsedMilliseconds);
+
+
