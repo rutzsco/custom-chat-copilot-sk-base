@@ -1,5 +1,6 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 
+using System.Net.Http;
 using MinimalApi.Services.Profile;
 
 namespace MinimalApi.Services;
@@ -19,27 +20,12 @@ internal sealed class EndpointTaskService : IChatService
 
     public async IAsyncEnumerable<ChatChunkResponse> ReplyAsync(UserInformation user, ProfileDefinition profile, ChatRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
- 
-
-
-        //var requestPayload = new
-        //{
-        //    taskId = request.ChatTurnId,
-        //    files = new[]
-        //        {
-        //            new
-        //            {
-        //                Name = "Label",
-        //                DataUrl = request.FileUploads.FirstOrDefault().DataUrl,
-        //            }
-        //        }
-        //};
         var sb = new StringBuilder();
         var apiRequest = new HttpRequestMessage(HttpMethod.Post, _configuration[profile.AssistantEndpointSettings.APIEndpointSetting]);
         apiRequest.Headers.Add("X-Api-Key", _configuration[profile.AssistantEndpointSettings.APIEndpointKeySetting]);
         apiRequest.Content = BuildTaskRequest(request);
 
-        var response = await _httpClient.SendAsync(apiRequest, HttpCompletionOption.ResponseHeadersRead);
+        var response = await _httpClient.SendAsync(apiRequest);
         response.EnsureSuccessStatusCode();
 
         var payload = await response.Content.ReadAsStringAsync();
@@ -47,7 +33,10 @@ internal sealed class EndpointTaskService : IChatService
 
         TaskResponse taskResponse = JsonSerializer.Deserialize<TaskResponse>(payload);
         var thoughts = new List<ThoughtRecord>();
-        thoughts.Add(new ThoughtRecord("Assistant Response", sb.ToString()));
+        foreach (var thought in taskResponse.thoughtProcess)
+        {
+            thoughts.Add(new ThoughtRecord($"{thought.agentName}-{thought.step}", thought.content));
+        }
 
         yield return new ChatChunkResponse("", new ApproachResponse(taskResponse.answer, null, new ResponseContext(profile.Name, null, thoughts.ToArray(), request.ChatTurnId, request.ChatId, null)));
     }
@@ -83,4 +72,7 @@ internal sealed class EndpointTaskService : IChatService
     }
 }
 
-public record TaskResponse(string answer, string? error = null);
+public record TaskResponse(string answer, IEnumerable<WorkflowLogEntry> thoughtProcess, string? error = null);
+
+
+public record WorkflowLogEntry(string agentName, string step, string? content = null);

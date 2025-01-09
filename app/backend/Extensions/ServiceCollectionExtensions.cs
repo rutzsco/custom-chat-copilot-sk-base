@@ -23,8 +23,6 @@ internal static class ServiceCollectionExtensions
 {
     internal static IServiceCollection AddAzureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddHttpClient();
-
         var sp = services.BuildServiceProvider();
         var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
 
@@ -310,12 +308,13 @@ internal static class ServiceCollectionExtensions
 
     private static void RegisterDomainServices(IServiceCollection services, IConfiguration configuration)
     {
+
+
         // Add ChatHistory and document upload services if the connection string is provided
         if (string.IsNullOrEmpty(configuration[AppConfigurationSetting.CosmosDBConnectionString]) && string.IsNullOrEmpty(configuration[AppConfigurationSetting.CosmosDBEndpoint]))
         {
             services.AddScoped<IChatHistoryService, ChatHistoryServiceStub>();
             services.AddScoped<IDocumentService, DocumentServiceSub>();
-            services.AddHttpClient();
         }
         else
         {
@@ -325,12 +324,12 @@ internal static class ServiceCollectionExtensions
             if (documentUploadStrategy == "AzureNative")
             {
                 services.AddSingleton<IDocumentService, DocumentServiceAzureNative>();
-                services.AddHttpClient<DocumentServiceAzureNative, DocumentServiceAzureNative>();
+                services.AddHttpClient<DocumentServiceAzureNative>();
             }
             else
             {
                 services.AddSingleton<IDocumentService, DocumentService>();
-                services.AddHttpClient<DocumentService, DocumentService>();
+                services.AddHttpClient<DocumentService>();
             }
         }
 
@@ -341,7 +340,11 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<EndpointChatServiceV2>();
         services.AddSingleton<EndpointTaskService>();
         services.AddSingleton<AzureBlobStorageService>();
-        services.AddHttpClient<IngestionService, IngestionService>();
+        services.AddHttpClient<IngestionService>();
+        services.AddHttpClient<EndpointTaskService>(client =>
+        {
+            client.Timeout = TimeSpan.FromMinutes(5);
+        });
     }
 
     private static void SetupOpenAIClientsUsingOnBehalfOfOthersFlowAndSubscriptionKey(IServiceProvider sp, IHttpContextAccessor httpContextAccessor, IConfiguration config, string? standardServiceEndpoint, out AzureOpenAIClient? openAIClient3, out AzureOpenAIClient? openAIClient4)
