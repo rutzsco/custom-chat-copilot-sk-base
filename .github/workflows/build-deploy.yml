@@ -11,9 +11,7 @@ jobs:
     defaults:
       run:
         working-directory: app
-    outputs:
-      image-name: ${{ steps.image-name.outputs.IMAGE_NAME }}
-      image-version: ${{ steps.image-name.outputs.IMAGE_VERSION }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -37,10 +35,4 @@ jobs:
         with:
           context: ./app
           push: true
-          tags: rutzscolabcr.azurecr.io/aiflows/chat-ui:${{ steps.date.outputs.tag }}
-
-      - name: Set image name for other jobs
-        id: image-name
-        run: |
-          echo "IMAGE_VERSION=${{ steps.date.outputs.tag }}" >> $GITHUB_OUTPUT
-          echo "IMAGE_NAME=rutzscolabcr.azurecr.io/aiflows/chat-ui" >> $GITHUB_OUTPUT
+          tags: ghcr.io/aiflows/chat-ui:${{ steps.date.outputs.tag }}
