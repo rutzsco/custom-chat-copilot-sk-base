@@ -35,4 +35,4 @@ jobs:
         with:
           context: ./app
           push: true
-          tags: ghcr.io/aiflows/chat-ui:${{ steps.date.outputs.tag }}
+          tags: ghcr.io/rutzsco/aiflows/chat-ui:${{ steps.date.outputs.tag }}
