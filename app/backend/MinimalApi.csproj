@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <Content Remove="Services\Profile\Profiles-rutzsco.json" />
+    <Content Remove="Services\Profile\profiles-snow.json" />
     <Content Remove="Services\Profile\profiles.json" />
     <Content Remove="Services\Profile\profiles.local.json" />
   </ItemGroup>
@@ -47,6 +48,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Services\Profile\profiles-snow.json" />
     <EmbeddedResource Include="Services\Profile\profiles-rutzsco.json" />
     <EmbeddedResource Include="Services\Profile\profiles.json" />
     <EmbeddedResource Include="Services\Profile\Prompts\CSVCopilotSystemPrompt.txt" />
