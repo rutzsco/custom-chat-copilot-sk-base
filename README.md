@@ -124,75 +124,27 @@ az containerapp update --name <APPLICATION_NAME> --resource-group <RESOURCE_GROU
 ```
 This documentation outlines the various application settings used in the configuration of Azure services and other APIs.
 
-### Azure Storage
+| **Category**               | **Setting**                          | **Description**                                                                 | **Value**                                                                 |
+|----------------------------|--------------------------------------|---------------------------------------------------------------------------------|-------------------------------------------------------------------------|
+| **Azure Storage**           | `AzureStorageUserUploadContainer`    | The name of the container in Azure Blob Storage where user uploads are stored.  | `"content"`                                                              |
+|                            | `AzureStorageAccountConnectionString`| Connection string for the Azure Storage account, containing authentication information and storage endpoint details. | `"DefaultEndpointsProtocol=https;AccountName=<SERVICENAME>;AccountKey=...;EndpointSuffix=core.windows.net"` |
+| **Azure Search Service**    | `AzureSearchServiceEndpoint`         | The endpoint URL for the Azure Search Service.                                 | `"https://<SERVICENAME>.search.windows.net"`                              |
+|                            | `AzureSearchServiceKey`               | The primary administrative API key for the Azure Search Service.               | `"<APIKEY>"`                                                              |
+| **Azure OpenAI Services**   | `AOAIPremiumServiceEndpoint`          | The endpoint URL for the Azure OpenAI Premium services.                        | `"https://<SERVICENAME>.openai.azure.com/"`                               |
+|                            | `AOAIPremiumServiceKey`                | The authentication key for accessing the Azure OpenAI Premium services.        | `"<APIKEY>"`                                                              |
+|                            | `AOAIPremiumChatGptDeployment`         | The specific deployment of ChatGPT model used in the Azure OpenAI Premium services. | `"gpt-4"`                                                              |
+|                            | `AOAIStandardServiceEndpoint`          | The endpoint URL for the Azure OpenAI Standard services.                       | `"https://<SERVICENAME>.openai.azure.com/"`                               |
+|                            | `AOAIStandardServiceKey`                | The authentication key for accessing the Azure OpenAI Standard services.       | `"f4471e39c00e4dfd86ae15bc3bcf68b1"`                                      |
+|                            | `AOAIStandardChatGptDeployment`         | The specific deployment of ChatGPT model used in the Azure OpenAI Standard services. | `"chatgpt16k"`                                                        |
+|                            | `AOAIEmbeddingsDeployment`             | The specific deployment of the text embedding model used in the Azure OpenAI services. | `"text-embedding"`                                                   |
+| **Cosmos DB**               | `CosmosDBConnectionString`             | Connection string for accessing Azure Cosmos DB, including authentication information and endpoint details. | `"AccountEndpoint=https://<SERVICENAME>.documents.azure.com:443/;AccountKey=...;"` |
+| **Ingestion Pipeline API**  | `IngestionPipelineAPI`                 | The endpoint URL for the ingestion pipeline API.                              | `"https://<SERVICENAME>.azurewebsites.net/"`                              |
+|                            | `IngestionPipelineAPIKey`               | The API key for authenticating requests to the ingestion pipeline.             | `"<APIKEY>"`                                                              |
+| **Additional Settings**     | `EnableDataProtectionBlobKeyStorage`    | Boolean flag to enable or disable blob key storage under the data protection mechanism. | `"false"`                                                             |
 
-#### `AzureStorageUserUploadContainer`
-- **Description**: The name of the container in Azure Blob Storage where user uploads are stored.
-- **Value**: `"content"`
 
-#### `AzureStorageAccountConnectionString`
-- **Description**: Connection string for the Azure Storage account, containing authentication information and storage endpoint details.
-- **Value**: `"DefaultEndpointsProtocol=https;AccountName=<SERVICENAME>;AccountKey=...;EndpointSuffix=core.windows.net"`
+## RBAC
 
-### Azure Search Service
-
-#### `AzureSearchServiceEndpoint`
-- **Description**: The endpoint URL for the Azure Search Service.
-- **Value**: `"https://<SERVICENAME>.search.windows.net"`
-
-#### `AzureSearchServiceKey`
-- **Description**: The primary administrative API key for the Azure Search Service.
-- **Value**: `"<APIKEY>"`
-
-### Azure OpenAI Services
-
-#### `AOAIPremiumServiceEndpoint`
-- **Description**: The endpoint URL for the Azure OpenAI Premium services.
-- **Value**: `"https://<SERVICENAME>.openai.azure.com/"`
-
-#### `AOAIPremiumServiceKey`
-- **Description**: The authentication key for accessing the Azure OpenAI Premium services.
-- **Value**: `"<APIKEY>"`
-
-#### `AOAIPremiumChatGptDeployment`
-- **Description**: The specific deployment of ChatGPT model used in the Azure OpenAI Premium services.
-- **Value**: `"gpt-4"`
-
-#### `AOAIStandardServiceEndpoint`
-- **Description**: The endpoint URL for the Azure OpenAI Standard services.
-- **Value**: `"https://<SERVICENAME>.openai.azure.com/"`
-
-#### `AOAIStandardServiceKey`
-- **Description**: The authentication key for accessing the Azure OpenAI Standard services.
-- **Value**: `"f4471e39c00e4dfd86ae15bc3bcf68b1"`
-
-#### `AOAIStandardChatGptDeployment`
-- **Description**: The specific deployment of ChatGPT model used in the Azure OpenAI Standard services.
-- **Value**: `"chatgpt16k"`
-
-#### `AOAIEmbeddingsDeployment`
-- **Description**: The specific deployment of the text embedding model used in the Azure OpenAI services.
-- **Value**: `"text-embedding"`
-
-### Cosmos DB
-
-#### `CosmosDBConnectionString`
-- **Description**: Connection string for accessing Azure Cosmos DB, including authentication information and endpoint details.
-- **Value**: `"AccountEndpoint=https://<SERVICENAME>.documents.azure.com:443/;AccountKey=...;"`
-
-### Ingestion Pipeline API
-
-#### `IngestionPipelineAPI`
-- **Description**: The endpoint URL for the ingestion pipeline API.
-- **Value**: `"https://<SERVICENAME>.azurewebsites.net/"`
-
-#### `IngestionPipelineAPIKey`
-- **Description**: The API key for authenticating requests to the ingestion pipeline.
-- **Value**: `"<APIKEY>"`
-
-### Additional Settings
-
-#### `EnableDataProtectionBlobKeyStorage`
-- **Description**: Boolean flag to enable or disable blob key storage under the data protection mechanism.
-- **Value**: `"false"`
-
+Storage Blob Data Contributor scope to Storage Account
+Search Index Data Contributor scope Azure AI Search
+Cognitive Services OpenAI Contributor scope OpenAI
