@@ -1,0 +1,46 @@
+[
+  {
+    "Name": "Service Now Advisor",
+    "Id": "ServiceNowAdvisor",
+    "Approach": "RAG",
+    "SecurityModel": "None",
+    "SecurityModelGroupMembership": [ "LocalDevUser" ],
+    "SampleQuestions": [
+      "How do I stop a non-responsive application on my Mac?",
+      "I accidentally deleted an email, what should I do?",
+      "How do I set up a VPN for my iPhone?"
+    ],
+    "RAGSettings": {
+      "GenerateSearchQueryPluginName": "GenerateSearchQuery",
+      "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
+      "DocumentRetrievalPluginName": "DocumentRetrieval",
+      "DocumentRetrievalPluginQueryFunctionName": "KwiecienV2",
+      "DocumentRetrievalIndexName": "jci-snow-index-20250124073904",
+      "ChatSystemMessageFile": "RAGSNOWKnowledgeChatSystemPrompt",
+      "StorageContianer": "snow-content-extract",
+      "DocumentRetrievalDocumentCount": 50
+    }
+  },
+  {
+    "Name": "Service Now Advisor Catalog",
+    "Id": "ServiceNowCatalogAdvisor",
+    "Approach": "RAG",
+    "SecurityModel": "None",
+    "SecurityModelGroupMembership": [ "LocalDevUser" ],
+    "SampleQuestions": [
+      "How do I stop a non-responsive application on my Mac?",
+      "I accidentally deleted an email, what should I do?",
+      "How do I set up a VPN for my iPhone?"
+    ],
+    "RAGSettings": {
+      "GenerateSearchQueryPluginName": "GenerateSearchQuery",
+      "GenerateSearchQueryPluginQueryFunctionName": "GenerateSearchQuery",
+      "DocumentRetrievalPluginName": "DocumentRetrieval",
+      "DocumentRetrievalPluginQueryFunctionName": "KwiecienV2",
+      "DocumentRetrievalIndexName": "jci-snow-catalog-index-20250124091549",
+      "ChatSystemMessageFile": "RAGSNOWCatalogSystemPrompt",
+      "StorageContianer": "snow-content-extract",
+      "DocumentRetrievalDocumentCount": 50
+    }
+  }
+]
