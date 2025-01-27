@@ -53,6 +53,8 @@
     <EmbeddedResource Include="Services\Profile\Prompts\AutoBodyCopilotSystemPromptV2.txt" />
     <EmbeddedResource Include="Services\Profile\Prompts\AutoBodyCopilotSystemPrompt.txt" />
     <EmbeddedResource Include="Services\Profile\Prompts\ChatSimpleSystemPrompt.txt" />
+    <EmbeddedResource Include="Services\Profile\Prompts\RAGSNOWKnowledgeChatSystemPrompt.txt" />
+    <EmbeddedResource Include="Services\Profile\Prompts\RAGSNOWCatalogSystemPrompt.txt" />
     <EmbeddedResource Include="Services\Profile\Prompts\RAGChatSystemPrompt.txt" />
     <EmbeddedResource Include="Services\Profile\Prompts\ChatSimpleUserPrompt.txt" />
     <EmbeddedResource Include="Services\Profile\Prompts\RAGChatUserPrompt.txt" />
