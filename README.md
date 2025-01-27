@@ -122,7 +122,20 @@ az containerapp update --name <APPLICATION_NAME> --resource-group <RESOURCE_GROU
   "EnableDataProtectionBlobKeyStorage" : "false"
 }
 ```
-#### Core Settings
+#### Core Settings - Managed Identity
+
+| **Setting**                          | **Description**                                                                 | **Value**                                                                 |
+|--------------------------------------|---------------------------------------------------------------------------------|-------------------------------------------------------------------------|
+| `AzureStorageAccountEndpoint`       | Connection string for the Azure Storage account, containing authentication information and storage endpoint details. | `"DefaultEndpointsProtocol=https;AccountName=<SERVICENAME>;AccountKey=...;EndpointSuffix=core.windows.net"` |
+| `AzureSearchServiceEndpoint`         | The endpoint URL for the Azure Search Service.                                 | `"https://<SERVICENAME>.search.windows.net"`                              |
+| `AOAIPremiumServiceEndpoint`          | The endpoint URL for the Azure OpenAI Premium services.                        | `"https://<SERVICENAME>.openai.azure.com/"`                               |
+| `AOAIPremiumChatGptDeployment`         | The specific deployment of ChatGPT model used in the Azure OpenAI Premium services. | `"gpt-4"`                                                              |
+| `AOAIStandardServiceEndpoint`          | The endpoint URL for the Azure OpenAI Standard services.                       | `"https://<SERVICENAME>.openai.azure.com/"`                               |
+| `AOAIStandardChatGptDeployment`         | The specific deployment of ChatGPT model used in the Azure OpenAI Standard services. | `"chatgpt16k"`                                                        |
+| `AOAIEmbeddingsDeployment`             | The specific deployment of the text embedding model used in the Azure OpenAI services. | `"text-embedding"`                                                   |
+| `CosmosDBEndpoint`             | Connection string for accessing Azure Cosmos DB, including authentication information and endpoint details. | `"AccountEndpoint=https://<SERVICENAME>.documents.azure.com:443/;AccountKey=...;"` |
+
+#### Core Settings - Keys
 
 | **Category**               | **Setting**                          | **Description**                                                                 | **Value**                                                                 |
 |----------------------------|--------------------------------------|---------------------------------------------------------------------------------|-------------------------------------------------------------------------|
@@ -137,7 +150,6 @@ az containerapp update --name <APPLICATION_NAME> --resource-group <RESOURCE_GROU
 |                            | `AOAIStandardChatGptDeployment`         | The specific deployment of ChatGPT model used in the Azure OpenAI Standard services. | `"chatgpt16k"`                                                        |
 |                            | `AOAIEmbeddingsDeployment`             | The specific deployment of the text embedding model used in the Azure OpenAI services. | `"text-embedding"`                                                   |
 | **Cosmos DB**               | `CosmosDBConnectionString`             | Connection string for accessing Azure Cosmos DB, including authentication information and endpoint details. | `"AccountEndpoint=https://<SERVICENAME>.documents.azure.com:443/;AccountKey=...;"` |
-
 #### Optional Settings
 
 | **Category**               | **Setting**                          | **Description**                                                                 | **Value**                                                                 |
