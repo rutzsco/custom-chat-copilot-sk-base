@@ -122,12 +122,11 @@ az containerapp update --name <APPLICATION_NAME> --resource-group <RESOURCE_GROU
   "EnableDataProtectionBlobKeyStorage" : "false"
 }
 ```
-This documentation outlines the various application settings used in the configuration of Azure services and other APIs.
+#### Core Settings
 
 | **Category**               | **Setting**                          | **Description**                                                                 | **Value**                                                                 |
 |----------------------------|--------------------------------------|---------------------------------------------------------------------------------|-------------------------------------------------------------------------|
-| **Azure Storage**           | `AzureStorageUserUploadContainer`    | The name of the container in Azure Blob Storage where user uploads are stored.  | `"content"`                                                              |
-|                            | `AzureStorageAccountConnectionString`| Connection string for the Azure Storage account, containing authentication information and storage endpoint details. | `"DefaultEndpointsProtocol=https;AccountName=<SERVICENAME>;AccountKey=...;EndpointSuffix=core.windows.net"` |
+| **Azure Storage**           | `AzureStorageAccountConnectionString`| Connection string for the Azure Storage account, containing authentication information and storage endpoint details. | `"DefaultEndpointsProtocol=https;AccountName=<SERVICENAME>;AccountKey=...;EndpointSuffix=core.windows.net"` |
 | **Azure Search Service**    | `AzureSearchServiceEndpoint`         | The endpoint URL for the Azure Search Service.                                 | `"https://<SERVICENAME>.search.windows.net"`                              |
 |                            | `AzureSearchServiceKey`               | The primary administrative API key for the Azure Search Service.               | `"<APIKEY>"`                                                              |
 | **Azure OpenAI Services**   | `AOAIPremiumServiceEndpoint`          | The endpoint URL for the Azure OpenAI Premium services.                        | `"https://<SERVICENAME>.openai.azure.com/"`                               |
@@ -138,10 +137,15 @@ This documentation outlines the various application settings used in the configu
 |                            | `AOAIStandardChatGptDeployment`         | The specific deployment of ChatGPT model used in the Azure OpenAI Standard services. | `"chatgpt16k"`                                                        |
 |                            | `AOAIEmbeddingsDeployment`             | The specific deployment of the text embedding model used in the Azure OpenAI services. | `"text-embedding"`                                                   |
 | **Cosmos DB**               | `CosmosDBConnectionString`             | Connection string for accessing Azure Cosmos DB, including authentication information and endpoint details. | `"AccountEndpoint=https://<SERVICENAME>.documents.azure.com:443/;AccountKey=...;"` |
+
+#### Optional Settings
+
+| **Category**               | **Setting**                          | **Description**                                                                 | **Value**                                                                 |
+|----------------------------|--------------------------------------|---------------------------------------------------------------------------------|-------------------------------------------------------------------------|
+| **Azure Storage**           | `AzureStorageUserUploadContainer`    | The name of the container in Azure Blob Storage where user uploads are stored.  | `"content"`                                                              |
 | **Ingestion Pipeline API**  | `IngestionPipelineAPI`                 | The endpoint URL for the ingestion pipeline API.                              | `"https://<SERVICENAME>.azurewebsites.net/"`                              |
 |                            | `IngestionPipelineAPIKey`               | The API key for authenticating requests to the ingestion pipeline.             | `"<APIKEY>"`                                                              |
 | **Additional Settings**     | `EnableDataProtectionBlobKeyStorage`    | Boolean flag to enable or disable blob key storage under the data protection mechanism. | `"false"`                                                             |
-
 
 ## RBAC
 
